@@ -3,7 +3,16 @@ import typing
 
 import numpy as np
 
+
 Connectivity = typing.NewType("Connectivity", list(typing.Tuple[int, int]))
+
+
+@dataclass
+class NIR:
+  """Neural Intermediate Representation (NIR)"""
+  units: typing.List[typing.Any] # List of units
+  connectivity: Connectivity
+
 
 @dataclass
 class LeakyIntegrator:
