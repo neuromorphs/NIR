@@ -1,10 +1,22 @@
 from dataclasses import dataclass
+import typing
 
 import numpy as np
 
+Connectivity = typing.NewType("Connectivity", list(typing.Tuple[int, int]))
+
 @dataclass
 class LeakyIntegrator:
-  """Leaky integrator neuron model."""
+  """Leaky integrator neuron model.
+  
+  The leaky integrator neuron model is defined by the following equation:
+  $$
+  \tau \dot{v} = \alpha(v_{leak} - v) + \beta I
+  $$
+  Where $\tau$ is the time constant, $v$ is the membrane potential,
+  $\alpha$ is the gain, $v_{leak}$ is the leak voltage, and $\beta$ is the bias for 
+  the input current $I$.
+  """
 
   tau: np.ndarray # Time constant
   alpha: np.ndarray # Gain
