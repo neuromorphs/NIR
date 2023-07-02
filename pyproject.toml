@@ -2,7 +2,7 @@
 requires = ["setuptools"]
 
 [project]
-name = "NIR"
+name = "nir"
 version = "0.0.1"
 description = "Neuromorphic Intermediate Representation"
 authors = [
@@ -29,3 +29,6 @@ classifiers = [
     "Topic :: Software Development :: Libraries :: Python Modules",
 ]
 dependencies = [ "numpy", "h5py" ]
+
+[tool.setuptools.packages]
+find = {} 
