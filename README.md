@@ -17,6 +17,7 @@ $$\text{Conv1d}: \mathbb{R}^{c_{out} \times c_{in} \times x},  \text{Strides}, \
 $$\text{Conv2d}: \mathbb{R}^{c_{out} \times c_{in} \times y \times x},  \text{Strides}, \text{Groups}, ... $$ 
 
 where LIF is defined as a dynamical equation:
+
 $$ \tau \dot{v} = v_{leak} - v + R i $$ 
 
 
