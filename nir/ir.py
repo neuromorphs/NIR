@@ -22,7 +22,7 @@ class NIRUnit:
 
 
 @dataclass
-class LeakyIntegrator(NIRUnit):
+class LI(NIRUnit):
     """Leaky integrator neuron model.
 
     The leaky integrator neuron model is defined by the following equation:
@@ -37,6 +37,33 @@ class LeakyIntegrator(NIRUnit):
     tau: np.ndarray  # Time constant
     r: np.ndarray  # Bias
     v_leak: np.ndarray  # Leak voltage
+
+
+@dataclass
+class LIF(NIRUnit):
+    """Leaky integrate and-fire-neuron model.
+
+    The leaky integrate-and-fire neuron model is defined by the following equation:
+    $$
+    \tau \dot{v} = (v_{leak} - v) + R I
+    z = \being{cases}
+        1 & v > theta \\
+        0 & else
+    \end{cases}
+    v = \begin{cases}
+        v-theta & z=1 \\
+        v & else
+    \end{cases}
+    $$
+    Where $\tau$ is the time constant, $v$ is the membrane potential,
+    $v_{leak}$ is the leak voltage, $R$ is the resistance, $theta$ is
+    the firing threshold, and $I$ is the input current.
+    """
+
+    tau: np.ndarray  # Time constant
+    r: np.ndarray  # Bias
+    v_leak: np.ndarray  # Leak voltage
+    theta: np.ndarray  # Firing threshold
 
 
 @dataclass

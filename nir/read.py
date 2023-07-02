@@ -10,12 +10,21 @@ def read(filename: typing.Union[str, pathlib.Path]) -> nir.NIR:
     with h5py.File(filename, "r") as f:
         units = []
         for k, unit in f["units"].items():
-            if unit["type"][()] == b"LeakyIntegrator":
+            if unit["type"][()] == b"LI":
                 units.append(
-                    nir.LeakyIntegrator(
+                    nir.LI(
                         tau=unit["tau"][()],
                         r=unit["r"][()],
                         v_leak=unit["v_leak"][()],
+                    )
+                )
+            elif unit["type"][()] == b"LIF":
+                units.append(
+                    nir.LIF(
+                        tau=unit["tau"][()],
+                        r=unit["r"][()],
+                        v_leak=unit["v_leak"][()],
+                        theta=unit["theta"][()],
                     )
                 )
             elif unit["type"][()] == b"Linear":

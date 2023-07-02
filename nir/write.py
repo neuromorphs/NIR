@@ -9,13 +9,20 @@ import nir
 
 def write(filename: typing.Union[str, pathlib.Path], graph: nir.NIR) -> None:
     def convert_unit(unit: nir.NIRUnit) -> dict:
-        if isinstance(unit, nir.LeakyIntegrator):
+        if isinstance(unit, nir.LI):
             return {
-                "type": "LeakyIntegrator",
+                "type": "LI",
                 "tau": unit.tau,
-                "alpha": unit.alpha,
-                "beta": unit.beta,
+                "r": unit.beta,
                 "v_leak": unit.v_leak,
+            }
+        elif isinstance(unit, nir.LIF):
+            return {
+                "type": "LIF",
+                "tau": unit.tau,
+                "r": unit.beta,
+                "v_leak": unit.v_leak,
+                "theta": unit.theta,
             }
         elif isinstance(unit, nir.Linear):
             return {
