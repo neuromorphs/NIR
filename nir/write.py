@@ -8,63 +8,63 @@ import nir
 
 
 def write(filename: typing.Union[str, pathlib.Path], graph: nir.NIR) -> None:
-    def convert_unit(unit: nir.NIRUnit) -> dict:
-        if isinstance(unit, nir.LI):
+    def convert_node(node: nir.NIRNode) -> dict:
+        if isinstance(node, nir.LI):
             return {
                 "type": "LI",
-                "tau": unit.tau,
-                "r": unit.beta,
-                "v_leak": unit.v_leak,
+                "tau": node.tau,
+                "r": node.r,
+                "v_leak": node.v_leak,
             }
-        elif isinstance(unit, nir.LIF):
+        elif isinstance(node, nir.LIF):
             return {
                 "type": "LIF",
-                "tau": unit.tau,
-                "r": unit.beta,
-                "v_leak": unit.v_leak,
-                "theta": unit.theta,
+                "tau": node.tau,
+                "r": node.r,
+                "v_leak": node.v_leak,
+                "theta": node.theta,
             }
-        elif isinstance(unit, nir.Linear):
+        elif isinstance(node, nir.Linear):
             return {
                 "type": "Linear",
-                "weights": unit.weights,
-                "bias": unit.bias,
+                "weights": node.weights,
+                "bias": node.bias,
             }
-        elif isinstance(unit, nir.Conv1d):
+        elif isinstance(node, nir.Conv1d):
             return {
                 "type": "Conv1d",
-                "weights": unit.weights,
-                "stride": unit.stride,
-                "padding": unit.padding,
-                "dilation": unit.dilation,
-                "groups": unit.groups,
-                "bias": unit.bias,
+                "weights": node.weights,
+                "stride": node.stride,
+                "padding": node.padding,
+                "dilation": node.dilation,
+                "groups": node.groups,
+                "bias": node.bias,
             }
-        elif isinstance(unit, nir.Conv2d):
+        elif isinstance(node, nir.Conv2d):
             return {
                 "type": "Conv2d",
-                "weights": unit.weights,
-                "stride": unit.stride,
-                "padding": unit.padding,
-                "dilation": unit.dilation,
-                "groups": unit.groups,
-                "bias": unit.bias,
+                "weights": node.weights,
+                "stride": node.stride,
+                "padding": node.padding,
+                "dilation": node.dilation,
+                "groups": node.groups,
+                "bias": node.bias,
             }
         else:
-            raise ValueError(f"Unknown unit type: {unit}")
+            raise ValueError(f"Unknown node type: {node}")
 
     """Write a NIR to a HDF5 file."""
     with h5py.File(filename, "w") as f:
-        units_group = f.create_group("units")
-        for i, unit in enumerate(graph.units):
-            d = convert_unit(unit)
-            unit_group = units_group.create_group(str(i))
+        nodes_group = f.create_group("nodes")
+        for i, node in enumerate(graph.nodes):
+            d = convert_node(node)
+            node_group = nodes_group.create_group(str(i))
             for k, v in d.items():
                 if isinstance(v, str):
-                    unit_group.create_dataset(k, data=v, dtype=h5py.string_dtype())
+                    node_group.create_dataset(k, data=v, dtype=h5py.string_dtype())
                 elif isinstance(v, np.ndarray):
-                    unit_group.create_dataset(k, data=v, dtype=v.dtype)
+                    node_group.create_dataset(k, data=v, dtype=v.dtype)
                 else:
-                    unit_group.create_dataset(k, data=v)
+                    node_group.create_dataset(k, data=v)
                     # raise ValueError(f"Unknown type: {type(v)}")
-        f.create_dataset("connectivity", data=graph.connectivity)
+        f.create_dataset("edges", data=graph.edges)

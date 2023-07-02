@@ -6,57 +6,57 @@ import nir
 
 
 def read(filename: typing.Union[str, pathlib.Path]) -> nir.NIR:
-    """Load a NIR from a HDF5 file."""
+    """Load a NIR from a HDF/conn5 file."""
     with h5py.File(filename, "r") as f:
-        units = []
-        for k, unit in f["units"].items():
-            if unit["type"][()] == b"LI":
-                units.append(
+        nodes = []
+        for k, node in f["nodes"].items():
+            if node["type"][()] == b"LI":
+                nodes.append(
                     nir.LI(
-                        tau=unit["tau"][()],
-                        r=unit["r"][()],
-                        v_leak=unit["v_leak"][()],
+                        tau=node["tau"][()],
+                        r=node["r"][()],
+                        v_leak=node["v_leak"][()],
                     )
                 )
-            elif unit["type"][()] == b"LIF":
-                units.append(
+            elif node["type"][()] == b"LIF":
+                nodes.append(
                     nir.LIF(
-                        tau=unit["tau"][()],
-                        r=unit["r"][()],
-                        v_leak=unit["v_leak"][()],
-                        theta=unit["theta"][()],
+                        tau=node["tau"][()],
+                        r=node["r"][()],
+                        v_leak=node["v_leak"][()],
+                        theta=node["theta"][()],
                     )
                 )
-            elif unit["type"][()] == b"Linear":
-                units.append(
+            elif node["type"][()] == b"Linear":
+                nodes.append(
                     nir.Linear(
-                        weights=unit["weights"][()],
-                        bias=unit["bias"][()],
+                        weights=node["weights"][()],
+                        bias=node["bias"][()],
                     )
                 )
-            elif unit["type"][()] == b"Conv1d":
-                units.append(
+            elif node["type"][()] == b"Conv1d":
+                nodes.append(
                     nir.Conv1d(
-                        weights=unit["weights"][()],
-                        stride=unit["stride"][()],
-                        padding=unit["padding"][()],
-                        dilation=unit["dilation"][()],
-                        groups=unit["groups"][()],
-                        bias=unit["bias"][()],
+                        weights=node["weights"][()],
+                        stride=node["stride"][()],
+                        padding=node["padding"][()],
+                        dilation=node["dilation"][()],
+                        groups=node["groups"][()],
+                        bias=node["bias"][()],
                     )
                 )
-            elif unit["type"][()] == b"Conv2d":
-                units.append(
+            elif node["type"][()] == b"Conv2d":
+                nodes.append(
                     nir.Conv2d(
-                        weights=unit["weights"][()],
-                        stride=unit["stride"][()],
-                        padding=unit["padding"][()],
-                        dilation=unit["dilation"][()],
-                        groups=unit["groups"][()],
-                        bias=unit["bias"][()],
+                        weights=node["weights"][()],
+                        stride=node["stride"][()],
+                        padding=node["padding"][()],
+                        dilation=node["dilation"][()],
+                        groups=node["groups"][()],
+                        bias=node["bias"][()],
                     )
                 )
             else:
-                raise ValueError(f"Unknown unit type: {unit['type'][()]}")
-        connectivity = f["connectivity"][()]
-        return nir.NIR(units=units, connectivity=connectivity)
+                raise ValueError(f"Unknown unit type: {node['type'][()]}")
+        edges = f["edges"][()]
+        return nir.NIR(nodes=nodes, edges=edges)

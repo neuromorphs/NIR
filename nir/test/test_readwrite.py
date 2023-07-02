@@ -5,11 +5,34 @@ import numpy as np
 import nir
 
 
-def test_simple():
+def factory_test_graph(ir: nir.NIR):
     tmp = tempfile.mktemp()
-    ir = nir.NIR(units=[nir.Linear(weights=[1, 2, 3], bias=4)], connectivity=[(0, 0)])
     nir.write(tmp, ir)
     ir2 = nir.read(tmp)
-    assert np.array_equal(ir.units[0].weights, ir2.units[0].weights)
-    assert np.array_equal(ir.units[0].bias, ir2.units[0].bias)
-    assert np.array_equal(ir.connectivity, ir2.connectivity)
+    for i in range(len(ir.nodes)):
+        for k, v in ir.nodes[i].__dict__.items():
+            if isinstance(v, np.ndarray) or isinstance(v, list):
+                assert np.array_equal(v, getattr(ir2.nodes[i], k))
+            else:
+                assert v == getattr(ir2.nodes[i], k)
+
+
+def test_simple():
+    ir = nir.NIR(nodes=[nir.Linear(weights=[1, 2, 3], bias=4)], edges=[(0, 0)])
+    factory_test_graph(ir)
+
+
+def test_leaky_integrator():
+    ir = nir.NIR(
+        nodes=[nir.Linear(weights=[1], bias=0), nir.LI(tau=1, r=2, v_leak=3)],
+        edges=[(0, 0)],
+    )
+    factory_test_graph(ir)
+
+
+def test_leaky_integrator_and_fire():
+    ir = nir.NIR(
+        nodes=[nir.Linear(weights=[1], bias=0), nir.LIF(tau=1, r=2, v_leak=3, theta=4)],
+        edges=[(0, 0)],
+    )
+    factory_test_graph(ir)

@@ -4,25 +4,25 @@ import typing
 import numpy as np
 
 
-Connectivity = typing.NewType("Connectivity", list[typing.Tuple[int, int]])
+Edges = typing.NewType("Edges", list[typing.Tuple[int, int]])
 
 
 @dataclass
 class NIR:
     """Neural Intermediate Representation (NIR)"""
 
-    units: typing.List[typing.Any]  # List of units
-    connectivity: Connectivity
+    nodes: typing.List[typing.Any]  # List of computational nodes
+    edges: Edges
 
 
-class NIRUnit:
+class NIRNode:
     """Basic Neural Intermediate Representation Unit (NIRUnit)"""
 
     pass
 
 
 @dataclass
-class LI(NIRUnit):
+class LI(NIRNode):
     """Leaky integrator neuron model.
 
     The leaky integrator neuron model is defined by the following equation:
@@ -35,15 +35,15 @@ class LI(NIRUnit):
     """
 
     tau: np.ndarray  # Time constant
-    r: np.ndarray  # Bias
+    r: np.ndarray  # Resistance
     v_leak: np.ndarray  # Leak voltage
 
 
 @dataclass
-class LIF(NIRUnit):
+class LIF(NIRNode):
     """Leaky integrate and-fire-neuron model.
 
-    The leaky integrate-and-fire neuron model is defined by the following equation:
+    The leaky integrate-and-fire neuron model is defined by the following equations:
     $$
     \tau \dot{v} = (v_{leak} - v) + R I
     z = \being{cases}
@@ -61,20 +61,20 @@ class LIF(NIRUnit):
     """
 
     tau: np.ndarray  # Time constant
-    r: np.ndarray  # Bias
+    r: np.ndarray  # Resistance
     v_leak: np.ndarray  # Leak voltage
     theta: np.ndarray  # Firing threshold
 
 
 @dataclass
-class Linear(NIRUnit):
+class Linear(NIRNode):
 
     weights: np.ndarray  # Weights M * N
     bias: np.ndarray  # Bias M
 
 
 @dataclass
-class Conv1d(NIRUnit):
+class Conv1d(NIRNode):
     """Convolutional layer in 1d"""
 
     weights: np.ndarray  # Weights C_out * C_in * X
@@ -86,7 +86,7 @@ class Conv1d(NIRUnit):
 
 
 @dataclass
-class Conv2d(NIRUnit):
+class Conv2d(NIRNode):
     """Convolutional layer in 2d"""
 
     weights: np.ndarray  # Weights C_out * C_in * X * Y
