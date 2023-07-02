@@ -7,7 +7,7 @@ version = "0.0.1"
 description = "Neuromorphic Intermediate Representation"
 authors = [
   { name = "Steven Abreu", email = "s.abreu@rug.nl" },
-  { name = "Felix Bauer", email = "felix.bauer@synsen.ai" },
+  { name = "Felix Bauer", email = "felix.bauer@synsense.ai" },
   { name = "Jason Eshraghian", email = "jeshragh@ucsc.edu" },
   { name = "Matthias Jobst", email = "matthias.jobst2@tu-dresden.de" },
   { name = "Gregor Lenz", email = "mail@lenzgregor.com" },
@@ -28,7 +28,11 @@ classifiers = [
     "Topic :: Scientific/Engineering :: Physics",
     "Topic :: Software Development :: Libraries :: Python Modules",
 ]
+
 dependencies = [ "numpy", "h5py" ]
+
+[project.urls]
+homepage = "https://github.com/neuromorphs/nir"
 
 [tool.setuptools.packages]
 find = {} 

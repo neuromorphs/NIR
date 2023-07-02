@@ -5,13 +5,19 @@ NIR defines neuron models and connectivity for arbitrary networks that include s
 ## Computational units
 On top of popular primitives such as convolutional or fully connected/linear computations, we define additional compuational primitives that are specific to neuromorphic computing and hardware implementations thereof. Computational units that are not specifically neuromorphic take inspiration from the Pytorch ecosystem in terms of naming and parameters (such as Conv2d that uses groups/strides). Example definitons of computational units:
 
-$$ 
-\text{LIF}: [ \tau, \alpha, \beta ] \\
-\text{Linear}: \mathbb{R}^{m \times n},  \mathbb{R}^n \\
-\text{Conv2d}: \mathbb{R}^{c_{out} \times c_{in} \times y \times x},  \text{Strides}, \text{Groups}, ... \\
 
-$$ 
-where LIF is defined as a dynamical equation: $$ \tau \dot{v} = \alpha(v_{leak} - v) + \beta i $$ 
+$$\text{LI}: [ \tau, R, v_{leak}]$$
+
+$$\text{LIF}: [ \tau, R, v_{leak}, v_{threshold} ]$$
+
+$$\text{Linear}: \mathbb{R}^{m \times n},  \mathbb{R}^n$$
+
+$$\text{Conv1d}: \mathbb{R}^{c_{out} \times c_{in} \times x},  \text{Strides}, \text{Groups}, ... $$ 
+
+$$\text{Conv2d}: \mathbb{R}^{c_{out} \times c_{in} \times y \times x},  \text{Strides}, \text{Groups}, ... $$ 
+
+where LIF is defined as a dynamical equation:
+$$ \tau \dot{v} = v_{leak} - v + R i $$ 
 
 
 ## Connectivity 
@@ -28,3 +34,35 @@ The intermediate represenation can be stored as hdf5 file, which benefits from c
 ## Frameworks that currently support NIR:
 * work in progress
 * another work in progress
+
+## Acknowledgements
+
+Authors (in alphabetical order):
+* [Steven Abreu](https://github.com/stevenabreu7)
+* [Felix Bauer](https://github.com/bauerfe)
+* [Jason Eshraghian](https://github.com/jeshraghian)
+* Matthias Jobst
+* [Gregor Lenz](https://github.com/biphasic)
+* [Jens Egholm Pedersen](https://github.com/jegp)
+* [Sadique Sheik](https://github.com/sheiksadique)
+
+If you use NIR in your work, please cite the [following Zenodo reference](https://zenodo.org/record/8105042)
+
+```
+@software{nir2023,
+  author       = {Abreu, Steven and
+                  Bauer, Felix and
+                  Eshraghian, Jason and
+                  Jobst, Matthias and
+                  Lenz, Gregor and
+                  Pedersen, Jens Egholm and
+                  Sheik, Sadique},
+  title        = {Neuromorphic Intermediate Representation},
+  month        = jul,
+  year         = 2023,
+  publisher    = {Zenodo},
+  version      = {0.0.1},
+  doi          = {10.5281/zenodo.8105042},
+  url          = {https://doi.org/10.5281/zenodo.8105042}
+}
+```
