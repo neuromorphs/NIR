@@ -32,7 +32,7 @@ def test_leaky_integrator():
 
 def test_leaky_integrator_and_fire():
     ir = nir.NIR(
-        nodes=[nir.Linear(weights=[1], bias=0), nir.LIF(tau=1, r=2, v_leak=3, r=4)],
+        nodes=[nir.Linear(weights=[1], bias=0), nir.LIF(tau=1, r=2, v_leak=3, v_th=4)],
         edges=[(0, 0)],
     )
     factory_test_graph(ir)

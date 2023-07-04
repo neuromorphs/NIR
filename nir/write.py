@@ -22,7 +22,7 @@ def write(filename: typing.Union[str, pathlib.Path], graph: nir.NIR) -> None:
                 "tau": node.tau,
                 "r": node.r,
                 "v_leak": node.v_leak,
-                "theta": node.theta,
+                "v_th": node.v_th,
             }
         elif isinstance(node, nir.Linear):
             return {
