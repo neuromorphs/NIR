@@ -42,7 +42,7 @@ Authors (in alphabetical order):
 * [Steven Abreu](https://github.com/stevenabreu7)
 * [Felix Bauer](https://github.com/bauerfe)
 * [Jason Eshraghian](https://github.com/jeshraghian)
-* Matthias Jobst
+* [Matthias Jobst](https://github.com/matjobst)
 * [Gregor Lenz](https://github.com/biphasic)
 * [Jens Egholm Pedersen](https://github.com/jegp)
 * [Sadique Sheik](https://github.com/sheiksadique)
