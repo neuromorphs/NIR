@@ -10,7 +10,18 @@ def read(filename: typing.Union[str, pathlib.Path]) -> nir.NIR:
     with h5py.File(filename, "r") as f:
         nodes = []
         for k, node in f["nodes"].items():
-            if node["type"][()] == b"LI":
+            if node["type"][()] == b"Input":
+                nodes.append(
+                    nir.Input(
+                        shape=node["shape"][()],
+                    )
+                )
+            elif node["type"][()] == b"Output":
+                nodes.append(
+                    nir.Output(
+                    )
+                )
+            elif node["type"][()] == b"LI":
                 nodes.append(
                     nir.LI(
                         tau=node["tau"][()],
