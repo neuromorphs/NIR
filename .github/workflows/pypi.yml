@@ -11,6 +11,8 @@ jobs:
     permissions:
       id-token: write  # IMPORTANT: this permission is mandatory for trusted publishing
     steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
     - name: Build Python package
       run: pip install build && python -m build
     - name: Publish package distributions to PyPI

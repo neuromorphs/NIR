@@ -51,7 +51,7 @@ class LIF(NIRNode):
         0 & else
     \end{cases}
     v = \begin{cases}
-        v-theta & z=1 \\
+        v-v_{th} & z=1 \\
         v & else
     \end{cases}
     $$
@@ -63,7 +63,7 @@ class LIF(NIRNode):
     tau: np.ndarray  # Time constant
     r: np.ndarray  # Resistance
     v_leak: np.ndarray  # Leak voltage
-    theta: np.ndarray  # Firing threshold
+    v_th: np.ndarray  # Firing threshold
 
 
 @dataclass
