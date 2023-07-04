@@ -4,7 +4,7 @@ import typing
 import numpy as np
 
 
-Edges = typing.NewType("Edges", list[typing.Tuple[int, int]])
+Edges = typing.NewType("Edges", typing.List[typing.Tuple[int, int]])
 
 
 @dataclass
