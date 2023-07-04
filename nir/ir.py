@@ -20,6 +20,22 @@ class NIRNode:
 
     pass
 
+@dataclass
+class Input(NIRNode):
+    """Input Node.
+
+    This is a virtual node, which allows feeding in data into the graph.
+    """
+    shape: np.ndarray # Shape of input data
+
+@dataclass
+class Output(NIRNode):
+    """Output Node.
+    
+    Defines an output of the graph.
+    """
+    pass
+
 
 @dataclass
 class LI(NIRNode):
