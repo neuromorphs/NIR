@@ -9,7 +9,16 @@ import nir
 
 def write(filename: typing.Union[str, pathlib.Path], graph: nir.NIR) -> None:
     def convert_node(node: nir.NIRNode) -> dict:
-        if isinstance(node, nir.LI):
+        if isinstance(node, nir.Input):
+            return {
+                "type": "Input",
+                "shape": node.shape,
+            }
+        elif isinstance(node, nir.Output):
+            return {
+                "type": "Output",
+            }
+        elif isinstance(node, nir.LI):
             return {
                 "type": "LI",
                 "tau": node.tau,
