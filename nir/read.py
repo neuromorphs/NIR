@@ -24,7 +24,7 @@ def read(filename: typing.Union[str, pathlib.Path]) -> nir.NIR:
                         tau=node["tau"][()],
                         r=node["r"][()],
                         v_leak=node["v_leak"][()],
-                        theta=node["theta"][()],
+                        v_th=node["v_th"][()],
                     )
                 )
             elif node["type"][()] == b"Linear":

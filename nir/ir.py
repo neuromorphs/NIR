@@ -47,23 +47,23 @@ class LIF(NIRNode):
     $$
     \tau \dot{v} = (v_{leak} - v) + R I
     z = \being{cases}
-        1 & v > theta \\
+        1 & v > v_th \\
         0 & else
     \end{cases}
     v = \begin{cases}
-        v-theta & z=1 \\
+        v-v_{th} & z=1 \\
         v & else
     \end{cases}
     $$
     Where $\tau$ is the time constant, $v$ is the membrane potential,
-    $v_{leak}$ is the leak voltage, $R$ is the resistance, $theta$ is
+    $v_{leak}$ is the leak voltage, $R$ is the resistance, $v_th$ is
     the firing threshold, and $I$ is the input current.
     """
 
     tau: np.ndarray  # Time constant
     r: np.ndarray  # Resistance
     v_leak: np.ndarray  # Leak voltage
-    theta: np.ndarray  # Firing threshold
+    v_th: np.ndarray  # Firing threshold
 
 
 @dataclass
