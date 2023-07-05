@@ -36,3 +36,6 @@ homepage = "https://github.com/neuromorphs/nir"
 
 [tool.setuptools.packages]
 find = {} 
+
+[tool.ruff.per-file-ignores]
+"docs/conf.py" = ["E402"]
