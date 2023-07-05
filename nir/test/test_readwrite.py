@@ -36,3 +36,10 @@ def test_leaky_integrator_and_fire():
         edges=[(0, 0)],
     )
     factory_test_graph(ir)
+
+def test_simple_with_read_write():
+    ir = nir.NIR(
+        nodes=[nir.Input(shape=[3,]), nir.Linear(weights=[1, 2, 3], bias=4), nir.Output()],
+        edges=[(0, 1), (1,2)]
+    )
+    factory_test_graph(ir)
