@@ -7,6 +7,5 @@ This seems to not work so well..
     :toctree: _autosummary
     :recursive:
 
-    nir.ir
     nir.write
     nir.read
