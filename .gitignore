@@ -7,3 +7,4 @@ build
 .docs_venv
 _build
 _archive
+_autosummary

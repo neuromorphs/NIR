@@ -33,6 +33,17 @@ html:
   use_repository_button: true
 
 sphinx:
+  templates_path: '_templates'
+  extra_extensions:
+    - sphinx.ext.intersphinx
+    - sphinx_inline_tabs
+    - sphinx_proof
+    - sphinx_examples
+    - hoverxref.extension
+    - sphinx.ext.autodoc
+    - sphinx.ext.autosummary
+    - sphinx.ext.coverage
+    - sphinx.ext.napoleon
   config:
     intersphinx_mapping:
       ebp:
@@ -65,10 +76,4 @@ sphinx:
           "floor": ["\\lfloor#1\\rfloor", 1]
           "bmat": ["\\left[\\begin{array}"]
           "emat": ["\\end{array}\\right]"]
-        
-  extra_extensions:
-    - sphinx.ext.intersphinx
-    - sphinx_inline_tabs
-    - sphinx_proof
-    - sphinx_examples
-    - hoverxref.extension
+    autosummary_generate: True

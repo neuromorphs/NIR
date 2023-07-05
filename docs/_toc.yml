@@ -7,3 +7,6 @@ parts:
 - caption: Basic examples 🪄
   chapters:
   - file: samplepage
+- caption: Reference
+  chapters:
+  - file: api
