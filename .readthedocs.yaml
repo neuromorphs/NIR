@@ -14,19 +14,23 @@ build:
     # nodejs: "19"
     # rust: "1.64"
     # golang: "1.19"
+  jobs:
+    pre_build:
+      # Generate on-the-fly Sphinx configuration from Jupyter Book's _config.yml
+      - "jupyter-book config sphinx docs/"
 
-# Build documentation in the "docs/" directory with Sphinx
-sphinx:
-   configuration: docs/conf.py
+# # Build documentation in the "docs/" directory with Sphinx
+# sphinx:
+#    configuration: docs/conf.py
 
 # Optionally build your docs in additional formats such as PDF and ePub
-# formats:
-#    - pdf
+formats:
+   - pdf
 #    - epub
 
 # Optional but recommended, declare the Python requirements required
 # to build your documentation
 # See https://docs.readthedocs.io/en/stable/guides/reproducible-builds.html
-# python:
-#    install:
-#    - requirements: docs/requirements.txt
+python:
+   install:
+   - requirements: docs/requirements.txt
