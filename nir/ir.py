@@ -79,7 +79,7 @@ class LIF(NIRNode):
     tau: np.ndarray  # Time constant
     r: np.ndarray  # Resistance
     v_leak: np.ndarray  # Leak voltage
-    v_th: np.ndarray  # Firing threshold
+    v_threshold: np.ndarray  # Firing threshold
 
 
 @dataclass
@@ -117,7 +117,7 @@ class Conv2d(NIRNode):
 class Threshold(NIRNode):
     """Threshold node."""
 
-    v_thr: np.ndarray  # Firing threshold
+    threshold: np.ndarray  # Firing threshold
 
 
 @dataclass

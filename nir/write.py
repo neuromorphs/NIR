@@ -31,7 +31,7 @@ def write(filename: typing.Union[str, pathlib.Path], graph: nir.NIR) -> None:
                 "tau": node.tau,
                 "r": node.r,
                 "v_leak": node.v_leak,
-                "v_th": node.v_th,
+                "v_threshold": node.v_threshold,
             }
         elif isinstance(node, nir.Linear):
             return {
@@ -58,6 +58,16 @@ def write(filename: typing.Union[str, pathlib.Path], graph: nir.NIR) -> None:
                 "dilation": node.dilation,
                 "groups": node.groups,
                 "bias": node.bias,
+            }
+        elif isinstance(node, nir.Delay):
+            return {
+                "type": "Delay",
+                "delay": node.delay
+            }
+        elif isinstance(node, nir.Threshold):
+            return {
+                "type": "Threshold",
+                "threshold": node.threshold
             }
         else:
             raise ValueError(f"Unknown node type: {node}")

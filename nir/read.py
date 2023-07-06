@@ -35,7 +35,7 @@ def read(filename: typing.Union[str, pathlib.Path]) -> nir.NIR:
                         tau=node["tau"][()],
                         r=node["r"][()],
                         v_leak=node["v_leak"][()],
-                        v_th=node["v_th"][()],
+                        v_threshold=node["v_threshold"][()],
                     )
                 )
             elif node["type"][()] == b"Linear":
@@ -65,6 +65,18 @@ def read(filename: typing.Union[str, pathlib.Path]) -> nir.NIR:
                         dilation=node["dilation"][()],
                         groups=node["groups"][()],
                         bias=node["bias"][()],
+                    )
+                )
+            elif node["type"][()] == b"Delay":
+                nodes.append(
+                    nir.Delay(
+                        delay=node["delay"][()],
+                    )
+                )
+            elif node["type"][()] == b"Threshold":
+                nodes.append(
+                    nir.Threshold(
+                        threshold=node["threshold"][()],
                     )
                 )
             else:
