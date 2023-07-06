@@ -111,3 +111,17 @@ class Conv2d(NIRNode):
     dilation: int  # Dilation
     groups: int  # Groups
     bias: np.ndarray  # Bias C_out
+
+
+@dataclass
+class Threshold(NIRNode):
+    """Threshold node."""
+
+    v_thr: np.ndarray  # Firing threshold
+
+
+@dataclass
+class Delay(NIRNode):
+    """Simple delay node."""
+
+    delay: np.ndarray # Delay

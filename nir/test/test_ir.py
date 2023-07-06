@@ -19,3 +19,24 @@ def test_simple_with_input_output():
     assert ir.nodes[1].bias == 4
     assert ir.edges == [(0, 1), (1, 2)]
 
+def test_delay():
+    ir = nir.NIR(
+        nodes=[
+            nir.Input(shape=[3,]),
+            nir.Delay(delay=[1, 2, 3]),
+            nir.Output()],
+        edges=[(0, 1), (1,2)])
+    assert ir.nodes[0].shape == [3,]
+    assert ir.nodes[1].delay == [1, 2, 3]
+    assert ir.edges == [(0, 1), (1, 2)]
+
+def test_threshold():
+    ir = nir.NIR(
+        nodes=[
+            nir.Input(shape=[3,]),
+            nir.Threshold(threshold=[2.0, 2.5, 2.8]),
+            nir.Output()],
+        edges=[(0, 1), (1,2)])
+    assert ir.nodes[0].shape == [3,]
+    assert ir.nodes[1].threshold == [2.0, 2.5, 2.8]
+    assert ir.edges == [(0, 1), (1, 2)]
