@@ -37,7 +37,6 @@ The intermediate represenation can be stored as hdf5 file, which benefits from c
 * another work in progress
 
 ## Acknowledgements
-
 Authors (in alphabetical order):
 * [Steven Abreu](https://github.com/stevenabreu7)
 * [Felix Bauer](https://github.com/bauerfe)

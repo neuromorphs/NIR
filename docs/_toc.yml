@@ -2,11 +2,12 @@
 # Learn more at https://jupyterbook.org/customize/toc.html
 
 format: jb-book
-root: intro
+root: welcome
 parts:
-- caption: Basic examples 🪄
+- caption: Introduction
   chapters:
-  - file: samplepage
+  - file: intro
+  - file: support
 - caption: Reference
   chapters:
   - file: api
