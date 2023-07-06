@@ -45,3 +45,21 @@ def test_simple_with_read_write():
         edges=[(0, 1), (1,2)]
     )
     factory_test_graph(ir)
+
+def test_delay():
+    ir = nir.NIR(
+        nodes=[nir.Input(shape=[3,]),
+               nir.Delay(delay=[1, 2, 3]),
+               nir.Output()],
+        edges=[(0, 1), (1,2)]
+    )
+    factory_test_graph(ir)
+
+def test_threshold():
+    ir = nir.NIR(
+        nodes=[nir.Input(shape=[3,]),
+               nir.Threshold(threshold=[2.0, 2.5, 2.8]),
+               nir.Output()],
+        edges=[(0, 1), (1,2)]
+    )
+    factory_test_graph(ir)
