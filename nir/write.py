@@ -39,19 +39,9 @@ def write(filename: typing.Union[str, pathlib.Path], graph: nir.NIR) -> None:
                 "weights": node.weights,
                 "bias": node.bias,
             }
-        elif isinstance(node, nir.Conv1d):
+        elif isinstance(node, nir.Convolution):
             return {
-                "type": "Conv1d",
-                "weights": node.weights,
-                "stride": node.stride,
-                "padding": node.padding,
-                "dilation": node.dilation,
-                "groups": node.groups,
-                "bias": node.bias,
-            }
-        elif isinstance(node, nir.Conv2d):
-            return {
-                "type": "Conv2d",
+                "type": "Convolution",
                 "weights": node.weights,
                 "stride": node.stride,
                 "padding": node.padding,

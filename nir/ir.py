@@ -90,27 +90,21 @@ class Linear(NIRNode):
 
 
 @dataclass
-class Conv1d(NIRNode):
-    """Convolutional layer in 1d"""
+class Convolution(NIRNode):
+    """Convolutional layer in arbitrary dimension.
+    
+    Weights denote the kernels of the convolution according to 
+    $C_out \times C_in \times W_0 \times ... \times W_m $ where $W$ is the weight for the $m$th dimension
+    in the convolution (from 1 upwards).
+    A PyTorch `Conv1d` model would be represented by $C_out \times C_in \times W_0$.
+    """
 
     weights: np.ndarray  # Weights C_out * C_in * X
+    bias: np.ndarray  # Bias C_out
     stride: int  # Stride
     padding: int  # Padding
     dilation: int  # Dilation
     groups: int  # Groups
-    bias: np.ndarray  # Bias C_out
-
-
-@dataclass
-class Conv2d(NIRNode):
-    """Convolutional layer in 2d"""
-
-    weights: np.ndarray  # Weights C_out * C_in * X * Y
-    stride: int  # Stride
-    padding: int  # Padding
-    dilation: int  # Dilation
-    groups: int  # Groups
-    bias: np.ndarray  # Bias C_out
 
 
 @dataclass

@@ -45,20 +45,9 @@ def read(filename: typing.Union[str, pathlib.Path]) -> nir.NIR:
                         bias=node["bias"][()],
                     )
                 )
-            elif node["type"][()] == b"Conv1d":
+            elif node["type"][()] == b"Convolution":
                 nodes.append(
-                    nir.Conv1d(
-                        weights=node["weights"][()],
-                        stride=node["stride"][()],
-                        padding=node["padding"][()],
-                        dilation=node["dilation"][()],
-                        groups=node["groups"][()],
-                        bias=node["bias"][()],
-                    )
-                )
-            elif node["type"][()] == b"Conv2d":
-                nodes.append(
-                    nir.Conv2d(
+                    nir.Convolution(
                         weights=node["weights"][()],
                         stride=node["stride"][()],
                         padding=node["padding"][()],

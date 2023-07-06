@@ -24,8 +24,15 @@ def test_simple():
 
 def test_leaky_integrator():
     ir = nir.NIR(
-        nodes=[nir.Linear(weights=[1], bias=0), nir.LI(tau=1, r=2, v_leak=3)],
+        nodes=[nir.Linear(weights=[1], bias=[0]), nir.LI(tau=1, r=2, v_leak=3)],
         edges=[(0, 0)],
+    )
+    factory_test_graph(ir)
+
+def test_convolution():
+    ir = nir.NIR(
+        nodes=[nir.Linear(weights=[1], bias=[0]), nir.Convolution(np.ones((3, 3, 3)), np.ones((3,)), 1, 1, 1, 1)],
+        edges=[(0, 1)],
     )
     factory_test_graph(ir)
 
