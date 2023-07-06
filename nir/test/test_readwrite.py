@@ -29,9 +29,13 @@ def test_leaky_integrator():
     )
     factory_test_graph(ir)
 
+
 def test_convolution():
     ir = nir.NIR(
-        nodes=[nir.Linear(weights=[1], bias=[0]), nir.Convolution(np.ones((3, 3, 3)), np.ones((3,)), 1, 1, 1, 1)],
+        nodes=[
+            nir.Linear(weights=[1], bias=[0]),
+            nir.Convolution(np.ones((3, 3, 3)), np.ones((3,)), 1, 1, 1, 1),
+        ],
         edges=[(0, 1)],
     )
     factory_test_graph(ir)
@@ -39,34 +43,58 @@ def test_convolution():
 
 def test_leaky_integrator_and_fire():
     ir = nir.NIR(
-        nodes=[nir.Linear(weights=[1], bias=0), nir.LIF(tau=1, r=2, v_leak=3, v_threshold=4)],
+        nodes=[
+            nir.Linear(weights=[1], bias=0),
+            nir.LIF(tau=1, r=2, v_leak=3, v_threshold=4),
+        ],
         edges=[(0, 0)],
     )
     factory_test_graph(ir)
 
+
 def test_simple_with_read_write():
     ir = nir.NIR(
-        nodes=[nir.Input(shape=[3,]),
-               nir.Linear(weights=[1, 2, 3], bias=4),
-               nir.Output()],
-        edges=[(0, 1), (1,2)]
+        nodes=[
+            nir.Input(
+                shape=[
+                    3,
+                ]
+            ),
+            nir.Linear(weights=[1, 2, 3], bias=4),
+            nir.Output(),
+        ],
+        edges=[(0, 1), (1, 2)],
     )
     factory_test_graph(ir)
+
 
 def test_delay():
     ir = nir.NIR(
-        nodes=[nir.Input(shape=[3,]),
-               nir.Delay(delay=[1, 2, 3]),
-               nir.Output()],
-        edges=[(0, 1), (1,2)]
+        nodes=[
+            nir.Input(
+                shape=[
+                    3,
+                ]
+            ),
+            nir.Delay(delay=[1, 2, 3]),
+            nir.Output(),
+        ],
+        edges=[(0, 1), (1, 2)],
     )
     factory_test_graph(ir)
 
+
 def test_threshold():
     ir = nir.NIR(
-        nodes=[nir.Input(shape=[3,]),
-               nir.Threshold(threshold=[2.0, 2.5, 2.8]),
-               nir.Output()],
-        edges=[(0, 1), (1,2)]
+        nodes=[
+            nir.Input(
+                shape=[
+                    3,
+                ]
+            ),
+            nir.Threshold(threshold=[2.0, 2.5, 2.8]),
+            nir.Output(),
+        ],
+        edges=[(0, 1), (1, 2)],
     )
     factory_test_graph(ir)

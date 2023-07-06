@@ -50,15 +50,9 @@ def write(filename: typing.Union[str, pathlib.Path], graph: nir.NIR) -> None:
                 "bias": node.bias,
             }
         elif isinstance(node, nir.Delay):
-            return {
-                "type": "Delay",
-                "delay": node.delay
-            }
+            return {"type": "Delay", "delay": node.delay}
         elif isinstance(node, nir.Threshold):
-            return {
-                "type": "Threshold",
-                "threshold": node.threshold
-            }
+            return {"type": "Threshold", "threshold": node.threshold}
         else:
             raise ValueError(f"Unknown node type: {node}")
 

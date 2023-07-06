@@ -17,10 +17,7 @@ def read(filename: typing.Union[str, pathlib.Path]) -> nir.NIR:
                     )
                 )
             elif node["type"][()] == b"Output":
-                nodes.append(
-                    nir.Output(
-                    )
-                )
+                nodes.append(nir.Output())
             elif node["type"][()] == b"LI":
                 nodes.append(
                     nir.LI(

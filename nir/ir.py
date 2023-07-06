@@ -20,20 +20,24 @@ class NIRNode:
 
     pass
 
+
 @dataclass
 class Input(NIRNode):
     """Input Node.
 
     This is a virtual node, which allows feeding in data into the graph.
     """
-    shape: np.ndarray # Shape of input data
+
+    shape: np.ndarray  # Shape of input data
+
 
 @dataclass
 class Output(NIRNode):
     """Output Node.
-    
+
     Defines an output of the graph.
     """
+
     pass
 
 
@@ -84,7 +88,6 @@ class LIF(NIRNode):
 
 @dataclass
 class Linear(NIRNode):
-
     weights: np.ndarray  # Weights M * N
     bias: np.ndarray  # Bias M
 
@@ -92,10 +95,10 @@ class Linear(NIRNode):
 @dataclass
 class Convolution(NIRNode):
     """Convolutional layer in arbitrary dimension.
-    
-    Weights denote the kernels of the convolution according to 
-    $C_out \times C_in \times W_0 \times ... \times W_m $ where $W$ is the weight for the $m$th dimension
-    in the convolution (from 1 upwards).
+
+    Weights denote the kernels of the convolution according to
+    $C_out \times C_in \times W_0 \times ... \times W_m $ where $W$ is the weight
+    for the $m$th dimension in the convolution (from 1 upwards).
     A PyTorch `Conv1d` model would be represented by $C_out \times C_in \times W_0$.
     """
 
@@ -118,4 +121,4 @@ class Threshold(NIRNode):
 class Delay(NIRNode):
     """Simple delay node."""
 
-    delay: np.ndarray # Delay
+    delay: np.ndarray  # Delay
