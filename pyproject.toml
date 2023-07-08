@@ -3,7 +3,7 @@ requires = ["setuptools"]
 
 [project]
 name = "nir"
-version = "0.0.4"
+version = "0.0.5"
 description = "Neuromorphic Intermediate Representation"
 authors = [
   { name = "Steven Abreu", email = "s.abreu@rug.nl" },
