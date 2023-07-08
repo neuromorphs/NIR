@@ -39,15 +39,16 @@ class Output(NIRNode):
 
 @dataclass
 class LI(NIRNode):
-    """Leaky integrator neuron model.
+    r"""Leaky integrator neuron model.
 
     The leaky integrator neuron model is defined by the following equation:
-    $$
-    \tau \dot{v} = (v_{leak} - v) + R I
-    $$
-    Where $\tau$ is the time constant, $v$ is the membrane potential,
-    $v_{leak}$ is the leak voltage, $R$ is the resistance, and $I$ is the
-    input current.
+
+    .. math:: 
+        \tau \dot{v} = (v_{leak} - v) + R I
+
+    Where :math:`\tau` is the time constant, :math:`v` is the membrane potential,
+    :math:`v_{leak}` is the leak voltage, :math:`R` is the resistance, and :math:`I` 
+    is the input current.
     """
 
     tau: np.ndarray  # Time constant
@@ -57,20 +58,23 @@ class LI(NIRNode):
 
 @dataclass
 class LIF(NIRNode):
-    """Leaky integrate and-fire-neuron model.
+    r"""Leaky integrate and-fire-neuron model.
 
     The leaky integrate-and-fire neuron model is defined by the following equations:
-    $$
-    \tau \dot{v} = (v_{leak} - v) + R I
-    z = \being{cases}
-        1 & v > v_th \\
-        0 & else
-    \end{cases}
-    v = \begin{cases}
-        v-v_{th} & z=1 \\
-        v & else
-    \end{cases}
-    $$
+    
+    .. math::
+        \tau \dot{v} = (v_{leak} - v) + R I
+    
+        z = \begin{cases} 
+            1 & v > v_{thr} \\ 
+            0 & else
+        \end{cases}
+
+        v = \begin{cases}
+            v-v_{thr} & z=1 \\
+            v & else
+        \end{cases}
+
     Where $\tau$ is the time constant, $v$ is the membrane potential,
     $v_{leak}$ is the leak voltage, $R$ is the resistance, $v_th$ is
     the firing threshold, and $I$ is the input current.
