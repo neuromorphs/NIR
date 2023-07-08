@@ -32,9 +32,19 @@ $$
 ## Format
 The intermediate represenation can be stored as hdf5 file, which benefits from compression. 
 
-## Frameworks that currently support NIR:
-* work in progress
-* another work in progress
+## Frameworks that currently support NIR
+
+| **Framework** | **Write to NIR** | **Read from NIR** |
+| --------------- | :--: | :--: |
+| [Lava-DL](https://github.com/lava-nc/lava-dl) | ⬚ | ⬚ |
+| [Nengo](https://nengo.ai) | ⬚ | ⬚ |
+| [Norse](https://github.com/norse/norse) | ✓ | ⬚ |
+| [Rockpool](https://rockpool.ai) | ⬚ | ⬚ |
+| [Sinabs](https://sinabs.readthedocs.io) | ⬚ | ⬚ |
+| [SpiNNaker2](https://spinncloud.com/portfolio/spinnaker2/) | ⬚ | ⬚ |
+| [SynSense Speck](https://www.synsense.ai/products/speck-2/) | ⬚ | ⬚ |
+| [SynSense Xylo](https://www.synsense.ai/products/xylo/) | ⬚ | ⬚ |
+
 
 ## Acknowledgements
 Authors (in alphabetical order):
