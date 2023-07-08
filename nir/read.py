@@ -22,6 +22,13 @@ def read(filename: typing.Union[str, pathlib.Path]) -> nir.NIR:
                         r=node["r"][()],
                     )
                 )
+            elif node["type"][()] == b"IF":
+                nodes.append(
+                    nir.IF(
+                        r=node["r"][()],
+                        v_threshold=node["v_threshold"][()],
+                    )
+                )
             elif node["type"][()] == b"Input":
                 nodes.append(
                     nir.Input(

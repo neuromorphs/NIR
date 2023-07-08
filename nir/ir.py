@@ -55,6 +55,30 @@ class I(NIRNode):
 
 
 @dataclass
+class IF(NIRNode):
+    """Integrate-and-fire neuron model.
+
+   The integrate-and-fire neuron model is defined by the following equations:
+
+   .. math::
+        \dot{V} = R I
+
+        z = \begin{cases} 
+            1 & v > v_{threshold} \\ 
+            0 & else
+        \end{cases}
+
+        v = \begin{cases}
+            v-v_{thr} & z=1 \\
+            v & else
+            \end{cases}
+    """
+
+    r: np.ndarray  # Resistance
+    v_threshold: np.ndarray  # Firing threshold
+
+
+@dataclass
 class LI(NIRNode):
     r"""Leaky integrator neuron model.
 

@@ -1,5 +1,4 @@
-on:
-  release:
+on: [release]
 
 jobs:
   pypi-publish:

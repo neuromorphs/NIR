@@ -13,6 +13,8 @@ def write(filename: typing.Union[str, pathlib.Path], graph: nir.NIR) -> None:
             return {"type": "Delay", "delay": node.delay}
         elif isinstance(node, nir.I):
             return {"type": "I", "r": node.r}
+        elif isinstance(node, nir.IF):
+            return {"type": "IF", "r": node.r, "v_threshold": node.v_threshold}
         elif isinstance(node, nir.Input):
             return {
                 "type": "Input",
