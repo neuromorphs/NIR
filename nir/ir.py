@@ -20,21 +20,38 @@ class NIRNode:
 
     pass
 
+
 @dataclass
 class Input(NIRNode):
     """Input Node.
 
     This is a virtual node, which allows feeding in data into the graph.
     """
-    shape: np.ndarray # Shape of input data
+
+    shape: np.ndarray  # Shape of input data
+
 
 @dataclass
 class Output(NIRNode):
     """Output Node.
-    
+
     Defines an output of the graph.
     """
+
     pass
+
+
+@dataclass
+class I(NIRNode):
+    """Integrator
+
+    The integrator neuron model is defined by the following equation:
+
+    .. math::
+        \dot{v} = R I
+    """
+
+    r: np.ndarray
 
 
 @dataclass
@@ -43,11 +60,11 @@ class LI(NIRNode):
 
     The leaky integrator neuron model is defined by the following equation:
 
-    .. math:: 
+    .. math::
         \tau \dot{v} = (v_{leak} - v) + R I
 
     Where :math:`\tau` is the time constant, :math:`v` is the membrane potential,
-    :math:`v_{leak}` is the leak voltage, :math:`R` is the resistance, and :math:`I` 
+    :math:`v_{leak}` is the leak voltage, :math:`R` is the resistance, and :math:`I`
     is the input current.
     """
 
@@ -88,7 +105,6 @@ class LIF(NIRNode):
 
 @dataclass
 class Linear(NIRNode):
-
     weights: np.ndarray  # Weights M * N
     bias: np.ndarray  # Bias M
 
@@ -128,4 +144,4 @@ class Threshold(NIRNode):
 class Delay(NIRNode):
     """Simple delay node."""
 
-    delay: np.ndarray # Delay
+    delay: np.ndarray  # Delay

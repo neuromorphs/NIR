@@ -9,14 +9,14 @@ import nir
 
 def write(filename: typing.Union[str, pathlib.Path], graph: nir.NIR) -> None:
     def convert_node(node: nir.NIRNode) -> dict:
-        if isinstance(node, nir.Input):
+        if isinstance(node, nir.Delay):
+            return {"type": "Delay", "delay": node.delay}
+        elif isinstance(node, nir.I):
+            return {"type": "I", "r": node.r}
+        elif isinstance(node, nir.Input):
             return {
                 "type": "Input",
                 "shape": node.shape,
-            }
-        elif isinstance(node, nir.Output):
-            return {
-                "type": "Output",
             }
         elif isinstance(node, nir.LI):
             return {
@@ -59,16 +59,12 @@ def write(filename: typing.Union[str, pathlib.Path], graph: nir.NIR) -> None:
                 "groups": node.groups,
                 "bias": node.bias,
             }
-        elif isinstance(node, nir.Delay):
+        elif isinstance(node, nir.Output):
             return {
-                "type": "Delay",
-                "delay": node.delay
+                "type": "Output",
             }
         elif isinstance(node, nir.Threshold):
-            return {
-                "type": "Threshold",
-                "threshold": node.threshold
-            }
+            return {"type": "Threshold", "threshold": node.threshold}
         else:
             raise ValueError(f"Unknown node type: {node}")
 

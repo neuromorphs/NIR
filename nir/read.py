@@ -10,17 +10,26 @@ def read(filename: typing.Union[str, pathlib.Path]) -> nir.NIR:
     with h5py.File(filename, "r") as f:
         nodes = []
         for k, node in f["nodes"].items():
-            if node["type"][()] == b"Input":
+            if node["type"][()] == b"Delay":
+                nodes.append(
+                    nir.Delay(
+                        delay=node["delay"][()],
+                    )
+                )
+            elif node["type"][()] == b"I":
+                nodes.append(
+                    nir.I(
+                        r=node["r"][()],
+                    )
+                )
+            elif node["type"][()] == b"Input":
                 nodes.append(
                     nir.Input(
                         shape=node["shape"][()],
                     )
                 )
             elif node["type"][()] == b"Output":
-                nodes.append(
-                    nir.Output(
-                    )
-                )
+                nodes.append(nir.Output())
             elif node["type"][()] == b"LI":
                 nodes.append(
                     nir.LI(
@@ -65,12 +74,6 @@ def read(filename: typing.Union[str, pathlib.Path]) -> nir.NIR:
                         dilation=node["dilation"][()],
                         groups=node["groups"][()],
                         bias=node["bias"][()],
-                    )
-                )
-            elif node["type"][()] == b"Delay":
-                nodes.append(
-                    nir.Delay(
-                        delay=node["delay"][()],
                     )
                 )
             elif node["type"][()] == b"Threshold":
