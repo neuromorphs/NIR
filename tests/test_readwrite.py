@@ -30,7 +30,7 @@ def test_integrator():
     factory_test_graph(ir)
 
 
-def test_integrator():
+def test_integrate_and_fire():
     ir = nir.NIR(
         nodes=[nir.Linear(weights=[1], bias=0), nir.IF(r=2, v_threshold=3)],
         edges=[(0, 0)],
