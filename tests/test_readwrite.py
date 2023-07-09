@@ -18,13 +18,13 @@ def factory_test_graph(ir: nir.NIR):
 
 
 def test_simple():
-    ir = nir.NIR(nodes=[nir.Linear(weights=[1, 2, 3], bias=4)], edges=[(0, 0)])
+    ir = nir.NIR(nodes=[nir.Linear(weight=[1, 2, 3], bias=4)], edges=[(0, 0)])
     factory_test_graph(ir)
 
 
 def test_integrator():
     ir = nir.NIR(
-        nodes=[nir.Linear(weights=[1], bias=0), nir.I(r=2)],
+        nodes=[nir.Linear(weight=[1], bias=0), nir.I(r=2)],
         edges=[(0, 0)],
     )
     factory_test_graph(ir)
@@ -32,7 +32,7 @@ def test_integrator():
 
 def test_integrate_and_fire():
     ir = nir.NIR(
-        nodes=[nir.Linear(weights=[1], bias=0), nir.IF(r=2, v_threshold=3)],
+        nodes=[nir.Linear(weight=[1], bias=0), nir.IF(r=2, v_threshold=3)],
         edges=[(0, 0)],
     )
     factory_test_graph(ir)
@@ -40,7 +40,7 @@ def test_integrate_and_fire():
 
 def test_leaky_integrator():
     ir = nir.NIR(
-        nodes=[nir.Linear(weights=[1], bias=0), nir.LI(tau=1, r=2, v_leak=3)],
+        nodes=[nir.Linear(weight=[1], bias=0), nir.LI(tau=1, r=2, v_leak=3)],
         edges=[(0, 0)],
     )
     factory_test_graph(ir)
@@ -49,7 +49,7 @@ def test_leaky_integrator():
 def test_leaky_integrator_and_fire():
     ir = nir.NIR(
         nodes=[
-            nir.Linear(weights=[1], bias=0),
+            nir.Linear(weight=[1], bias=0),
             nir.LIF(tau=1, r=2, v_leak=3, v_threshold=4),
         ],
         edges=[(0, 0)],
@@ -65,7 +65,7 @@ def test_simple_with_read_write():
                     3,
                 ]
             ),
-            nir.Linear(weights=[1, 2, 3], bias=4),
+            nir.Linear(weight=[1, 2, 3], bias=4),
             nir.Output(),
         ],
         edges=[(0, 1), (1, 2)],
