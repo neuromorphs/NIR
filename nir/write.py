@@ -8,6 +8,7 @@ import nir
 
 
 def write(filename: typing.Union[str, pathlib.Path], graph: nir.NIR) -> None:
+    """Write a NIR to a HDF5 file."""
     def convert_node(node: nir.NIRNode) -> dict:
         if isinstance(node, nir.Delay):
             return {"type": "Delay", "delay": node.delay}

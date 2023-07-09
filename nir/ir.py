@@ -56,22 +56,24 @@ class I(NIRNode):
 
 @dataclass
 class IF(NIRNode):
-    """Integrate-and-fire neuron model.
+    r"""Integrate-and-fire neuron model.
 
-   The integrate-and-fire neuron model is defined by the following equations:
+    The integrate-and-fire neuron model is defined by the following equations:
 
-   .. math::
-        \dot{V} = R I
+    .. math::
+        \dot{v} = R I
 
+    .. math::
         z = \begin{cases} 
-            1 & v > v_{threshold} \\ 
+            1 & v > v_{thr} \\ 
             0 & else
         \end{cases}
 
+    .. math::
         v = \begin{cases}
             v-v_{thr} & z=1 \\
             v & else
-            \end{cases}
+        \end{cases}
     """
 
     r: np.ndarray  # Resistance
@@ -105,12 +107,14 @@ class LIF(NIRNode):
     
     .. math::
         \tau \dot{v} = (v_{leak} - v) + R I
-    
+
+    .. math::
         z = \begin{cases} 
             1 & v > v_{thr} \\ 
             0 & else
         \end{cases}
 
+    .. math::
         v = \begin{cases}
             v-v_{thr} & z=1 \\
             v & else
