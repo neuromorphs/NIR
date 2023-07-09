@@ -27,7 +27,7 @@ class NIRNode:
 class Conv1d(NIRNode):
     """Convolutional layer in 1d"""
 
-    weights: np.ndarray  # Weights C_out * C_in * X
+    weight: np.ndarray  # Weight C_out * C_in * X
     stride: int  # Stride
     padding: int  # Padding
     dilation: int  # Dilation
@@ -39,7 +39,7 @@ class Conv1d(NIRNode):
 class Conv2d(NIRNode):
     """Convolutional layer in 2d"""
 
-    weights: np.ndarray  # Weights C_out * C_in * X * Y
+    weight: np.ndarray  # Weight C_out * C_in * X * Y
     stride: int  # Stride
     padding: int  # Padding
     dilation: int  # Dilation
@@ -131,8 +131,8 @@ class LI(NIRNode):
 
 @dataclass
 class Linear(NIRNode):
-    weights: np.ndarray  # Weights M * N
-    bias: np.ndarray  # Bias M
+    weight: np.ndarray  # Weight term
+    bias: np.ndarray  # Bias term
 
 @dataclass
 class LIF(NIRNode):
