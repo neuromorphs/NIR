@@ -10,39 +10,7 @@ import nir
 def write(filename: typing.Union[str, pathlib.Path], graph: nir.NIR) -> None:
     """Write a NIR to a HDF5 file."""
     def convert_node(node: nir.NIRNode) -> dict:
-        if isinstance(node, nir.Delay):
-            return {"type": "Delay", "delay": node.delay}
-        elif isinstance(node, nir.I):
-            return {"type": "I", "r": node.r}
-        elif isinstance(node, nir.IF):
-            return {"type": "IF", "r": node.r, "v_threshold": node.v_threshold}
-        elif isinstance(node, nir.Input):
-            return {
-                "type": "Input",
-                "shape": node.shape,
-            }
-        elif isinstance(node, nir.LI):
-            return {
-                "type": "LI",
-                "tau": node.tau,
-                "r": node.r,
-                "v_leak": node.v_leak,
-            }
-        elif isinstance(node, nir.LIF):
-            return {
-                "type": "LIF",
-                "tau": node.tau,
-                "r": node.r,
-                "v_leak": node.v_leak,
-                "v_threshold": node.v_threshold,
-            }
-        elif isinstance(node, nir.Linear):
-            return {
-                "type": "Linear",
-                "weights": node.weights,
-                "bias": node.bias,
-            }
-        elif isinstance(node, nir.Conv1d):
+        if isinstance(node, nir.Conv1d):
             return {
                 "type": "Conv1d",
                 "weights": node.weights,
@@ -61,6 +29,38 @@ def write(filename: typing.Union[str, pathlib.Path], graph: nir.NIR) -> None:
                 "dilation": node.dilation,
                 "groups": node.groups,
                 "bias": node.bias,
+            }
+        elif isinstance(node, nir.Delay):
+            return {"type": "Delay", "delay": node.delay}
+        elif isinstance(node, nir.I):
+            return {"type": "I", "r": node.r}
+        elif isinstance(node, nir.IF):
+            return {"type": "IF", "r": node.r, "v_threshold": node.v_threshold}
+        elif isinstance(node, nir.Input):
+            return {
+                "type": "Input",
+                "shape": node.shape,
+            }
+        elif isinstance(node, nir.LI):
+            return {
+                "type": "LI",
+                "tau": node.tau,
+                "r": node.r,
+                "v_leak": node.v_leak,
+            }
+        elif isinstance(node, nir.Linear):
+            return {
+                "type": "Linear",
+                "weights": node.weights,
+                "bias": node.bias,
+            }
+        elif isinstance(node, nir.LIF):
+            return {
+                "type": "LIF",
+                "tau": node.tau,
+                "r": node.r,
+                "v_leak": node.v_leak,
+                "v_threshold": node.v_threshold,
             }
         elif isinstance(node, nir.Output):
             return {

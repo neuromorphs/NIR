@@ -9,7 +9,9 @@ Edges = typing.NewType("Edges", typing.List[typing.Tuple[int, int]])
 
 @dataclass
 class NIR:
-    """Neural Intermediate Representation (NIR)"""
+    """Neural Intermediate Representation (NIR)
+
+    A graph of computational nodes and identity edges."""
 
     nodes: typing.List[typing.Any]  # List of computational nodes
     edges: Edges
@@ -22,6 +24,43 @@ class NIRNode:
 
 
 @dataclass
+class Conv1d(NIRNode):
+    """Convolutional layer in 1d"""
+
+    weights: np.ndarray  # Weights C_out * C_in * X
+    stride: int  # Stride
+    padding: int  # Padding
+    dilation: int  # Dilation
+    groups: int  # Groups
+    bias: np.ndarray  # Bias C_out
+
+
+@dataclass
+class Conv2d(NIRNode):
+    """Convolutional layer in 2d"""
+
+    weights: np.ndarray  # Weights C_out * C_in * X * Y
+    stride: int  # Stride
+    padding: int  # Padding
+    dilation: int  # Dilation
+    groups: int  # Groups
+    bias: np.ndarray  # Bias C_out
+
+
+@dataclass
+class Delay(NIRNode):
+    """Simple delay node.
+
+    This node implements a simple delay:
+
+    .. math::
+        y(t) = x(t - \tau)
+    """
+
+    delay: np.ndarray  # Delay
+
+
+@dataclass
 class Input(NIRNode):
     """Input Node.
 
@@ -31,19 +70,10 @@ class Input(NIRNode):
     shape: np.ndarray  # Shape of input data
 
 
-@dataclass
-class Output(NIRNode):
-    """Output Node.
-
-    Defines an output of the graph.
-    """
-
-    pass
-
 
 @dataclass
 class I(NIRNode):
-    """Integrator
+    r"""Integrator
 
     The integrator neuron model is defined by the following equation:
 
@@ -100,6 +130,11 @@ class LI(NIRNode):
 
 
 @dataclass
+class Linear(NIRNode):
+    weights: np.ndarray  # Weights M * N
+    bias: np.ndarray  # Bias M
+
+@dataclass
 class LIF(NIRNode):
     r"""Leaky integrate and-fire-neuron model.
 
@@ -132,44 +167,26 @@ class LIF(NIRNode):
 
 
 @dataclass
-class Linear(NIRNode):
-    weights: np.ndarray  # Weights M * N
-    bias: np.ndarray  # Bias M
+class Output(NIRNode):
+    """Output Node.
 
+    Defines an output of the graph.
+    """
 
-@dataclass
-class Conv1d(NIRNode):
-    """Convolutional layer in 1d"""
-
-    weights: np.ndarray  # Weights C_out * C_in * X
-    stride: int  # Stride
-    padding: int  # Padding
-    dilation: int  # Dilation
-    groups: int  # Groups
-    bias: np.ndarray  # Bias C_out
-
-
-@dataclass
-class Conv2d(NIRNode):
-    """Convolutional layer in 2d"""
-
-    weights: np.ndarray  # Weights C_out * C_in * X * Y
-    stride: int  # Stride
-    padding: int  # Padding
-    dilation: int  # Dilation
-    groups: int  # Groups
-    bias: np.ndarray  # Bias C_out
+    pass
 
 
 @dataclass
 class Threshold(NIRNode):
-    """Threshold node."""
+    r"""Threshold node.
+
+    This node implements the heaviside step function:
+
+    .. math::
+        z = \begin{cases}
+            1 & v > v_{thr} \\
+            0 & else
+        \end{cases}
+    """
 
     threshold: np.ndarray  # Firing threshold
-
-
-@dataclass
-class Delay(NIRNode):
-    """Simple delay node."""
-
-    delay: np.ndarray  # Delay
