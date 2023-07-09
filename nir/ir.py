@@ -60,19 +60,9 @@ class Delay(NIRNode):
     delay: np.ndarray  # Delay
 
 
-@dataclass
-class Input(NIRNode):
-    """Input Node.
-
-    This is a virtual node, which allows feeding in data into the graph.
-    """
-
-    shape: np.ndarray  # Shape of input data
-
-
 
 @dataclass
-class I(NIRNode):
+class I(NIRNode): # noqa: E742
     r"""Integrator
 
     The integrator neuron model is defined by the following equation:
@@ -106,6 +96,16 @@ class IF(NIRNode):
 
     r: np.ndarray  # Resistance
     v_threshold: np.ndarray  # Firing threshold
+
+
+@dataclass
+class Input(NIRNode):
+    """Input Node.
+
+    This is a virtual node, which allows feeding in data into the graph.
+    """
+
+    shape: np.ndarray  # Shape of input data
 
 
 @dataclass
