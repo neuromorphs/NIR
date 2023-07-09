@@ -13,7 +13,7 @@ def read(filename: typing.Union[str, pathlib.Path]) -> nir.NIR:
             if node["type"][()] == b"Conv1d":
                 nodes.append(
                     nir.Conv1d(
-                        weights=node["weights"][()],
+                        weight=node["weight"][()],
                         stride=node["stride"][()],
                         padding=node["padding"][()],
                         dilation=node["dilation"][()],
@@ -24,7 +24,7 @@ def read(filename: typing.Union[str, pathlib.Path]) -> nir.NIR:
             elif node["type"][()] == b"Conv2d":
                 nodes.append(
                     nir.Conv2d(
-                        weights=node["weights"][()],
+                        weight=node["weight"][()],
                         stride=node["stride"][()],
                         padding=node["padding"][()],
                         dilation=node["dilation"][()],
@@ -68,7 +68,7 @@ def read(filename: typing.Union[str, pathlib.Path]) -> nir.NIR:
             elif node["type"][()] == b"Linear":
                 nodes.append(
                     nir.Linear(
-                        weights=node["weights"][()],
+                        weight=node["weight"][()],
                         bias=node["bias"][()],
                     )
                 )
