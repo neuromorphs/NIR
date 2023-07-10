@@ -187,7 +187,8 @@ class LIF(NIRNode):
 class CubaLIF(NIRNode):
     r"""Current based leaky integrate and-fire-neuron model.
 
-    The current based leaky integrate-and-fire neuron model is defined by the following equations:
+    The current based leaky integrate-and-fire neuron model
+    is defined by the following equations:
 
     .. math::
         \tau_syn \ dot{I} = - I + S
@@ -206,9 +207,13 @@ class CubaLIF(NIRNode):
             v & else
         \end{cases}
 
-    Where :math:`\tau_syn` is the synaptic time constant, :math:`\tau_mem` is the membrane time constant,
-    :math:`v` is the membrane potential, :math:`v_{leak}` is the leak voltage,
-    :math:`R` is the resistance, :math:`v_{threshold}` is the firing threshold, and :math:`S` is the input spike.
+    Where :math:`\tau_syn` is the synaptic time constant,
+    :math:`\tau_mem` is the membrane time constant,
+    :math:`v` is the membrane potential,
+    :math:`v_{leak}` is the leak voltage,
+    :math:`R` is the resistance,
+    :math:`v_{threshold}` is the firing threshold,
+    and :math:`S` is the input spike.
     """
 
     tau_syn: np.ndarray  # Time constant
