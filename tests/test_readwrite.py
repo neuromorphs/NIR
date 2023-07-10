@@ -5,7 +5,7 @@ import numpy as np
 import nir
 
 
-def factory_test_graph(ir: nir.NIR):
+def factory_test_graph(ir: nir.NIRGraph):
     tmp = tempfile.mktemp()
     nir.write(tmp, ir)
     ir2 = nir.read(tmp)
@@ -18,12 +18,12 @@ def factory_test_graph(ir: nir.NIR):
 
 
 def test_simple():
-    ir = nir.NIR(nodes=[nir.Affine(weight=[1, 2, 3], bias=4)], edges=[(0, 0)])
+    ir = nir.NIRGraph(nodes=[nir.Affine(weight=[1, 2, 3], bias=4)], edges=[(0, 0)])
     factory_test_graph(ir)
 
 
 def test_integrator():
-    ir = nir.NIR(
+    ir = nir.NIRGraph(
         nodes=[nir.Affine(weight=[1], bias=0), nir.I(r=2)],
         edges=[(0, 0)],
     )
@@ -31,7 +31,7 @@ def test_integrator():
 
 
 def test_integrate_and_fire():
-    ir = nir.NIR(
+    ir = nir.NIRGraph(
         nodes=[nir.Affine(weight=[1], bias=0), nir.IF(r=2, v_threshold=3)],
         edges=[(0, 0)],
     )
@@ -39,21 +39,23 @@ def test_integrate_and_fire():
 
 
 def test_leaky_integrator():
-    ir = nir.NIR(
+    ir = nir.NIRGraph(
         nodes=[nir.Affine(weight=[1], bias=0), nir.LI(tau=1, r=2, v_leak=3)],
         edges=[(0, 0)],
     )
     factory_test_graph(ir)
 
+
 def test_linear():
-    ir = nir.NIR(
+    ir = nir.NIRGraph(
         nodes=[nir.Linear(weight=[1]), nir.LI(tau=1, r=2, v_leak=3)],
         edges=[(0, 0)],
     )
     factory_test_graph(ir)
 
+
 def test_leaky_integrator_and_fire():
-    ir = nir.NIR(
+    ir = nir.NIRGraph(
         nodes=[
             nir.Affine(weight=[1], bias=0),
             nir.LIF(tau=1, r=2, v_leak=3, v_threshold=4),
@@ -64,7 +66,7 @@ def test_leaky_integrator_and_fire():
 
 
 def test_simple_with_read_write():
-    ir = nir.NIR(
+    ir = nir.NIRGraph(
         nodes=[
             nir.Input(
                 shape=[
@@ -80,7 +82,7 @@ def test_simple_with_read_write():
 
 
 def test_delay():
-    ir = nir.NIR(
+    ir = nir.NIRGraph(
         nodes=[
             nir.Input(
                 shape=[
@@ -96,7 +98,7 @@ def test_delay():
 
 
 def test_threshold():
-    ir = nir.NIR(
+    ir = nir.NIRGraph(
         nodes=[
             nir.Input(
                 shape=[
