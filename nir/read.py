@@ -64,6 +64,16 @@ def read_node(node: typing.Any) -> nir.NIRNode:
             v_leak=node["v_leak"][()],
             v_threshold=node["v_threshold"][()],
         )
+    elif node["type"][()] == b"CubaLIF":
+        nodes.append(
+            nir.CubaLIF(
+                tau_mem=node["tau_mem"][()],
+                tau_syn=node["tau_syn"][()],
+                r=node["r"][()],
+                v_leak=node["v_leak"][()],
+                v_threshold=node["v_threshold"][()],
+            )
+        )
     elif node["type"][()] == b"NIRGraph":
         return nir.NIRGraph(
             nodes=[read_node(n) for n in node["nodes"].values()],
