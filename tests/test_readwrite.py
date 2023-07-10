@@ -5,20 +5,44 @@ import numpy as np
 import nir
 
 
+def assert_equivalence(ir: nir.NIRGraph, ir2: nir.NIRGraph):
+    for i in range(len(ir.nodes)):
+        if isinstance (ir.nodes[i], nir.NIRGraph):
+            # Handle nested graphs
+            assert isinstance(ir2.nodes[i], nir.NIRGraph)
+            assert_equivalence(ir.nodes[i], ir2.nodes[i])
+        else:
+            for k, v in ir.nodes[i].__dict__.items():
+                if isinstance(v, np.ndarray) or isinstance(v, list):
+                    assert np.array_equal(v, getattr(ir2.nodes[i], k))
+                else:
+                    assert v == getattr(ir2.nodes[i], k)
+
+
 def factory_test_graph(ir: nir.NIRGraph):
     tmp = tempfile.mktemp()
     nir.write(tmp, ir)
     ir2 = nir.read(tmp)
-    for i in range(len(ir.nodes)):
-        for k, v in ir.nodes[i].__dict__.items():
-            if isinstance(v, np.ndarray) or isinstance(v, list):
-                assert np.array_equal(v, getattr(ir2.nodes[i], k))
-            else:
-                assert v == getattr(ir2.nodes[i], k)
+    assert_equivalence(ir, ir2)
 
 
 def test_simple():
     ir = nir.NIRGraph(nodes=[nir.Affine(weight=[1, 2, 3], bias=4)], edges=[(0, 0)])
+    factory_test_graph(ir)
+
+
+def test_nested():
+    nested = nir.NIRGraph(
+        nodes=[
+            nir.I(r=[1, 1]),
+            nir.Delay([2, 2]),
+        ],
+        edges=[(0, 1), (1, 0)]
+    )
+    ir = nir.NIRGraph(
+        nodes=[nir.Affine(weight=[1, 2], bias=4), nested],
+        edges=[(0, 1)],
+    )
     factory_test_graph(ir)
 
 

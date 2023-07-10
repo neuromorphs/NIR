@@ -8,6 +8,24 @@ def test_simple():
     assert ir.edges == [(0, 0)]
 
 
+def test_nested():
+    nested = nir.NIRGraph(
+        nodes=[
+            nir.I(r=[1, 1]),
+            nir.Delay([2, 2]),
+        ],
+        edges=[(0, 1), (1, 0)]
+    )
+    ir = nir.NIRGraph(
+        nodes=[nir.Affine(weight=[1, 2], bias=4), nested],
+        edges=[(0, 1)],
+    )
+    assert ir.nodes[0].weight == [1, 2]
+    assert ir.nodes[1].nodes[0].r == [1, 1]
+    assert ir.nodes[1].nodes[1].delay == [2, 2]
+    assert ir.nodes[1].edges == [(0, 1), (1, 0)]
+
+
 def test_simple_with_input_output():
     ir = nir.NIRGraph(
         nodes=[
