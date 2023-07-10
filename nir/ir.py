@@ -24,6 +24,17 @@ class NIRNode:
 
 
 @dataclass
+class Affine(NIRNode):
+    r"""Affine transform:
+    ..math::
+        y(t) = x(t)*W + b
+    """
+    weight: np.ndarray  # Weight term
+    bias: np.ndarray  # Bias term
+
+
+
+@dataclass
 class Conv1d(NIRNode):
     """Convolutional layer in 1d"""
 
@@ -131,8 +142,12 @@ class LI(NIRNode):
 
 @dataclass
 class Linear(NIRNode):
+    r"""Linear transform without bias:
+    ..math::
+        y(t) = x(t)*W
+    """
     weight: np.ndarray  # Weight term
-    bias: np.ndarray  # Bias term
+
 
 @dataclass
 class LIF(NIRNode):

@@ -5,21 +5,23 @@ NIR defines neuron models and connectivity for arbitrary networks that include s
 ## Computational units
 On top of popular primitives such as convolutional or fully connected/linear computations, we define additional compuational primitives that are specific to neuromorphic computing and hardware implementations thereof. Computational units that are not specifically neuromorphic take inspiration from the Pytorch ecosystem in terms of naming and parameters (such as Conv2d that uses groups/strides). Example definitons of computational units:
 
+$$\text{Affine}: \mathbb{R}^{m \times n},  \mathbb{R}^n$$
+
+$$\text{Conv1d}: \mathbb{R}^{c_{out} \times c_{in} \times x},  \text{Strides}, \text{Groups}, ... $$ 
+
+$$\text{Conv2d}: \mathbb{R}^{c_{out} \times c_{in} \times y \times x},  \text{Strides}, \text{Groups}, ... $$ 
+
 $$\text{I}: [ R ]$$
 
 $$\text{LI}: [ \tau, R, v_{leak}]$$
 
 $$\text{LIF}: [ \tau, R, v_{leak}, v_{threshold} ]$$
 
-$$\text{Linear}: \mathbb{R}^{m \times n},  \mathbb{R}^n$$
-
-$$\text{Conv1d}: \mathbb{R}^{c_{out} \times c_{in} \times x},  \text{Strides}, \text{Groups}, ... $$ 
-
-$$\text{Conv2d}: \mathbb{R}^{c_{out} \times c_{in} \times y \times x},  \text{Strides}, \text{Groups}, ... $$ 
-
 where LIF is defined as a dynamical equation:
 
 $$ \tau \dot{v} = v_{leak} - v + R i $$ 
+
+$$\text{Linear}: \mathbb{R}^{m \times n}$$
 
 
 ## Connectivity 
