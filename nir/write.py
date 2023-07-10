@@ -67,6 +67,15 @@ def write(filename: typing.Union[str, pathlib.Path], graph: nir.NIR) -> None:
                 "v_leak": node.v_leak,
                 "v_threshold": node.v_threshold,
             }
+        elif isinstance(node, nir.CubaLIF):
+            return {
+                "type": "CubaLIF",
+                "tau_mem": node.tau_mem,
+                "tau_syn": node.tau_syn,
+                "r": node.r,
+                "v_leak": node.v_leak,
+                "v_threshold": node.v_threshold,
+            }
         elif isinstance(node, nir.Output):
             return {
                 "type": "Output",
