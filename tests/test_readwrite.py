@@ -62,6 +62,16 @@ def test_leaky_integrator_and_fire():
     )
     factory_test_graph(ir)
 
+def test_current_based_leaky_integrator_and_fire():
+    ir = nir.NIR(
+        nodes=[
+            nir.Linear(weight=[1]),
+            nir.CubaLIF(tau_mem=1, tau_syn=1, r=2, v_leak=3, v_threshold=4),
+        ],
+        edges=[(0, 0)],
+    )
+    factory_test_graph(ir)
+
 
 def test_simple_with_read_write():
     ir = nir.NIR(
