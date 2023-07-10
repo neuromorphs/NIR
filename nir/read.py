@@ -10,7 +10,14 @@ def read(filename: typing.Union[str, pathlib.Path]) -> nir.NIR:
     with h5py.File(filename, "r") as f:
         nodes = []
         for k, node in f["nodes"].items():
-            if node["type"][()] == b"Conv1d":
+            if node["type"][()] == b"Affine":
+                nodes.append(
+                    nir.Affine(
+                        weight=node["weight"][()],
+                        bias=node["bias"][()],
+                    )
+                )
+            elif node["type"][()] == b"Conv1d":
                 nodes.append(
                     nir.Conv1d(
                         weight=node["weight"][()],
@@ -69,7 +76,6 @@ def read(filename: typing.Union[str, pathlib.Path]) -> nir.NIR:
                 nodes.append(
                     nir.Linear(
                         weight=node["weight"][()],
-                        bias=node["bias"][()],
                     )
                 )
             elif node["type"][()] == b"LIF":

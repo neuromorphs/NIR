@@ -10,7 +10,13 @@ import nir
 def write(filename: typing.Union[str, pathlib.Path], graph: nir.NIR) -> None:
     """Write a NIR to a HDF5 file."""
     def convert_node(node: nir.NIRNode) -> dict:
-        if isinstance(node, nir.Conv1d):
+        if isinstance(node, nir.Affine):
+            return {
+                "type": "Affine",
+                "weight": node.weight,
+                "bias": node.bias,
+            }
+        elif isinstance(node, nir.Conv1d):
             return {
                 "type": "Conv1d",
                 "weight": node.weight,
@@ -52,7 +58,6 @@ def write(filename: typing.Union[str, pathlib.Path], graph: nir.NIR) -> None:
             return {
                 "type": "Linear",
                 "weight": node.weight,
-                "bias": node.bias,
             }
         elif isinstance(node, nir.LIF):
             return {
