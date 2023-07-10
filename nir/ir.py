@@ -26,7 +26,8 @@ class NIRNode:
 @dataclass
 class Affine(NIRNode):
     r"""Affine transform:
-    ..math::
+
+    .. math::
         y(t) = W*x(t) + b
     """
     weight: np.ndarray  # Weight term
@@ -143,7 +144,8 @@ class LI(NIRNode):
 @dataclass
 class Linear(NIRNode):
     r"""Linear transform without bias:
-    ..math::
+
+    .. math::
         y(t) = W*x(t)
     """
     weight: np.ndarray  # Weight term
@@ -170,9 +172,9 @@ class LIF(NIRNode):
             v & else
         \end{cases}
 
-    Where $\tau$ is the time constant, $v$ is the membrane potential,
-    $v_{leak}$ is the leak voltage, $R$ is the resistance, $v_th$ is
-    the firing threshold, and $I$ is the input current.
+    Where :math:`\tau` is the time constant, :math:`v` is the membrane potential,
+    :math:`v_{leak}` is the leak voltage, :math:`R` is the resistance, 
+    :math:`v_{threshold}` is the firing threshold, and :math:`I` is the input current.
     """
 
     tau: np.ndarray  # Time constant
