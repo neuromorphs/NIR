@@ -8,14 +8,16 @@ Edges = typing.NewType("Edges", typing.List[typing.Tuple[int, int]])
 
 
 class NIRNode:
-    """Basic Neural Intermediate Representation Unit (NIRUnit)"""
-
-    pass
+    """Base superclass of Neural Intermediate Representation Unit (NIR).
+    All NIR primitives inherit from this class, but NIRNodes should never be
+    instantiated.
+    """
 
 
 @dataclass
 class NIRGraph(NIRNode):
-    """Neural Intermediate Representation (NIRNode)
+    """Neural Intermediate Representation (NIR) Graph containing a number
+    of nodes and edges.
 
     A graph of computational nodes and identity edges."""
 
