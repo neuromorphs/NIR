@@ -27,7 +27,7 @@ class NIRNode:
 class Affine(NIRNode):
     r"""Affine transform:
     ..math::
-        y(t) = x(t)*W + b
+        y(t) = W*x(t) + b
     """
     weight: np.ndarray  # Weight term
     bias: np.ndarray  # Bias term
@@ -144,7 +144,7 @@ class LI(NIRNode):
 class Linear(NIRNode):
     r"""Linear transform without bias:
     ..math::
-        y(t) = x(t)*W
+        y(t) = W*x(t)
     """
     weight: np.ndarray  # Weight term
 
