@@ -2,3 +2,4 @@ sphinx
 sphinx-book-theme
 myst-parser
 numpy
+h5py
