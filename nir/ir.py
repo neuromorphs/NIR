@@ -61,6 +61,47 @@ class Conv2d(NIRNode):
 
 
 @dataclass
+class CubaLIF(NIRNode):
+    r"""Current based leaky integrate and-fire-neuron model.
+
+    The current based leaky integrate-and-fire neuron model
+    is defined by the following equations:
+
+    .. math::
+        \tau_{syn} \dot {I} = - I + S
+
+    .. math::
+        \tau_{mem} \dot {v} = (v_{leak} - v) + R I
+
+    .. math::
+        z = \begin{cases}
+            1 & v > v_{threshold} \\
+            0 & else
+        \end{cases}
+
+    .. math::
+        v = \begin{cases}
+            v-v_{threshold} & z=1 \\
+            v & else
+        \end{cases}
+
+    Where :math:`\tau_{syn}` is the synaptic time constant,
+    :math:`\tau_{mem}` is the membrane time constant,
+    :math:`v` is the membrane potential,
+    :math:`v_{leak}` is the leak voltage,
+    :math:`R` is the resistance,
+    :math:`v_{threshold}` is the firing threshold,
+    and :math:`S` is the input spike.
+    """
+
+    tau_syn: np.ndarray  # Time constant
+    tau_mem: np.ndarray  # Time constant
+    r: np.ndarray  # Resistance
+    v_leak: np.ndarray  # Leak voltage
+    v_threshold: np.ndarray  # Firing threshold
+
+
+@dataclass
 class Delay(NIRNode):
     """Simple delay node.
 
@@ -178,46 +219,6 @@ class LIF(NIRNode):
     """
 
     tau: np.ndarray  # Time constant
-    r: np.ndarray  # Resistance
-    v_leak: np.ndarray  # Leak voltage
-    v_threshold: np.ndarray  # Firing threshold
-
-
-@dataclass
-class CubaLIF(NIRNode):
-    r"""Current based leaky integrate and-fire-neuron model.
-
-    The current based leaky integrate-and-fire neuron model
-    is defined by the following equations:
-
-    .. math::
-        \tau_syn \ dot{I} = - I + S
-
-        \tau_mem \dot{v} = (v_{leak} - v) + R I
-
-    .. math::
-        z = \begin{cases}
-            1 & v > v_{thr} \\
-            0 & else
-        \end{cases}
-
-    .. math::
-        v = \begin{cases}
-            v-v_{thr} & z=1 \\
-            v & else
-        \end{cases}
-
-    Where :math:`\tau_syn` is the synaptic time constant,
-    :math:`\tau_mem` is the membrane time constant,
-    :math:`v` is the membrane potential,
-    :math:`v_{leak}` is the leak voltage,
-    :math:`R` is the resistance,
-    :math:`v_{threshold}` is the firing threshold,
-    and :math:`S` is the input spike.
-    """
-
-    tau_syn: np.ndarray  # Time constant
-    tau_mem: np.ndarray  # Time constant
     r: np.ndarray  # Resistance
     v_leak: np.ndarray  # Leak voltage
     v_threshold: np.ndarray  # Firing threshold
