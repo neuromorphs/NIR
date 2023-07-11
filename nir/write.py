@@ -77,7 +77,7 @@ def _convert_node(node: nir.NIRNode) -> dict:
     elif isinstance(node, nir.NIRGraph):
         return {
             "type": "NIRGraph",
-            "nodes": {i: _convert_node(n) for i, n in enumerate(node.nodes)},
+            "nodes": {k: _convert_node(n) for k, n in node.nodes.items()},
             "edges": node.edges,
         }
     elif isinstance(node, nir.Output):

@@ -74,7 +74,7 @@ def read_node(node: typing.Any) -> nir.NIRNode:
         )
     elif node["type"][()] == b"NIRGraph":
         return nir.NIRGraph(
-            nodes=[read_node(n) for n in node["nodes"].values()],
+            nodes={k: read_node(n) for k, n in node["nodes"].items()},
             edges=node["edges"][()],
         )
     elif node["type"][()] == b"Output":

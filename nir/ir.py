@@ -4,7 +4,7 @@ import typing
 import numpy as np
 
 
-Edges = typing.NewType("Edges", typing.List[typing.Tuple[int, int]])
+Edges = typing.NewType("Edges", typing.List[typing.Tuple[str, str]])
 
 
 class NIRNode:
@@ -21,7 +21,7 @@ class NIRGraph(NIRNode):
 
     A graph of computational nodes and identity edges."""
 
-    nodes: typing.List[NIRNode]  # List of computational nodes
+    nodes: typing.Dict[str, NIRNode]  # List of computational nodes
     edges: Edges
 
 
