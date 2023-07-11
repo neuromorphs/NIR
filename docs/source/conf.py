@@ -29,7 +29,12 @@ author = "NIR team"
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
-extensions = ["myst_parser", "sphinx.ext.autodoc", "sphinx.ext.mathjax"]
+extensions = [
+    "myst_parser", 
+    "sphinx.ext.autodoc",
+    "sphinx.ext.mathjax",
+    "sphinx.ext.autosummary"
+]
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
@@ -49,7 +54,7 @@ exclude_patterns = []
 html_theme = "sphinx_book_theme"
 
 html_theme_options = {
-    "search_bar_text": "Search this book...",
+    "search_bar_text": "Search NIR docs...",
     "repository_url": "https://github.com/neuromorphs/nir",
     "repository_branch": "docs",
     "use_repository_button": True,
