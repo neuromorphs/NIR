@@ -7,20 +7,22 @@ import numpy as np
 Edges = typing.NewType("Edges", typing.List[typing.Tuple[int, int]])
 
 
+class NIRNode:
+    """Base superclass of Neural Intermediate Representation Unit (NIR).
+    All NIR primitives inherit from this class, but NIRNodes should never be
+    instantiated.
+    """
+
+
 @dataclass
-class NIR:
-    """Neural Intermediate Representation (NIR)
+class NIRGraph(NIRNode):
+    """Neural Intermediate Representation (NIR) Graph containing a number
+    of nodes and edges.
 
     A graph of computational nodes and identity edges."""
 
-    nodes: typing.List[typing.Any]  # List of computational nodes
+    nodes: typing.List[NIRNode]  # List of computational nodes
     edges: Edges
-
-
-class NIRNode:
-    """Basic Neural Intermediate Representation Unit (NIRUnit)"""
-
-    pass
 
 
 @dataclass
@@ -32,7 +34,6 @@ class Affine(NIRNode):
     """
     weight: np.ndarray  # Weight term
     bias: np.ndarray  # Bias term
-
 
 
 @dataclass
@@ -72,9 +73,8 @@ class Delay(NIRNode):
     delay: np.ndarray  # Delay
 
 
-
 @dataclass
-class I(NIRNode): # noqa: E742
+class I(NIRNode):  # noqa: E742
     r"""Integrator
 
     The integrator neuron model is defined by the following equation:

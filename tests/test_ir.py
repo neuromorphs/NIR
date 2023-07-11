@@ -2,14 +2,32 @@ import nir
 
 
 def test_simple():
-    ir = nir.NIR(nodes=[nir.Affine(weight=[1, 2, 3], bias=4)], edges=[(0, 0)])
+    ir = nir.NIRGraph(nodes=[nir.Affine(weight=[1, 2, 3], bias=4)], edges=[(0, 0)])
     assert ir.nodes[0].weight == [1, 2, 3]
     assert ir.nodes[0].bias == 4
     assert ir.edges == [(0, 0)]
 
 
+def test_nested():
+    nested = nir.NIRGraph(
+        nodes=[
+            nir.I(r=[1, 1]),
+            nir.Delay([2, 2]),
+        ],
+        edges=[(0, 1), (1, 0)]
+    )
+    ir = nir.NIRGraph(
+        nodes=[nir.Affine(weight=[1, 2], bias=4), nested],
+        edges=[(0, 1)],
+    )
+    assert ir.nodes[0].weight == [1, 2]
+    assert ir.nodes[1].nodes[0].r == [1, 1]
+    assert ir.nodes[1].nodes[1].delay == [2, 2]
+    assert ir.nodes[1].edges == [(0, 1), (1, 0)]
+
+
 def test_simple_with_input_output():
-    ir = nir.NIR(
+    ir = nir.NIRGraph(
         nodes=[
             nir.Input(
                 shape=[
@@ -30,7 +48,7 @@ def test_simple_with_input_output():
 
 
 def test_delay():
-    ir = nir.NIR(
+    ir = nir.NIRGraph(
         nodes=[
             nir.Input(
                 shape=[
@@ -50,7 +68,7 @@ def test_delay():
 
 
 def test_threshold():
-    ir = nir.NIR(
+    ir = nir.NIRGraph(
         nodes=[
             nir.Input(
                 shape=[
@@ -68,7 +86,8 @@ def test_threshold():
     assert ir.nodes[1].threshold == [2.0, 2.5, 2.8]
     assert ir.edges == [(0, 1), (1, 2)]
 
+
 def test_linear():
-    ir = nir.NIR(nodes=[nir.Linear(weight=[1, 2, 3])], edges=[(0, 0)])
+    ir = nir.NIRGraph(nodes=[nir.Linear(weight=[1, 2, 3])], edges=[(0, 0)])
     assert ir.nodes[0].weight == [1, 2, 3]
     assert ir.edges == [(0, 0)]
