@@ -68,7 +68,7 @@ class CubaLIF(NIRNode):
     is defined by the following equations:
 
     .. math::
-        \tau_{syn} \dot {I} = - I + S
+        \tau_{syn} \dot {I} = - I + w_{in} S
 
     .. math::
         \tau_{mem} \dot {v} = (v_{leak} - v) + R I
@@ -87,6 +87,7 @@ class CubaLIF(NIRNode):
 
     Where :math:`\tau_{syn}` is the synaptic time constant,
     :math:`\tau_{mem}` is the membrane time constant,
+    :math:`w_{in}` is the input current weight (elementwise),
     :math:`v` is the membrane potential,
     :math:`v_{leak}` is the leak voltage,
     :math:`R` is the resistance,
@@ -99,6 +100,11 @@ class CubaLIF(NIRNode):
     r: np.ndarray  # Resistance
     v_leak: np.ndarray  # Leak voltage
     v_threshold: np.ndarray  # Firing threshold
+    w_in: np.ndarray = 1.  # Input current weight
+
+    def __post_init__(self):
+        # If w_in is a scalar, make it an array of same shape as v_threshold
+        self.w_in = np.ones_like(self.v_threshold) * self.w_in
 
 
 @dataclass
