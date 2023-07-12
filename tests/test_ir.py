@@ -4,7 +4,9 @@ import nir
 
 
 def test_simple():
-    ir = nir.NIRGraph(nodes={"a": nir.Affine(weight=[1, 2, 3], bias=4)}, edges=[("a", "a")])
+    ir = nir.NIRGraph(
+        nodes={"a": nir.Affine(weight=[1, 2, 3], bias=4)}, edges=[("a", "a")]
+    )
     assert ir.nodes["a"].weight == [1, 2, 3]
     assert ir.nodes["a"].bias == 4
     assert ir.edges == [("a", "a")]
