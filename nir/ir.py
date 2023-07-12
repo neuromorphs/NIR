@@ -4,7 +4,7 @@ import typing
 import numpy as np
 
 
-Edges = typing.NewType("Edges", typing.List[typing.Tuple[int, int]])
+Edges = typing.NewType("Edges", typing.List[typing.Tuple[str, str]])
 
 
 class NIRNode:
@@ -21,8 +21,17 @@ class NIRGraph(NIRNode):
 
     A graph of computational nodes and identity edges."""
 
-    nodes: typing.List[NIRNode]  # List of computational nodes
+    nodes: typing.Dict[str, NIRNode]  # List of computational nodes
     edges: Edges
+
+    @staticmethod
+    def from_list(*nodes: NIRNode) -> "NIRGraph":
+        """Create a sequential graph from a list of nodes by labelling them
+        after indices."""
+        return NIRGraph(
+            nodes={str(i): n for i, n in enumerate(nodes)},
+            edges=[(str(i), str(i + 1)) for i in range(len(nodes) - 1)],
+        )
 
 
 @dataclass
@@ -100,7 +109,7 @@ class CubaLIF(NIRNode):
     r: np.ndarray  # Resistance
     v_leak: np.ndarray  # Leak voltage
     v_threshold: np.ndarray  # Firing threshold
-    w_in: np.ndarray = 1.  # Input current weight
+    w_in: np.ndarray = 1.0  # Input current weight
 
     def __post_init__(self):
         # If w_in is a scalar, make it an array of same shape as v_threshold

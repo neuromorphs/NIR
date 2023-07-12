@@ -1,93 +1,103 @@
+import numpy as np
+
 import nir
 
 
 def test_simple():
-    ir = nir.NIRGraph(nodes=[nir.Affine(weight=[1, 2, 3], bias=4)], edges=[(0, 0)])
-    assert ir.nodes[0].weight == [1, 2, 3]
-    assert ir.nodes[0].bias == 4
-    assert ir.edges == [(0, 0)]
+    ir = nir.NIRGraph(
+        nodes={"a": nir.Affine(weight=[1, 2, 3], bias=4)}, edges=[("a", "a")]
+    )
+    assert ir.nodes["a"].weight == [1, 2, 3]
+    assert ir.nodes["a"].bias == 4
+    assert ir.edges == [("a", "a")]
 
 
 def test_nested():
     nested = nir.NIRGraph(
-        nodes=[
-            nir.I(r=[1, 1]),
-            nir.Delay([2, 2]),
-        ],
-        edges=[(0, 1), (1, 0)]
+        nodes={
+            "integrator": nir.I(r=[1, 1]),
+            "delay": nir.Delay([2, 2]),
+        },
+        edges=[("integrator", "delay"), ("delay", "integrator")],
     )
     ir = nir.NIRGraph(
-        nodes=[nir.Affine(weight=[1, 2], bias=4), nested],
-        edges=[(0, 1)],
+        nodes={"affine": nir.Affine(weight=[1, 2], bias=4), "inner": nested},
+        edges=[("affine", "inner")],
     )
-    assert ir.nodes[0].weight == [1, 2]
-    assert ir.nodes[1].nodes[0].r == [1, 1]
-    assert ir.nodes[1].nodes[1].delay == [2, 2]
-    assert ir.nodes[1].edges == [(0, 1), (1, 0)]
+    assert ir.nodes["affine"].weight == [1, 2]
+    assert ir.nodes["inner"].nodes["integrator"].r == [1, 1]
+    assert ir.nodes["inner"].nodes["delay"].delay == [2, 2]
+    assert ir.nodes["inner"].edges == [("integrator", "delay"), ("delay", "integrator")]
 
 
 def test_simple_with_input_output():
     ir = nir.NIRGraph(
-        nodes=[
-            nir.Input(
+        nodes={
+            "in": nir.Input(
                 shape=[
                     3,
                 ]
             ),
-            nir.Affine(weight=[1, 2, 3], bias=4),
-            nir.Output(),
-        ],
-        edges=[(0, 1), (1, 2)],
+            "w": nir.Affine(weight=[1, 2, 3], bias=4),
+            "out": nir.Output(),
+        },
+        edges=[("in", "w"), ("w", "out")],
     )
-    assert ir.nodes[0].shape == [
+    assert ir.nodes["in"].shape == [
         3,
     ]
-    assert ir.nodes[1].weight == [1, 2, 3]
-    assert ir.nodes[1].bias == 4
-    assert ir.edges == [(0, 1), (1, 2)]
+    assert ir.nodes["w"].weight == [1, 2, 3]
+    assert ir.nodes["w"].bias == 4
+    assert ir.edges == [("in", "w"), ("w", "out")]
 
 
 def test_delay():
     ir = nir.NIRGraph(
-        nodes=[
-            nir.Input(
+        nodes={
+            "in": nir.Input(
                 shape=[
                     3,
                 ]
             ),
-            nir.Delay(delay=[1, 2, 3]),
-            nir.Output(),
-        ],
-        edges=[(0, 1), (1, 2)],
+            "d": nir.Delay(delay=[1, 2, 3]),
+            "out": nir.Output(),
+        },
+        edges=[("in", "d"), ("d", "out")],
     )
-    assert ir.nodes[0].shape == [
+    assert ir.nodes["in"].shape == [
         3,
     ]
-    assert ir.nodes[1].delay == [1, 2, 3]
-    assert ir.edges == [(0, 1), (1, 2)]
+    assert ir.nodes["d"].delay == [1, 2, 3]
+    assert ir.edges == [("in", "d"), ("d", "out")]
+
+
+def test_cuba_lif():
+    a = np.random.randn(10, 10)
+    lif = nir.CubaLIF(tau_mem=a, tau_syn=a, r=a, v_leak=a, v_threshold=a)
+    assert np.allclose(lif.tau_mem, a)
 
 
 def test_threshold():
     ir = nir.NIRGraph(
-        nodes=[
-            nir.Input(
+        nodes={
+            "in": nir.Input(
                 shape=[
                     3,
                 ]
             ),
-            nir.Threshold(threshold=[2.0, 2.5, 2.8]),
-            nir.Output(),
-        ],
-        edges=[(0, 1), (1, 2)],
+            "thr": nir.Threshold(threshold=[2.0, 2.5, 2.8]),
+            "out": nir.Output(),
+        },
+        edges=[("in", "thr"), ("thr", "out")],
     )
-    assert ir.nodes[0].shape == [
+    assert ir.nodes["in"].shape == [
         3,
     ]
-    assert ir.nodes[1].threshold == [2.0, 2.5, 2.8]
-    assert ir.edges == [(0, 1), (1, 2)]
+    assert ir.nodes["thr"].threshold == [2.0, 2.5, 2.8]
+    assert ir.edges == [("in", "thr"), ("thr", "out")]
 
 
 def test_linear():
-    ir = nir.NIRGraph(nodes=[nir.Linear(weight=[1, 2, 3])], edges=[(0, 0)])
-    assert ir.nodes[0].weight == [1, 2, 3]
-    assert ir.edges == [(0, 0)]
+    ir = nir.NIRGraph(nodes={"a": nir.Linear(weight=[1, 2, 3])}, edges=[("a", "a")])
+    assert ir.nodes["a"].weight == [1, 2, 3]
+    assert ir.edges == [("a", "a")]
