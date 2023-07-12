@@ -1,0 +1,24 @@
+repos:
+- repo: https://github.com/astral-sh/ruff-pre-commit
+  # Ruff version.
+  rev: v0.0.277
+  hooks:
+    - id: ruff
+
+- repo: https://github.com/python/black
+  rev: 23.3.0 
+  hooks:
+  - id: black
+    language_version: python3
+
+- repo: https://github.com/pycqa/isort
+  rev: 5.12.0
+  hooks:
+    - id: isort
+      args: ["--profile", "black", "--filter-files"]
+
+- repo: https://github.com/myint/docformatter
+  rev: v1.6.0
+  hooks:
+    - id: docformatter
+      args: [--in-place, --wrap-summaries=88, --wrap-descriptions=88]
