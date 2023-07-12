@@ -27,20 +27,21 @@ def factory_test_graph(ir: nir.NIRGraph):
 
 
 def test_simple():
-    ir = nir.NIRGraph(
-        nodes={"a": nir.Affine(weight=[1, 2, 3], bias=4)}, edges=[("a", "a")]
-    )
+    w = np.array([1, 2, 3])
+    b = np.array([4, 4, 4])
+    ir = nir.NIRGraph(nodes={"a": nir.Affine(weight=w, bias=b)}, edges=[("a", "a")])
     factory_test_graph(ir)
 
 
 def test_nested():
+    i = np.array([1, 1])
     nested = nir.NIRGraph(
         nodes={
             "a": nir.I(r=[1, 1]),
             "b": nir.NIRGraph(
                 nodes={
-                    "a": nir.Input(np.array([1, 1])),
-                    "b": nir.Delay(np.array([1, 1])),
+                    "a": nir.Input(i),
+                    "b": nir.Delay(i),
                     "c": nir.Output(),
                 },
                 edges=[("a", "b"), ("b", "c")],
@@ -53,94 +54,113 @@ def test_nested():
 
 
 def test_integrator():
+    w = np.array([1, 2, 3])
+    b = np.array([4, 4, 4])
+    r = np.array([1, 1, 1])
     ir = nir.NIRGraph(
-        nodes={"a": nir.Affine(weight=[1], bias=0), "b": nir.I(r=2)},
+        nodes={"a": nir.Affine(weight=w, bias=b), "b": nir.I(r)},
         edges=[("a", "b")],
     )
     factory_test_graph(ir)
 
 
 def test_integrate_and_fire():
+    w = np.array([1, 2, 3])
+    b = np.array([4, 4, 4])
+    r = np.array([1, 1, 1])
+    v_threshold = np.array([1, 1, 1])
     ir = nir.NIRGraph(
-        nodes={"a": nir.Affine(weight=[1], bias=0), "b": nir.IF(r=2, v_threshold=3)},
+        nodes={"a": nir.Affine(weight=w, bias=b), "b": nir.IF(r, v_threshold)},
         edges=[("a", "b")],
     )
     factory_test_graph(ir)
 
 
 def test_leaky_integrator():
-    ir = nir.NIRGraph.from_list(
-        nir.Affine(weight=[1], bias=0), nir.LI(tau=1, r=2, v_leak=3)
-    )
+    w = np.array([1, 2, 3])
+    b = np.array([4, 4, 4])
+    tau = np.array([1, 1, 1])
+    r = np.array([1, 1, 1])
+    v_leak = np.array([1, 1, 1])
+
+    ir = nir.NIRGraph.from_list(nir.Affine(weight=w, bias=b), nir.LI(tau, r, v_leak))
     factory_test_graph(ir)
 
 
 def test_linear():
-    ir = nir.NIRGraph.from_list(nir.Linear(weight=[1]), nir.LI(tau=1, r=2, v_leak=3))
+    w = np.array([1, 2, 3])
+    b = np.array([4, 4, 4])
+    tau = np.array([1, 1, 1])
+    r = np.array([1, 1, 1])
+    v_leak = np.array([1, 1, 1])
+    ir = nir.NIRGraph.from_list(nir.Affine(w, b), nir.LI(tau, r, v_leak))
     factory_test_graph(ir)
 
 
 def test_leaky_integrator_and_fire():
+    w = np.array([1, 2, 3])
+    b = np.array([4, 4, 4])
+    tau = np.array([1, 1, 1])
+    r = np.array([1, 1, 1])
+    v_leak = np.array([1, 1, 1])
+    v_threshold = np.array([3, 3, 3])
     ir = nir.NIRGraph.from_list(
-        nir.Affine(weight=[1], bias=0),
-        nir.LIF(tau=1, r=2, v_leak=3, v_threshold=4),
+        nir.Affine(w, b),
+        nir.LIF(tau, r, v_leak, v_threshold),
     )
     factory_test_graph(ir)
 
 
 def test_current_based_leaky_integrator_and_fire():
+    w = np.array([1, 2, 3])
+    b = np.array([4, 4, 4])
+    tau_mem = np.array([1, 1, 1])
+    tau_syn = np.array([2, 2, 2])
+    r = np.array([1, 1, 1])
+    v_leak = np.array([1, 1, 1])
+    v_threshold = np.array([3, 3, 3])
     ir = nir.NIRGraph.from_list(
-        nir.Linear(weight=[1]),
-        nir.CubaLIF(tau_mem=1, tau_syn=1, r=2, v_leak=3, v_threshold=4),
+        nir.Affine(w, b),
+        nir.CubaLIF(tau_mem, tau_syn, r, v_leak, v_threshold),
     )
     factory_test_graph(ir)
 
 
 def test_scale():
-    ir = nir.NIRGraph(
-        nodes=[
-            nir.Input(shape=np.array([3])),
-            nir.Scale(scale=np.array([1, 2, 3])),
-            nir.Output(),
-        ],
-        edges=[(0, 1), (1, 2)],
+    ir = nir.NIRGraph.from_list(
+        nir.Input(shape=np.array([3])),
+        nir.Scale(scale=np.array([1, 2, 3])),
+        nir.Output(),
     )
     factory_test_graph(ir)
 
+
 def test_simple_with_read_write():
+    w = np.array([1, 2, 3])
+    b = np.array([4, 4, 4])
     ir = nir.NIRGraph.from_list(
-        nir.Input(
-            shape=[
-                3,
-            ]
-        ),
-        nir.Affine(weight=[1, 2, 3], bias=4),
+        nir.Input(shape=np.array([3])),
+        nir.Affine(w, b),
         nir.Output(),
     )
     factory_test_graph(ir)
 
 
 def test_delay():
+    delay = np.array([1, 2, 3])
     ir = nir.NIRGraph.from_list(
-        nir.Input(
-            shape=[
-                3,
-            ]
-        ),
-        nir.Delay(delay=[1, 2, 3]),
+        nir.Input(np.array([3])),
+        nir.Delay(delay),
         nir.Output(),
     )
     factory_test_graph(ir)
 
 
 def test_threshold():
+    threshold = np.array([1, 2, 3])
     ir = nir.NIRGraph.from_list(
-        nir.Input(
-            shape=[
-                3,
-            ]
-        ),
-        nir.Threshold(threshold=[2.0, 2.5, 2.8]),
+        nir.Input(np.array([3])),
+        nir.Threshold(threshold),
         nir.Output(),
     )
     factory_test_graph(ir)

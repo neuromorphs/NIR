@@ -4,33 +4,40 @@ import nir
 
 
 def test_simple():
-    ir = nir.NIRGraph(
-        nodes={"a": nir.Affine(weight=[1, 2, 3], bias=4)}, edges=[("a", "a")]
-    )
-    assert ir.nodes["a"].weight == [1, 2, 3]
-    assert ir.nodes["a"].bias == 4
+    w = np.array([1, 2, 3])
+    b = np.array([4, 4, 4])
+    ir = nir.NIRGraph(nodes={"a": nir.Affine(weight=w, bias=b)}, edges=[("a", "a")])
+    assert np.allclose(ir.nodes["a"].weight, w)
+    assert np.allclose(ir.nodes["a"].bias, b)
     assert ir.edges == [("a", "a")]
 
 
 def test_nested():
+    r = np.array([1, 1])
+    delay = np.array([2, 2])
+    w = np.array([1, 2])
+    b = np.array([4, 4])
     nested = nir.NIRGraph(
         nodes={
-            "integrator": nir.I(r=[1, 1]),
-            "delay": nir.Delay([2, 2]),
+            "integrator": nir.I(r=r),
+            "delay": nir.Delay(delay),
         },
         edges=[("integrator", "delay"), ("delay", "integrator")],
     )
     ir = nir.NIRGraph(
-        nodes={"affine": nir.Affine(weight=[1, 2], bias=4), "inner": nested},
+        nodes={"affine": nir.Affine(weight=w, bias=b), "inner": nested},
         edges=[("affine", "inner")],
     )
-    assert ir.nodes["affine"].weight == [1, 2]
-    assert ir.nodes["inner"].nodes["integrator"].r == [1, 1]
-    assert ir.nodes["inner"].nodes["delay"].delay == [2, 2]
+    assert np.allclose(ir.nodes["affine"].weight, w)
+    assert np.allclose(ir.nodes["affine"].bias, b)
+    assert np.allclose(ir.nodes["inner"].nodes["integrator"].r, r)
+    assert np.allclose(ir.nodes["inner"].nodes["delay"].delay, delay)
     assert ir.nodes["inner"].edges == [("integrator", "delay"), ("delay", "integrator")]
 
 
 def test_simple_with_input_output():
+    w = np.array([1, 2, 3])
+    b = np.array([4, 4, 4])
     ir = nir.NIRGraph(
         nodes={
             "in": nir.Input(
@@ -38,7 +45,7 @@ def test_simple_with_input_output():
                     3,
                 ]
             ),
-            "w": nir.Affine(weight=[1, 2, 3], bias=4),
+            "w": nir.Affine(weight=w, bias=b),
             "out": nir.Output(),
         },
         edges=[("in", "w"), ("w", "out")],
@@ -46,12 +53,13 @@ def test_simple_with_input_output():
     assert ir.nodes["in"].shape == [
         3,
     ]
-    assert ir.nodes["w"].weight == [1, 2, 3]
-    assert ir.nodes["w"].bias == 4
+    assert np.allclose(ir.nodes["w"].weight, w)
+    assert np.allclose(ir.nodes["w"].bias, b)
     assert ir.edges == [("in", "w"), ("w", "out")]
 
 
 def test_delay():
+    delay = np.array([1, 2, 3])
     ir = nir.NIRGraph(
         nodes={
             "in": nir.Input(
@@ -59,7 +67,7 @@ def test_delay():
                     3,
                 ]
             ),
-            "d": nir.Delay(delay=[1, 2, 3]),
+            "d": nir.Delay(delay=delay),
             "out": nir.Output(),
         },
         edges=[("in", "d"), ("d", "out")],
@@ -67,7 +75,7 @@ def test_delay():
     assert ir.nodes["in"].shape == [
         3,
     ]
-    assert ir.nodes["d"].delay == [1, 2, 3]
+    assert np.allclose(ir.nodes["d"].delay, delay)
     assert ir.edges == [("in", "d"), ("d", "out")]
 
 
@@ -78,6 +86,7 @@ def test_cuba_lif():
 
 
 def test_threshold():
+    threshold = np.array([1, 2, 3])
     ir = nir.NIRGraph(
         nodes={
             "in": nir.Input(
@@ -85,7 +94,7 @@ def test_threshold():
                     3,
                 ]
             ),
-            "thr": nir.Threshold(threshold=[2.0, 2.5, 2.8]),
+            "thr": nir.Threshold(threshold),
             "out": nir.Output(),
         },
         edges=[("in", "thr"), ("thr", "out")],
@@ -93,11 +102,12 @@ def test_threshold():
     assert ir.nodes["in"].shape == [
         3,
     ]
-    assert ir.nodes["thr"].threshold == [2.0, 2.5, 2.8]
+    assert np.allclose(ir.nodes["thr"].threshold, threshold)
     assert ir.edges == [("in", "thr"), ("thr", "out")]
 
 
 def test_linear():
-    ir = nir.NIRGraph(nodes={"a": nir.Linear(weight=[1, 2, 3])}, edges=[("a", "a")])
-    assert ir.nodes["a"].weight == [1, 2, 3]
+    w = np.array([1, 2, 3])
+    ir = nir.NIRGraph(nodes={"a": nir.Linear(weight=w)}, edges=[("a", "a")])
+    assert np.allclose(ir.nodes["a"].weight, w)
     assert ir.edges == [("a", "a")]
