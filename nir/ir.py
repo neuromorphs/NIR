@@ -250,11 +250,12 @@ class Output(NIRNode):
 
     pass
 
+
 @dataclass
 class Scale(NIRNode):
     r"""Scales a signal by some values.
 
-    This node is equivalent to the 
+    This node is equivalent to the
     `Hadamard product <https://en.wikipedia.org/wiki/Hadamard_product_(matrices)>`_.
 
     .. math::
