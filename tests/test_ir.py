@@ -40,13 +40,9 @@ def test_simple_with_input_output():
     b = np.array([4, 4, 4])
     ir = nir.NIRGraph(
         nodes={
-            "in": nir.Input(
-                shape=[
-                    3,
-                ]
-            ),
+            "in": nir.Input(np.array([3])),
             "w": nir.Affine(weight=w, bias=b),
-            "out": nir.Output(),
+            "out": nir.Output(np.array([3])),
         },
         edges=[("in", "w"), ("w", "out")],
     )
@@ -62,13 +58,9 @@ def test_delay():
     delay = np.array([1, 2, 3])
     ir = nir.NIRGraph(
         nodes={
-            "in": nir.Input(
-                shape=[
-                    3,
-                ]
-            ),
+            "in": nir.Input(np.array([3])),
             "d": nir.Delay(delay=delay),
-            "out": nir.Output(),
+            "out": nir.Output(np.array([3])),
         },
         edges=[("in", "d"), ("d", "out")],
     )
@@ -89,13 +81,9 @@ def test_threshold():
     threshold = np.array([1, 2, 3])
     ir = nir.NIRGraph(
         nodes={
-            "in": nir.Input(
-                shape=[
-                    3,
-                ]
-            ),
+            "in": nir.Input(np.array([3])),
             "thr": nir.Threshold(threshold),
-            "out": nir.Output(),
+            "out": nir.Output(np.array([3])),
         },
         edges=[("in", "thr"), ("thr", "out")],
     )

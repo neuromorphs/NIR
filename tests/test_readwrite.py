@@ -42,11 +42,11 @@ def test_nested():
                 nodes={
                     "a": nir.Input(i),
                     "b": nir.Delay(i),
-                    "c": nir.Output(),
+                    "c": nir.Output(np.array([1, 1])),
                 },
                 edges=[("a", "b"), ("b", "c")],
             ),
-            "c": nir.Output(),
+            "c": nir.Output(np.array([1, 1])),
         },
         edges=[("a", "b"), ("b", "a")],
     )
@@ -130,7 +130,7 @@ def test_scale():
     ir = nir.NIRGraph.from_list(
         nir.Input(shape=np.array([3])),
         nir.Scale(scale=np.array([1, 2, 3])),
-        nir.Output(),
+        nir.Output(shape=np.array([3])),
     )
     factory_test_graph(ir)
 
@@ -141,7 +141,7 @@ def test_simple_with_read_write():
     ir = nir.NIRGraph.from_list(
         nir.Input(shape=np.array([3])),
         nir.Affine(w, b),
-        nir.Output(),
+        nir.Output(shape=np.array([3])),
     )
     factory_test_graph(ir)
 
@@ -151,7 +151,7 @@ def test_delay():
     ir = nir.NIRGraph.from_list(
         nir.Input(np.array([3])),
         nir.Delay(delay),
-        nir.Output(),
+        nir.Output(np.array([3])),
     )
     factory_test_graph(ir)
 
@@ -161,6 +161,6 @@ def test_threshold():
     ir = nir.NIRGraph.from_list(
         nir.Input(np.array([3])),
         nir.Threshold(threshold),
-        nir.Output(),
+        nir.Output(np.array([3])),
     )
     factory_test_graph(ir)

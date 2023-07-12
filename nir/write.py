@@ -83,6 +83,7 @@ def _convert_node(node: nir.NIRNode) -> dict:
     elif isinstance(node, nir.Output):
         return {
             "type": "Output",
+            "shape": node.shape,
         }
     elif isinstance(node, nir.Scale):
         return {
