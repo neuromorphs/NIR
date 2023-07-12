@@ -84,6 +84,11 @@ def _convert_node(node: nir.NIRNode) -> dict:
         return {
             "type": "Output",
         }
+    elif isinstance(node, nir.Scale):
+        return {
+            "type": "Scale",
+            "scale": node.scale,
+        }
     elif isinstance(node, nir.Threshold):
         return {"type": "Threshold", "threshold": node.threshold}
     else:

@@ -96,6 +96,17 @@ def test_current_based_leaky_integrator_and_fire():
     factory_test_graph(ir)
 
 
+def test_scale():
+    ir = nir.NIRGraph(
+        nodes=[
+            nir.Input(shape=np.array([3])),
+            nir.Scale(scale=np.array([1, 2, 3])),
+            nir.Output(),
+        ],
+        edges=[(0, 1), (1, 2)],
+    )
+    factory_test_graph(ir)
+
 def test_simple_with_read_write():
     ir = nir.NIRGraph.from_list(
         nir.Input(

@@ -79,6 +79,8 @@ def read_node(node: typing.Any) -> nir.NIRNode:
         )
     elif node["type"][()] == b"Output":
         return nir.Output()
+    elif node["type"][()] == b"Scale":
+        return nir.Scale(node["scale"][()])
     elif node["type"][()] == b"Threshold":
         return nir.Threshold(
             threshold=node["threshold"][()],

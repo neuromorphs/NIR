@@ -36,7 +36,9 @@ class NIRGraph(NIRNode):
 
 @dataclass
 class Affine(NIRNode):
-    r"""Affine transform:
+    r"""Affine transform that linearly maps and translates the input signal.
+
+    This is equivalent to the `Affine transformation <https://en.wikipedia.org/wiki/Affine_transformation>`_
 
     .. math::
         y(t) = W*x(t) + b
@@ -247,6 +249,19 @@ class Output(NIRNode):
     """
 
     pass
+
+@dataclass
+class Scale(NIRNode):
+    r"""Scales a signal by some values.
+
+    This node is equivalent to the 
+    `Hadamard product <https://en.wikipedia.org/wiki/Hadamard_product_(matrices)>`_.
+
+    .. math::
+        y(t) = x(t) \odot s
+    """
+
+    scale: np.ndarray  # Scaling factor
 
 
 @dataclass
