@@ -28,7 +28,7 @@ def factory_test_graph(ir: nir.NIRGraph):
 
 def test_simple():
     ir = nir.NIRGraph(
-        nodes={"a": nir.Affine(weight=[1, 2, 3], bias=4)}, edges=[("a", "b")]
+        nodes={"a": nir.Affine(weight=[1, 2, 3], bias=4)}, edges=[("a", "a")]
     )
     factory_test_graph(ir)
 
@@ -37,7 +37,15 @@ def test_nested():
     nested = nir.NIRGraph(
         nodes={
             "a": nir.I(r=[1, 1]),
-            "b": nir.Delay([2, 2]),
+            "b": nir.NIRGraph(
+                nodes={
+                    "a": nir.Input(np.array([1, 1])),
+                    "b": nir.Delay(np.array([1, 1])),
+                    "c": nir.Output(),
+                },
+                edges=[("a", "b"), ("b", "c")],
+            ),
+            "c": nir.Output(),
         },
         edges=[("a", "b"), ("b", "a")],
     )

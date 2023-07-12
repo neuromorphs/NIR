@@ -1,3 +1,5 @@
+import numpy as np
+
 import nir
 
 
@@ -65,6 +67,11 @@ def test_delay():
     ]
     assert ir.nodes["d"].delay == [1, 2, 3]
     assert ir.edges == [("in", "d"), ("d", "out")]
+
+
+def test_cuba_lif():
+    a = np.random.randn(10, 10)
+    l = nir.CubaLIF(tau_mem=a, tau_syn=a, r=a, v_leak=a, v_threshold=a)
 
 
 def test_threshold():
