@@ -29,9 +29,7 @@ def factory_test_graph(ir: nir.NIRGraph):
 def test_simple():
     w = np.array([1, 2, 3])
     b = np.array([4, 4, 4])
-    ir = nir.NIRGraph(
-        nodes={"a": nir.Affine(weight=w, bias=b)}, edges=[("a", "a")]
-    )
+    ir = nir.NIRGraph(nodes={"a": nir.Affine(weight=w, bias=b)}, edges=[("a", "a")])
     factory_test_graph(ir)
 
 
@@ -85,9 +83,7 @@ def test_leaky_integrator():
     r = np.array([1, 1, 1])
     v_leak = np.array([1, 1, 1])
 
-    ir = nir.NIRGraph.from_list(
-        nir.Affine(weight=w, bias=b), nir.LI(tau, r, v_leak)
-    )
+    ir = nir.NIRGraph.from_list(nir.Affine(weight=w, bias=b), nir.LI(tau, r, v_leak))
     factory_test_graph(ir)
 
 
@@ -145,9 +141,7 @@ def test_simple_with_read_write():
     w = np.array([1, 2, 3])
     b = np.array([4, 4, 4])
     ir = nir.NIRGraph.from_list(
-        nir.Input(
-            shape=np.array([3])
-        ),
+        nir.Input(shape=np.array([3])),
         nir.Affine(w, b),
         nir.Output(),
     )

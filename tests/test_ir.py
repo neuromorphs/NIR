@@ -6,9 +6,7 @@ import nir
 def test_simple():
     w = np.array([1, 2, 3])
     b = np.array([4, 4, 4])
-    ir = nir.NIRGraph(
-        nodes={"a": nir.Affine(weight=w, bias=b)}, edges=[("a", "a")]
-    )
+    ir = nir.NIRGraph(nodes={"a": nir.Affine(weight=w, bias=b)}, edges=[("a", "a")])
     assert np.allclose(ir.nodes["a"].weight, w)
     assert np.allclose(ir.nodes["a"].bias, b)
     assert ir.edges == [("a", "a")]
