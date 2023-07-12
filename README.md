@@ -42,7 +42,7 @@ The intermediate represenation can be stored as hdf5 file, which benefits from c
 | [Lava-DL](https://github.com/lava-nc/lava-dl) | ⬚ | ⬚ |
 | [Nengo](https://nengo.ai) | ⬚ | ⬚ |
 | [Norse](https://github.com/norse/norse) | ✓ | ⬚ |
-| [Rockpool](https://rockpool.ai) | ⬚ | ⬚ |
+| [Rockpool](https://rockpool.ai) | ✓ | ✓ |
 | [Sinabs](https://sinabs.readthedocs.io) | ✓ | ✓ |
 | [snnTorch](https://github.com/jeshraghian/snntorch/) | ✓ | ⬚ |
 | [SpiNNaker2](https://spinncloud.com/portfolio/spinnaker2/) | ⬚ | ⬚ |
@@ -59,6 +59,7 @@ Authors (in alphabetical order):
 * [Gregor Lenz](https://github.com/biphasic)
 * [Jens Egholm Pedersen](https://github.com/jegp)
 * [Sadique Sheik](https://github.com/sheiksadique)
+* [Peng Zhou](https://github.com/pengzhouzp)
 
 If you use NIR in your work, please cite the [following Zenodo reference](https://zenodo.org/record/8105042)
 
