@@ -26,7 +26,8 @@ class NIRGraph(NIRNode):
 
     @staticmethod
     def from_list(*nodes: NIRNode) -> "NIRGraph":
-        """Create a sequential graph from a list of nodes by labelling them after indices."""
+        """Create a sequential graph from a list of nodes by labelling them
+        after indices."""
         return NIRGraph(
             nodes={str(i): n for i, n in enumerate(nodes)},
             edges=[(str(i), str(i + 1)) for i in range(len(nodes) - 1)],
