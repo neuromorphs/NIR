@@ -4,10 +4,10 @@ import nir
 
 
 def test_simple():
-    ir = nir.NIRGraph(nodes={0: nir.Affine(weight=[1, 2, 3], bias=4)}, edges=[(0, 0)])
-    assert ir.nodes[0].weight == [1, 2, 3]
-    assert ir.nodes[0].bias == 4
-    assert ir.edges == [(0, 0)]
+    ir = nir.NIRGraph(nodes={"a": nir.Affine(weight=[1, 2, 3], bias=4)}, edges=[("a", "a")])
+    assert ir.nodes["a"].weight == [1, 2, 3]
+    assert ir.nodes["a"].bias == 4
+    assert ir.edges == [("a", "a")]
 
 
 def test_nested():
@@ -71,7 +71,8 @@ def test_delay():
 
 def test_cuba_lif():
     a = np.random.randn(10, 10)
-    l = nir.CubaLIF(tau_mem=a, tau_syn=a, r=a, v_leak=a, v_threshold=a)
+    lif = nir.CubaLIF(tau_mem=a, tau_syn=a, r=a, v_leak=a, v_threshold=a)
+    assert np.allclose(lif.tau_mem, a)
 
 
 def test_threshold():
@@ -95,6 +96,6 @@ def test_threshold():
 
 
 def test_linear():
-    ir = nir.NIRGraph(nodes={0: nir.Linear(weight=[1, 2, 3])}, edges=[(0, 0)])
-    assert ir.nodes[0].weight == [1, 2, 3]
-    assert ir.edges == [(0, 0)]
+    ir = nir.NIRGraph(nodes={"a": nir.Linear(weight=[1, 2, 3])}, edges=[("a", "a")])
+    assert ir.nodes["a"].weight == [1, 2, 3]
+    assert ir.edges == [("a", "a")]
