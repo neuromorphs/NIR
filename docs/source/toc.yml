@@ -1,0 +1,29 @@
+format: jb-book
+root: index
+parts:
+- caption: Introduction
+  chapters:
+  - file: intro
+    title: What is NIR?
+  - file: about
+    title: About NIR
+- caption: User guide
+  chapters:
+  - file: format
+    title: The NIR format
+  - file: support
+    title: Platform support
+  - file: usage
+  - file: platforms
+- caption: Developer guide
+  chapters:
+  - file: dev
+    title: Development
+  - file: api
+    title: API
+  - file: internals
+    title: Internals
+- caption: API
+  chapters:
+  - file: modindex
+    title: API reference
