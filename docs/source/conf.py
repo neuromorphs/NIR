@@ -34,7 +34,21 @@ extensions = [
     "sphinx.ext.autodoc",
     "sphinx.ext.mathjax",
     "sphinx.ext.autosummary",
+    "sphinx_external_toc",
 ]
+external_toc_path = "toc.yml"
+
+myst_enable_extensions = [
+    "amsmath",
+    "dollarmath",
+]
+
+# Maps source configuration
+source_suffix = {
+    ".rst": "restructuredtext",
+    ".txt": "markdown",
+    ".md": "markdown",
+}
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
