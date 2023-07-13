@@ -34,6 +34,11 @@ def read_node(node: typing.Any) -> nir.NIRNode:
         return nir.Delay(
             delay=node["delay"][()],
         )
+    elif node["type"][()] == b"Flatten":
+        return nir.Flatten(
+            start_dim=node["start_dim"][()],
+            end_dim=node["end_dim"][()],
+        )
     elif node["type"][()] == b"I":
         return nir.I(
             r=node["r"][()],

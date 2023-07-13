@@ -99,3 +99,16 @@ def test_linear():
     ir = nir.NIRGraph(nodes={"a": nir.Linear(weight=w)}, edges=[("a", "a")])
     assert np.allclose(ir.nodes["a"].weight, w)
     assert ir.edges == [("a", "a")]
+
+
+def test_flatten():
+    ir = nir.NIRGraph(
+        nodes={
+            "in": nir.Input(np.array([4, 5, 2])),
+            "flat": nir.Flatten(0),
+            "out": nir.Output(np.array([20, 2]))
+        },
+        edges=[("in", "flat"), ("flat", "out")],
+    )
+    assert np.allclose(ir.nodes["in"].shape, [4, 5, 2])
+    assert np.allclose(ir.nodes["out"].shape, [20, 2])

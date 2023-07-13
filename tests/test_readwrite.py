@@ -164,3 +164,12 @@ def test_threshold():
         nir.Output(np.array([3])),
     )
     factory_test_graph(ir)
+
+
+def test_flatten():
+    ir = nir.NIRGraph.from_list(
+        nir.Input(shape=np.array([2, 3])),
+        nir.Flatten(),
+        nir.Output(shape=np.array([6])),
+    )
+    factory_test_graph(ir)
