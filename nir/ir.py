@@ -143,10 +143,11 @@ class Delay(NIRNode):
 class Flatten(NIRNode):
     """Flatten node.
 
-    This node flattens the input tensor to a 1D tensor.
+    This node flattens its input tensor.
     """
 
-    n_dims: int = 1  # Number of dimensions to flatten
+    start_dim: int = 1  # First dimension to flatten
+    end_dim: int = -1  # Last dimension to flatten
 
 
 @dataclass
