@@ -267,8 +267,6 @@ class Output(NIRNode):
     Defines an output of the graph.
     """
 
-    shape: int  # Size of output
-
 
 @dataclass
 class Scale(NIRNode):
