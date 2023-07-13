@@ -34,6 +34,11 @@ def read_node(node: typing.Any) -> nir.NIRNode:
         return nir.Delay(
             delay=node["delay"][()],
         )
+    elif node["type"][()] == b"Flatten":
+        return nir.Flatten(
+            start_dim=node["start_dim"][()],
+            end_dim=node["end_dim"][()],
+        )
     elif node["type"][()] == b"I":
         return nir.I(
             r=node["r"][()],
@@ -78,9 +83,11 @@ def read_node(node: typing.Any) -> nir.NIRNode:
             edges=node["edges"][()],
         )
     elif node["type"][()] == b"Output":
-        return nir.Output()
+        return nir.Output(shape=node["shape"][()])
     elif node["type"][()] == b"Scale":
-        return nir.Scale(node["scale"][()])
+        return nir.Scale(
+            scale=node["scale"][()],
+        )
     elif node["type"][()] == b"Threshold":
         return nir.Threshold(
             threshold=node["threshold"][()],

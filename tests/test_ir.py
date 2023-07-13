@@ -40,13 +40,9 @@ def test_simple_with_input_output():
     b = np.array([4, 4, 4])
     ir = nir.NIRGraph(
         nodes={
-            "in": nir.Input(
-                shape=[
-                    3,
-                ]
-            ),
+            "in": nir.Input(np.array([3])),
             "w": nir.Affine(weight=w, bias=b),
-            "out": nir.Output(),
+            "out": nir.Output(np.array([3])),
         },
         edges=[("in", "w"), ("w", "out")],
     )
@@ -62,13 +58,9 @@ def test_delay():
     delay = np.array([1, 2, 3])
     ir = nir.NIRGraph(
         nodes={
-            "in": nir.Input(
-                shape=[
-                    3,
-                ]
-            ),
+            "in": nir.Input(np.array([3])),
             "d": nir.Delay(delay=delay),
-            "out": nir.Output(),
+            "out": nir.Output(np.array([3])),
         },
         edges=[("in", "d"), ("d", "out")],
     )
@@ -89,13 +81,9 @@ def test_threshold():
     threshold = np.array([1, 2, 3])
     ir = nir.NIRGraph(
         nodes={
-            "in": nir.Input(
-                shape=[
-                    3,
-                ]
-            ),
+            "in": nir.Input(np.array([3])),
             "thr": nir.Threshold(threshold),
-            "out": nir.Output(),
+            "out": nir.Output(np.array([3])),
         },
         edges=[("in", "thr"), ("thr", "out")],
     )
@@ -111,3 +99,16 @@ def test_linear():
     ir = nir.NIRGraph(nodes={"a": nir.Linear(weight=w)}, edges=[("a", "a")])
     assert np.allclose(ir.nodes["a"].weight, w)
     assert ir.edges == [("a", "a")]
+
+
+def test_flatten():
+    ir = nir.NIRGraph(
+        nodes={
+            "in": nir.Input(np.array([4, 5, 2])),
+            "flat": nir.Flatten(0),
+            "out": nir.Output(np.array([20, 2]))
+        },
+        edges=[("in", "flat"), ("flat", "out")],
+    )
+    assert np.allclose(ir.nodes["in"].shape, [4, 5, 2])
+    assert np.allclose(ir.nodes["out"].shape, [20, 2])

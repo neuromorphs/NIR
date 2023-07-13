@@ -70,6 +70,14 @@ class Conv2d(NIRNode):
     groups: int  # Groups
     bias: np.ndarray  # Bias C_out
 
+    def __post_init__(self):
+        if isinstance(self.stride, int):
+            self.stride = (self.stride, self.stride)
+        if isinstance(self.padding, int):
+            self.padding = (self.padding, self.padding)
+        if isinstance(self.dilation, int):
+            self.dilation = (self.dilation, self.dilation)
+
 
 @dataclass
 class CubaLIF(NIRNode):
@@ -129,6 +137,17 @@ class Delay(NIRNode):
     """
 
     delay: np.ndarray  # Delay
+
+
+@dataclass
+class Flatten(NIRNode):
+    """Flatten node.
+
+    This node flattens its input tensor.
+    """
+
+    start_dim: int = 1  # First dimension to flatten
+    end_dim: int = -1  # Last dimension to flatten
 
 
 @dataclass
@@ -248,7 +267,7 @@ class Output(NIRNode):
     Defines an output of the graph.
     """
 
-    pass
+    shape: int  # Size of output
 
 
 @dataclass

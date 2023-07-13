@@ -36,6 +36,12 @@ def _convert_node(node: nir.NIRNode) -> dict:
         }
     elif isinstance(node, nir.Delay):
         return {"type": "Delay", "delay": node.delay}
+    elif isinstance(node, nir.Flatten):
+        return {
+            "type": "Flatten",
+            "start_dim": node.start_dim,
+            "end_dim": node.end_dim,
+        }
     elif isinstance(node, nir.I):
         return {"type": "I", "r": node.r}
     elif isinstance(node, nir.IF):
@@ -83,6 +89,7 @@ def _convert_node(node: nir.NIRNode) -> dict:
     elif isinstance(node, nir.Output):
         return {
             "type": "Output",
+            "shape": node.shape,
         }
     elif isinstance(node, nir.Scale):
         return {
