@@ -39,15 +39,13 @@ The intermediate represenation can be stored as hdf5 file, which benefits from c
 
 | **Framework** | **Write to NIR** | **Read from NIR** | **Examples** |
 | --------------- | :--: | :--: | :------: |
-| [Lava-DL](https://github.com/lava-nc/lava-dl) | ⬚ | ⬚ |
-| [Nengo](https://nengo.ai) | ⬚ | ⬚ | [Nengo examples](https://github.com/neuromorphs/nir/tree/main/example/nengo/) |
-| [Norse](https://github.com/norse/norse) | ✓ | ⬚ |
-| [Rockpool](https://rockpool.ai) | ✓ | ✓ |
-| [Sinabs](https://sinabs.readthedocs.io) | ✓ | ✓ |
+| [Lava-DL](https://github.com/lava-nc/lava-dl) | ✓ | ⬚ |
+| [Nengo](https://nengo.ai) | ✓ | ✓ | [Nengo examples](https://github.com/neuromorphs/nir/tree/main/example/nengo/) |
+| [Norse](https://github.com/norse/norse) | ✓ | ✓ | [Norse examples](https://github.com/neuromorphs/nir/tree/main/example/norse/) |
+| [Rockpool](https://rockpool.ai) ([SynSense Xylo chip](https://www.synsense.ai/products/xylo/)) | ✓ | ✓ |
+| [Sinabs](https://sinabs.readthedocs.io) ([SynSense Speck chip](https://www.synsense.ai/products/speck-2/)) | ✓ | ✓ |
 | [snnTorch](https://github.com/jeshraghian/snntorch/) | ✓ | ⬚ |
-| [SpiNNaker2](https://spinncloud.com/portfolio/spinnaker2/) | ⬚ | ⬚ |
-| [SynSense Speck](https://www.synsense.ai/products/speck-2/) | ⬚ | ⬚ |
-| [SynSense Xylo](https://www.synsense.ai/products/xylo/) | ⬚ | ⬚ |
+| [SpiNNaker2](https://spinncloud.com/portfolio/spinnaker2/) | ✓ | ⬚ |
 
 
 ## Acknowledgements

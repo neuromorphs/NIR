@@ -106,7 +106,7 @@ def test_flatten():
         nodes={
             "in": nir.Input(np.array([4, 5, 2])),
             "flat": nir.Flatten(0),
-            "out": nir.Output(np.array([20, 2]))
+            "out": nir.Output(np.array([20, 2])),
         },
         edges=[("in", "flat"), ("flat", "out")],
     )
