@@ -37,10 +37,10 @@ The intermediate represenation can be stored as hdf5 file, which benefits from c
 
 ## Frameworks that currently support NIR
 
-| **Framework** | **Write to NIR** | **Read from NIR** |
-| --------------- | :--: | :--: |
+| **Framework** | **Write to NIR** | **Read from NIR** | **Examples** |
+| --------------- | :--: | :--: | :------: |
 | [Lava-DL](https://github.com/lava-nc/lava-dl) | ⬚ | ⬚ |
-| [Nengo](https://nengo.ai) | ⬚ | ⬚ |
+| [Nengo](https://nengo.ai) | ⬚ | ⬚ | [Nengo examples](https://github.com/neuromorphs/nir/tree/main/example/nengo/) |
 | [Norse](https://github.com/norse/norse) | ✓ | ⬚ |
 | [Rockpool](https://rockpool.ai) | ✓ | ✓ |
 | [Sinabs](https://sinabs.readthedocs.io) | ✓ | ✓ |
