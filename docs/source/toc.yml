@@ -9,18 +9,24 @@ parts:
     title: About NIR
 - caption: User guide
   chapters:
-  - file: format
-    title: The NIR format
+  - file: usage
+  - file: primitives
+    title: NIR primitives
   - file: support
     title: Platform support
-  - file: usage
-  - file: platforms
+- caption: Examples
+  chapters:
+  - file: examples/lava
+  - file: examples/nengo
+  - file: examples/norse
+  - file: examples/rockpool
+  - file: examples/sinabs
+  - file: examples/snntorch
+  - file: examples/spinnaker
 - caption: Developer guide
   chapters:
   - file: dev
     title: Development
-  - file: api
-    title: API
   - file: internals
     title: Internals
 - caption: API
