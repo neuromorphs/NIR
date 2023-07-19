@@ -48,6 +48,18 @@ class NIRGraph(NIRNode):
     nodes: Nodes  # List of computational nodes
     edges: Edges  # List of edges between nodes
 
+    @property
+    def inputs(self):
+        return {
+            name: node for name, node in self.nodes.items() if isinstance(node, Input)
+        }
+
+    @property
+    def outputs(self):
+        return {
+            name: node for name, node in self.nodes.items() if isinstance(node, Output)
+        }
+
     @staticmethod
     def from_list(*nodes: NIRNode) -> "NIRGraph":
         """Create a sequential graph from a list of nodes by labelling them after

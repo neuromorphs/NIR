@@ -228,3 +228,47 @@ def test_subgraph_merge():
         ("linear", "linear_1"),
         ("linear_1", "output"),
     ]
+
+
+def test_inputs_outputs_properties():
+    ir = nir.NIRGraph(
+        nodes={
+            "in1": nir.Input(np.array([4, 5, 2])),
+            "in2": nir.Input(np.array([4, 5, 2])),
+            "flat": nir.Flatten(0),
+            "out1": nir.Output(np.array([20, 2])),
+            "out2": nir.Output(np.array([20, 2])),
+        },
+        edges=[("in1", "flat"), ("in2", "flat"), ("flat", "out1"), ("flat", "out2")],
+    )
+    ir2 = nir.NIRGraph(
+        nodes={
+            "in": nir.Input(np.array([4, 5, 2])),
+            "inner": ir,
+            "out": nir.Output(np.array([20, 2])),
+        },
+        edges=[
+            ("in", "inner.in1"),
+            ("in", "inner.in2"),
+            ("inner.out1", "out"),
+            ("inner.out2", "out"),
+        ],
+    )
+    assert np.allclose(ir.nodes["in1"].input_type["input"], [4, 5, 2])
+    assert np.allclose(ir.nodes["out1"].input_type["input"], [20, 2])
+    assert np.allclose(ir.nodes["in2"].input_type["input"], [4, 5, 2])
+    assert np.allclose(ir.nodes["out2"].input_type["input"], [20, 2])
+    assert ir.nodes["in1"] == ir.inputs["in1"]
+    assert ir.nodes["in2"] == ir.inputs["in2"]
+    assert ir.nodes["out1"] == ir.outputs["out1"]
+    assert ir.nodes["out2"] == ir.outputs["out2"]
+    assert ir.nodes["in1"] not in ir.outputs.values()
+    assert ir.nodes["in2"] not in ir.outputs.values()
+    assert ir.nodes["out1"] not in ir.inputs.values()
+    assert ir.nodes["out2"] not in ir.inputs.values()
+    assert ir.nodes["flat"] not in ir.inputs.values()
+    assert ir.nodes["flat"] not in ir.outputs.values()
+    assert ir.nodes["in1"] in ir2.nodes["inner"].inputs.values()
+    assert ir.nodes["in2"] in ir2.nodes["inner"].inputs.values()
+    assert ir.nodes["out1"] in ir2.nodes["inner"].outputs.values()
+    assert ir.nodes["out2"] in ir2.nodes["inner"].outputs.values()

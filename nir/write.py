@@ -107,7 +107,6 @@ def _convert_node(node: nir.NIRNode) -> dict:
 
 def write(filename: typing.Union[str, pathlib.Path], graph: nir.NIRNode) -> None:
     """Write a NIR to a HDF5 file."""
-
     def write_recursive(group: h5py.Group, node: dict) -> None:
         for k, v in node.items():
             if isinstance(v, str):
