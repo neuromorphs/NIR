@@ -3,3 +3,5 @@ ruff
 black
 hdf5
 numpy
+pytest
+sphinx
