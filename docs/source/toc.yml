@@ -26,7 +26,7 @@ parts:
 - caption: Developer guide
   chapters:
   - file: dev
-    title: Development
+    title: Contributing
   - file: internals
     title: Internals
 - caption: API
