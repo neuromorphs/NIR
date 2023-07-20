@@ -1,8 +1,7 @@
+import sinabs.layers as sl
 import torch
 import torch.nn as nn
-import sinabs.layers as sl
-from sinabs import to_nir
-
+from sinabs import from_nir, to_nir
 
 batch_size = 4
 
@@ -17,3 +16,7 @@ orig_model = nn.Sequential(
 # Convert model to NIR graph with a random input of representative shape
 nir_graph = to_nir(orig_model, torch.randn(batch_size, 10))
 print(nir_graph)
+
+
+# Reload sinabs model from NIR
+sinabs_model = from_nir(nir_graph, batch_size)
