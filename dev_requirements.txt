@@ -1,0 +1,5 @@
+pre-commit
+ruff
+black
+hdf5
+numpy
