@@ -1,5 +1,6 @@
 import nengo
 import numpy as np
+
 import nir
 
 model = nengo.Network(seed=3)
@@ -179,7 +180,7 @@ def nir_to_nengo(n):
             elif isinstance(obj, nir.Output):
                 nengo_map.append(
                     None
-                )  # because the NIR spec doesn't tell me the size, so I can't create this yet
+                )  # because NIR spec doesn't tell me the size, I can't create this yet
             else:
                 raise Exception(f"Unknown NIR object: {obj}")
         for pre, post in n.edges:

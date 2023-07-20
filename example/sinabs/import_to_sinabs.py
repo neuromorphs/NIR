@@ -1,6 +1,4 @@
 import torch
-import torch.nn as nn
-import sinabs.layers as sl
 from sinabs import from_nir
 
 import nir
@@ -15,6 +13,8 @@ nir_network = nir.NIRGraph.from_list(
     nir.Affine(affine_weights, affine_bias), nir.LI(li_tau, li_r, li_v_leak)
 )
 
-# Create Sinabs model from NIR graph. You need to define the batch size because Sinabs will use Squeeze versions of layers by default.
+# Create Sinabs model from NIR graph.
+# You need to define the batch size because Sinabs will use Squeeze
+# versions of layers by default.
 sinabs_model = from_nir(nir_network, batch_size=10)
 print(sinabs_model)
