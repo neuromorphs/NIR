@@ -3,6 +3,11 @@ import numpy as np
 import nir
 
 
+def test_has_version():
+    assert hasattr(nir.NIRNode(), "version")
+    assert isinstance(nir.NIRNode().version, str)
+
+
 def test_simple():
     w = np.array([1, 2, 3])
     b = np.array([4, 4, 4])

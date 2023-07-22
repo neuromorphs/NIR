@@ -1,40 +1,46 @@
-from dataclasses import dataclass
 import typing
 
 import numpy as np
 
+from . import __version__
+from .dataclass_utils import meta_dataclass
 
 Edges = typing.NewType("Edges", typing.List[typing.Tuple[str, str]])
 
 
+@meta_dataclass
 class NIRNode:
     """Base superclass of Neural Intermediate Representation Unit (NIR).
+
     All NIR primitives inherit from this class, but NIRNodes should never be
     instantiated.
     """
 
+    version: str = __version__  # The version of this node
 
-@dataclass
+
+@meta_dataclass
 class NIRGraph(NIRNode):
-    """Neural Intermediate Representation (NIR) Graph containing a number
-    of nodes and edges.
+    """Neural Intermediate Representation (NIR) Graph containing a number of nodes and
+    edges.
 
-    A graph of computational nodes and identity edges."""
+    A graph of computational nodes and identity edges.
+    """
 
     nodes: typing.Dict[str, NIRNode]  # List of computational nodes
     edges: Edges
 
     @staticmethod
     def from_list(*nodes: NIRNode) -> "NIRGraph":
-        """Create a sequential graph from a list of nodes by labelling them
-        after indices."""
+        """Create a sequential graph from a list of nodes by labelling them after
+        indices."""
         return NIRGraph(
             nodes={str(i): n for i, n in enumerate(nodes)},
             edges=[(str(i), str(i + 1)) for i in range(len(nodes) - 1)],
         )
 
 
-@dataclass
+@meta_dataclass
 class Affine(NIRNode):
     r"""Affine transform that linearly maps and translates the input signal.
 
@@ -47,9 +53,9 @@ class Affine(NIRNode):
     bias: np.ndarray  # Bias term
 
 
-@dataclass
+@meta_dataclass
 class Conv1d(NIRNode):
-    """Convolutional layer in 1d"""
+    """Convolutional layer in 1d."""
 
     weight: np.ndarray  # Weight C_out * C_in * X
     stride: int  # Stride
@@ -59,9 +65,9 @@ class Conv1d(NIRNode):
     bias: np.ndarray  # Bias C_out
 
 
-@dataclass
+@meta_dataclass
 class Conv2d(NIRNode):
-    """Convolutional layer in 2d"""
+    """Convolutional layer in 2d."""
 
     weight: np.ndarray  # Weight C_out * C_in * X * Y
     stride: int  # Stride
@@ -79,7 +85,7 @@ class Conv2d(NIRNode):
             self.dilation = (self.dilation, self.dilation)
 
 
-@dataclass
+@meta_dataclass
 class CubaLIF(NIRNode):
     r"""Current based leaky integrate and-fire-neuron model.
 
@@ -126,7 +132,7 @@ class CubaLIF(NIRNode):
         self.w_in = np.ones_like(self.v_threshold) * self.w_in
 
 
-@dataclass
+@meta_dataclass
 class Delay(NIRNode):
     """Simple delay node.
 
@@ -139,7 +145,7 @@ class Delay(NIRNode):
     delay: np.ndarray  # Delay
 
 
-@dataclass
+@meta_dataclass
 class Flatten(NIRNode):
     """Flatten node.
 
@@ -150,9 +156,9 @@ class Flatten(NIRNode):
     end_dim: int = -1  # Last dimension to flatten
 
 
-@dataclass
+@meta_dataclass
 class I(NIRNode):  # noqa: E742
-    r"""Integrator
+    r"""Integrator.
 
     The integrator neuron model is defined by the following equation:
 
@@ -163,7 +169,7 @@ class I(NIRNode):  # noqa: E742
     r: np.ndarray
 
 
-@dataclass
+@meta_dataclass
 class IF(NIRNode):
     r"""Integrate-and-fire neuron model.
 
@@ -173,8 +179,8 @@ class IF(NIRNode):
         \dot{v} = R I
 
     .. math::
-        z = \begin{cases} 
-            1 & v > v_{thr} \\ 
+        z = \begin{cases}
+            1 & v > v_{thr} \\
             0 & else
         \end{cases}
 
@@ -189,7 +195,7 @@ class IF(NIRNode):
     v_threshold: np.ndarray  # Firing threshold
 
 
-@dataclass
+@meta_dataclass
 class Input(NIRNode):
     """Input Node.
 
@@ -199,7 +205,7 @@ class Input(NIRNode):
     shape: np.ndarray  # Shape of input data
 
 
-@dataclass
+@meta_dataclass
 class LI(NIRNode):
     r"""Leaky integrator neuron model.
 
@@ -218,7 +224,7 @@ class LI(NIRNode):
     v_leak: np.ndarray  # Leak voltage
 
 
-@dataclass
+@meta_dataclass
 class Linear(NIRNode):
     r"""Linear transform without bias:
 
@@ -228,18 +234,18 @@ class Linear(NIRNode):
     weight: np.ndarray  # Weight term
 
 
-@dataclass
+@meta_dataclass
 class LIF(NIRNode):
     r"""Leaky integrate and-fire-neuron model.
 
     The leaky integrate-and-fire neuron model is defined by the following equations:
-    
+
     .. math::
         \tau \dot{v} = (v_{leak} - v) + R I
 
     .. math::
-        z = \begin{cases} 
-            1 & v > v_{thr} \\ 
+        z = \begin{cases}
+            1 & v > v_{thr} \\
             0 & else
         \end{cases}
 
@@ -250,7 +256,7 @@ class LIF(NIRNode):
         \end{cases}
 
     Where :math:`\tau` is the time constant, :math:`v` is the membrane potential,
-    :math:`v_{leak}` is the leak voltage, :math:`R` is the resistance, 
+    :math:`v_{leak}` is the leak voltage, :math:`R` is the resistance,
     :math:`v_{threshold}` is the firing threshold, and :math:`I` is the input current.
     """
 
@@ -260,7 +266,7 @@ class LIF(NIRNode):
     v_threshold: np.ndarray  # Firing threshold
 
 
-@dataclass
+@meta_dataclass
 class Output(NIRNode):
     """Output Node.
 
@@ -270,7 +276,7 @@ class Output(NIRNode):
     shape: int  # Size of output
 
 
-@dataclass
+@meta_dataclass
 class Scale(NIRNode):
     r"""Scales a signal by some values.
 
@@ -284,7 +290,7 @@ class Scale(NIRNode):
     scale: np.ndarray  # Scaling factor
 
 
-@dataclass
+@meta_dataclass
 class Threshold(NIRNode):
     r"""Threshold node.
 
