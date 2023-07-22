@@ -24,8 +24,6 @@ class Definitions:
 # Thanks to https://stackoverflow.com/q/69711886
 def meta_dataclass(
     cls=None,
-    /,
-    *,
     init=True,
     repr=True,
     eq=True,
