@@ -4,7 +4,7 @@ NIR integration is supported in Sinabs natively.
 
 `sinabs.to_nir` and `sinabs.from_nir` methods allow you to seemlessly navigate between `nir` and `sinabs`. Once your model is in sinabs, you can use this model to train or directly deploy your models to Speck/DynapCNN. 
 
-## NIR → Norse
+## NIR → Sinabs
 
 ```python
 import torch
@@ -27,10 +27,10 @@ sample_data = torch.randn(batch_size, 10)
 nir_graph = to_nir(orig_model, sample_data)
 ```
 
-## Norse → NIR
+## Sinabs → NIR
 ```python
 import sinabs.from_nir
 
 nir_model = ...
-sinabs_model = norse.from_nir(nir_model, batch_size=4)
+sinabs_model = sinabs.from_nir(nir_model, batch_size=4)
 ```
