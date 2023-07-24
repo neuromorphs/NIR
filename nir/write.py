@@ -13,7 +13,6 @@ def _convert_node(node: nir.NIRNode) -> dict:
             "type": "Affine",
             "weight": node.weight,
             "bias": node.bias,
-            "version": node.version,
         }
     elif isinstance(node, nir.Conv1d):
         return {
@@ -24,7 +23,6 @@ def _convert_node(node: nir.NIRNode) -> dict:
             "dilation": node.dilation,
             "groups": node.groups,
             "bias": node.bias,
-            "version": node.version,
         }
     elif isinstance(node, nir.Conv2d):
         return {
@@ -35,38 +33,34 @@ def _convert_node(node: nir.NIRNode) -> dict:
             "dilation": node.dilation,
             "groups": node.groups,
             "bias": node.bias,
-            "version": node.version,
         }
     elif isinstance(node, nir.Delay):
-        return {"type": "Delay", "delay": node.delay, "version": node.version}
+        return {"type": "Delay", "delay": node.delay}
     elif isinstance(node, nir.Flatten):
         return {
             "type": "Flatten",
             "start_dim": node.start_dim,
             "end_dim": node.end_dim,
-            "version": node.version,
         }
     elif isinstance(node, nir.I):
-        return {"type": "I", "r": node.r, "version": node.version}
+        return {"type": "I", "r": node.r}
     elif isinstance(node, nir.IF):
         return {
             "type": "IF",
             "r": node.r,
             "v_threshold": node.v_threshold,
-            "version": node.version,
         }
     elif isinstance(node, nir.Input):
-        return {"type": "Input", "shape": node.shape, "version": node.version}
+        return {"type": "Input", "shape": node.shape}
     elif isinstance(node, nir.LI):
         return {
             "type": "LI",
             "tau": node.tau,
             "r": node.r,
             "v_leak": node.v_leak,
-            "version": node.version,
         }
     elif isinstance(node, nir.Linear):
-        return {"type": "Linear", "weight": node.weight, "version": node.version}
+        return {"type": "Linear", "weight": node.weight}
     elif isinstance(node, nir.LIF):
         return {
             "type": "LIF",
@@ -74,7 +68,6 @@ def _convert_node(node: nir.NIRNode) -> dict:
             "r": node.r,
             "v_leak": node.v_leak,
             "v_threshold": node.v_threshold,
-            "version": node.version,
         }
     elif isinstance(node, nir.CubaLIF):
         return {
@@ -84,24 +77,21 @@ def _convert_node(node: nir.NIRNode) -> dict:
             "r": node.r,
             "v_leak": node.v_leak,
             "v_threshold": node.v_threshold,
-            "version": node.version,
         }
     elif isinstance(node, nir.NIRGraph):
         return {
             "type": "NIRGraph",
             "nodes": {k: _convert_node(n) for k, n in node.nodes.items()},
             "edges": node.edges,
-            "version": node.version,
         }
     elif isinstance(node, nir.Output):
-        return {"type": "Output", "shape": node.shape, "version": node.version}
+        return {"type": "Output", "shape": node.shape}
     elif isinstance(node, nir.Scale):
-        return {"type": "Scale", "scale": node.scale, "version": node.version}
+        return {"type": "Scale", "scale": node.scale}
     elif isinstance(node, nir.Threshold):
         return {
             "type": "Threshold",
             "threshold": node.threshold,
-            "version": node.version,
         }
     else:
         raise ValueError(f"Unknown node type: {node}")
@@ -122,7 +112,6 @@ def write(filename: typing.Union[str, pathlib.Path], graph: nir.NIRNode) -> None
                 group.create_dataset(k, data=v)
 
     with h5py.File(filename, "w") as f:
-        version = graph.version
-        f.create_dataset("version", data=version)
+        f.create_dataset("version", data=nir.version)
         node_group = f.create_group("node")
         write_recursive(node_group, _convert_node(graph))

@@ -4,8 +4,8 @@ import nir
 
 
 def test_has_version():
-    assert hasattr(nir.NIRNode(), "version")
-    assert isinstance(nir.NIRNode().version, str)
+    assert hasattr(nir, "version")
+    assert hasattr(nir, "__version__")
 
 
 def test_simple():
