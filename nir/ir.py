@@ -6,6 +6,7 @@ import numpy as np
 Edges = typing.NewType("Edges", typing.List[typing.Tuple[str, str]])
 
 
+@dataclass
 class NIRNode:
     """Base superclass of Neural Intermediate Representation Unit (NIR).
 

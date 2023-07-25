@@ -3,7 +3,6 @@ requires = ["setuptools"]
 
 [project]
 name = "nir"
-version = "0.1.0"
 description = "Neuromorphic Intermediate Representation"
 authors = [
   { name = "Steven Abreu", email = "s.abreu@rug.nl" },
@@ -28,14 +27,18 @@ classifiers = [
     "Topic :: Scientific/Engineering :: Physics",
     "Topic :: Software Development :: Libraries :: Python Modules",
 ]
-
 dependencies = [ "numpy", "h5py" ]
+dynamic = ["version"] # Version number read from __init__.py
 
 [project.urls]
 homepage = "https://github.com/neuromorphs/nir"
 
+[tool.setuptools.dynamic]
+version = {attr = "nir.__version__"}
+
 [tool.setuptools.packages]
 find = {} 
 
-[tool.ruff.per-file-ignores]
-"docs/conf.py" = ["E402"]
+[tool.ruff]
+line-length = 100
+per-file-ignores = {"docs/conf.py" = ["E402"]}
