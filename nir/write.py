@@ -1,5 +1,5 @@
-import typing
 import pathlib
+import typing
 
 import h5py
 import numpy as np
@@ -45,12 +45,13 @@ def _convert_node(node: nir.NIRNode) -> dict:
     elif isinstance(node, nir.I):
         return {"type": "I", "r": node.r}
     elif isinstance(node, nir.IF):
-        return {"type": "IF", "r": node.r, "v_threshold": node.v_threshold}
-    elif isinstance(node, nir.Input):
         return {
-            "type": "Input",
-            "shape": node.shape,
+            "type": "IF",
+            "r": node.r,
+            "v_threshold": node.v_threshold,
         }
+    elif isinstance(node, nir.Input):
+        return {"type": "Input", "shape": node.shape}
     elif isinstance(node, nir.LI):
         return {
             "type": "LI",
@@ -59,10 +60,7 @@ def _convert_node(node: nir.NIRNode) -> dict:
             "v_leak": node.v_leak,
         }
     elif isinstance(node, nir.Linear):
-        return {
-            "type": "Linear",
-            "weight": node.weight,
-        }
+        return {"type": "Linear", "weight": node.weight}
     elif isinstance(node, nir.LIF):
         return {
             "type": "LIF",
@@ -87,17 +85,14 @@ def _convert_node(node: nir.NIRNode) -> dict:
             "edges": node.edges,
         }
     elif isinstance(node, nir.Output):
-        return {
-            "type": "Output",
-            "shape": node.shape,
-        }
+        return {"type": "Output", "shape": node.shape}
     elif isinstance(node, nir.Scale):
-        return {
-            "type": "Scale",
-            "scale": node.scale,
-        }
+        return {"type": "Scale", "scale": node.scale}
     elif isinstance(node, nir.Threshold):
-        return {"type": "Threshold", "threshold": node.threshold}
+        return {
+            "type": "Threshold",
+            "threshold": node.threshold,
+        }
     else:
         raise ValueError(f"Unknown node type: {node}")
 
@@ -117,5 +112,6 @@ def write(filename: typing.Union[str, pathlib.Path], graph: nir.NIRNode) -> None
                 group.create_dataset(k, data=v)
 
     with h5py.File(filename, "w") as f:
+        f.create_dataset("version", data=nir.version)
         node_group = f.create_group("node")
         write_recursive(node_group, _convert_node(graph))

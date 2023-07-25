@@ -1,6 +1,7 @@
-import typing
-import h5py
 import pathlib
+import typing
+
+import h5py
 
 import nir
 
@@ -8,10 +9,7 @@ import nir
 def read_node(node: typing.Any) -> nir.NIRNode:
     """Read a graph from a HDF/conn5 file."""
     if node["type"][()] == b"Affine":
-        return nir.Affine(
-            weight=node["weight"][()],
-            bias=node["bias"][()],
-        )
+        return nir.Affine(weight=node["weight"][()], bias=node["bias"][()])
     elif node["type"][()] == b"Conv1d":
         return nir.Conv1d(
             weight=node["weight"][()],
@@ -31,27 +29,18 @@ def read_node(node: typing.Any) -> nir.NIRNode:
             bias=node["bias"][()],
         )
     elif node["type"][()] == b"Delay":
-        return nir.Delay(
-            delay=node["delay"][()],
-        )
+        return nir.Delay(delay=node["delay"][()])
     elif node["type"][()] == b"Flatten":
         return nir.Flatten(
             start_dim=node["start_dim"][()],
             end_dim=node["end_dim"][()],
         )
     elif node["type"][()] == b"I":
-        return nir.I(
-            r=node["r"][()],
-        )
+        return nir.I(r=node["r"][()])
     elif node["type"][()] == b"IF":
-        return nir.IF(
-            r=node["r"][()],
-            v_threshold=node["v_threshold"][()],
-        )
+        return nir.IF(r=node["r"][()], v_threshold=node["v_threshold"][()])
     elif node["type"][()] == b"Input":
-        return nir.Input(
-            shape=node["shape"][()],
-        )
+        return nir.Input(shape=node["shape"][()])
     elif node["type"][()] == b"LI":
         return nir.LI(
             tau=node["tau"][()],
@@ -59,9 +48,7 @@ def read_node(node: typing.Any) -> nir.NIRNode:
             v_leak=node["v_leak"][()],
         )
     elif node["type"][()] == b"Linear":
-        return nir.Linear(
-            weight=node["weight"][()],
-        )
+        return nir.Linear(weight=node["weight"][()])
     elif node["type"][()] == b"LIF":
         return nir.LIF(
             tau=node["tau"][()],
@@ -85,13 +72,9 @@ def read_node(node: typing.Any) -> nir.NIRNode:
     elif node["type"][()] == b"Output":
         return nir.Output(shape=node["shape"][()])
     elif node["type"][()] == b"Scale":
-        return nir.Scale(
-            scale=node["scale"][()],
-        )
+        return nir.Scale(scale=node["scale"][()])
     elif node["type"][()] == b"Threshold":
-        return nir.Threshold(
-            threshold=node["threshold"][()],
-        )
+        return nir.Threshold(threshold=node["threshold"][()])
     else:
         raise ValueError(f"Unknown unit type: {node['type'][()]}")
 
@@ -100,3 +83,10 @@ def read(filename: typing.Union[str, pathlib.Path]) -> nir.NIRGraph:
     """Load a NIR from a HDF/conn5 file."""
     with h5py.File(filename, "r") as f:
         return read_node(f["node"])
+
+
+def read_version(filename: typing.Union[str, pathlib.Path]) -> str:
+    """Reads the filename of a given NIR file, and raises an exception if
+    the version does not exist in the file."""
+    with h5py.File(filename, "r") as f:
+        return f["version"][()].decode("utf8")
