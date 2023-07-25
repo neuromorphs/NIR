@@ -14,7 +14,7 @@ def assert_equivalence(ir: nir.NIRGraph, ir2: nir.NIRGraph):
         else:
             for k, v in ir.nodes[ik].__dict__.items():
                 if isinstance(v, np.ndarray) or isinstance(v, list):
-                    assert np.array_equal(v, getattr(ir2.nodes[ik], k))
+                    assert np.array_equal(v, getattr(ir2.nodes[ik], k), equal_nan=True)
                 else:
                     assert v == getattr(ir2.nodes[ik], k)
 
@@ -171,5 +171,20 @@ def test_flatten():
         nir.Input(shape=np.array([2, 3])),
         nir.Flatten(),
         nir.Output(shape=np.array([6])),
+    )
+    factory_test_graph(ir)
+
+
+def test_project():
+    ir = nir.NIRGraph(
+        nodes={
+            "in": nir.Input(np.array([4, 5, 2])),
+            "project_out": nir.Project(
+                output_indices=np.array([np.nan, 0, 0, np.nan, np.nan])
+            ),
+            "project_in": nir.Project(output_indices=np.array([1])),
+            "out": nir.Output(np.array([4, 5, 2])),
+        },
+        edges=[("in", "project_out"), ("project_in", "out")],
     )
     factory_test_graph(ir)

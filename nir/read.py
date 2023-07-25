@@ -1,6 +1,7 @@
-import typing
-import h5py
 import pathlib
+import typing
+
+import h5py
 
 import nir
 
@@ -91,6 +92,10 @@ def read_node(node: typing.Any) -> nir.NIRNode:
     elif node["type"][()] == b"Threshold":
         return nir.Threshold(
             threshold=node["threshold"][()],
+        )
+    elif node["type"][()] == b"Project":
+        return nir.Project(
+            output_indices=node["output_indices"][()],
         )
     else:
         raise ValueError(f"Unknown unit type: {node['type'][()]}")

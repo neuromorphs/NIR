@@ -112,3 +112,19 @@ def test_flatten():
     )
     assert np.allclose(ir.nodes["in"].shape, [4, 5, 2])
     assert np.allclose(ir.nodes["out"].shape, [20, 2])
+
+
+def test_project():
+    ir = nir.NIRGraph(
+        nodes={
+            "in": nir.Input(np.array([4, 5, 2])),
+            "project_out": nir.Project(
+                output_indices=np.array([np.nan, 0, 0, np.nan, np.nan])
+            ),
+            "project_in": nir.Project(output_indices=np.array([1])),
+            "out": nir.Output(np.array([4, 5, 2])),
+        },
+        edges=[("in", "project_out"), ("project_in", "out")],
+    )
+    assert np.allclose(ir.nodes["in"].shape, [4, 5, 2])
+    assert np.allclose(ir.nodes["out"].shape, [4, 5, 2])

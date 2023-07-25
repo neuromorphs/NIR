@@ -1,5 +1,5 @@
-import typing
 import pathlib
+import typing
 
 import h5py
 import numpy as np
@@ -98,6 +98,8 @@ def _convert_node(node: nir.NIRNode) -> dict:
         }
     elif isinstance(node, nir.Threshold):
         return {"type": "Threshold", "threshold": node.threshold}
+    elif isinstance(node, nir.Project):
+        return {"type": "Project", "output_indices": node.output_indices}
     else:
         raise ValueError(f"Unknown node type: {node}")
 
