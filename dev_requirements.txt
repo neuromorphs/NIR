@@ -1,7 +1,7 @@
 pre-commit
 ruff
 black
-hdf5
+h5py
 numpy
 pytest
 sphinx
