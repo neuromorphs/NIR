@@ -15,6 +15,68 @@ def test_has_version():
     assert hasattr(nir, "__version__")
 
 
+def test_eq():
+    a = nir.Input(
+        shape=np.array(
+            [
+                2,
+                3,
+            ]
+        ),
+    )
+    a2 = nir.Input(
+        shape=np.array(
+            [
+                2,
+                3,
+            ]
+        ),
+    )
+    b = nir.Input(
+        shape=np.array(
+            [
+                2,
+                3,
+            ]
+        ),
+    )
+    b2 = nir.Input(
+        shape=np.array(
+            [
+                2,
+                2,
+            ]
+        ),
+    )
+    o = nir.Output(
+        shape=np.array(
+            [
+                2,
+                3,
+            ]
+        ),
+    )
+
+    assert a == a
+    assert a2 == a2
+    assert b == b
+    assert b2 == b2
+    assert a != a2
+    assert a != b
+    assert a != b2
+    assert a2 != a
+    assert a2 != b
+    assert a2 != b2
+    assert b != a
+    assert b != a2
+    assert b != b2
+    assert b2 != a
+    assert b2 != a2
+    assert b2 != b
+    assert a != o
+    assert o != a
+
+
 def test_simple():
     a = mock_affine(4, 3)
     ir = nir.NIRGraph(nodes={"a": a}, edges=[("a", "a")])

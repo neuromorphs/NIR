@@ -24,7 +24,7 @@ def _parse_shape_argument(x: Types, key: str):
         raise ValueError("Unknown shape argument", x)
 
 
-@dataclass
+@dataclass(eq=False)
 class NIRNode:
     """Base superclass of Neural Intermediate Representation Unit (NIR).
 
@@ -35,6 +35,9 @@ class NIRNode:
     # Note: Adding input/output types as follows is ideal, but requires Python 3.10
     # input_type: Types = field(init=False, kw_only=True)
     # output_type: Types = field(init=False, kw_only=True)
+
+    def __eq__(self, other):
+        return self is other
 
 
 @dataclass
@@ -346,7 +349,7 @@ class IF(NIRNode):
         self.output_type = {"output": np.array(self.r.shape)}
 
 
-@dataclass
+@dataclass(eq=False)
 class Input(NIRNode):
     """Input Node.
 
@@ -449,7 +452,7 @@ class LIF(NIRNode):
         self.output_type = {"output": np.array(self.r.shape)}
 
 
-@dataclass
+@dataclass(eq=False)
 class Output(NIRNode):
     """Output Node.
 
