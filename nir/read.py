@@ -67,7 +67,7 @@ def read_node(node: typing.Any) -> nir.NIRNode:
     elif node["type"][()] == b"NIRGraph":
         return nir.NIRGraph(
             nodes={k: read_node(n) for k, n in node["nodes"].items()},
-            edges=node["edges"][()],
+            edges=node["edges"].asstr()[()],
         )
     elif node["type"][()] == b"Output":
         return nir.Output(shape=node["shape"][()])
@@ -86,7 +86,7 @@ def read(filename: typing.Union[str, pathlib.Path]) -> nir.NIRGraph:
 
 
 def read_version(filename: typing.Union[str, pathlib.Path]) -> str:
-    """Reads the filename of a given NIR file, and raises an exception if
-    the version does not exist in the file."""
+    """Reads the filename of a given NIR file, and raises an exception if the version
+    does not exist in the file."""
     with h5py.File(filename, "r") as f:
         return f["version"][()].decode("utf8")
