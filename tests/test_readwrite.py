@@ -17,6 +17,9 @@ def assert_equivalence(ir: nir.NIRGraph, ir2: nir.NIRGraph):
                     assert np.array_equal(v, getattr(ir2.nodes[ik], k))
                 else:
                     assert v == getattr(ir2.nodes[ik], k)
+    for i, _ in enumerate(ir.edges):
+        assert ir.edges[i][0] == ir2.edges[i][0]
+        assert ir.edges[i][1] == ir2.edges[i][1]
 
 
 def factory_test_graph(ir: nir.NIRGraph):
