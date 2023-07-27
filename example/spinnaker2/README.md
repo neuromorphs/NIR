@@ -2,7 +2,7 @@
 
 SpiNNaker2 is a neuromorphic chip based around a grid of ARM Cortex-M4F processors which are tighly coupled with accelerators and a network-on-chip optimized for, but not limited to transmission of spikes.
 
-Running this requires the following library and installed SpiNNaker2 hardware: [py-spinnaker2](https://gitlab.com/spinnaker2/py-spinnaker2)
+Running this requires the following library and installed SpiNNaker2 hardware: [py-spinnaker2](https://gitlab.com/spinnaker2/py-spinnaker2). Currently the branch `py-spinnaker2_nir` is required.
 
 Examples:
 * Create a graph first: [generate_model.py](https://github.com/neuromorphs/nir/tree/main/example/spinnaker2/generate_model.py)
