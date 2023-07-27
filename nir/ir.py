@@ -1,5 +1,5 @@
-from dataclasses import dataclass
 import typing
+from dataclasses import dataclass
 
 import numpy as np
 
@@ -30,9 +30,39 @@ class NIRGraph(NIRNode):
     def from_list(*nodes: NIRNode) -> "NIRGraph":
         """Create a sequential graph from a list of nodes by labelling them after
         indices."""
+
+        def unique_node_name(node, name_dict):
+            print(node)
+            basename = node.__class__.__name__.lower()
+            print(basename)
+            idx = None
+            if basename in name_dict.keys():
+                idx = name_dict[basename]
+            if idx is not None:
+                name = basename + "_" + str(idx)
+                idx += 1
+            else:
+                name = basename
+                idx = 1
+            name_dict[basename] = idx
+            return name
+
+        name_dict = {}
+        names = []
+        node_dict = {}
+        edges = []
+
+        for node in nodes:
+            name = unique_node_name(node, name_dict)
+            node_dict[name] = node
+            names.append(name)
+
+        for i in range(len(nodes) - 1):
+            edges.append((names[i], names[i + 1]))
+
         return NIRGraph(
-            nodes={str(i): n for i, n in enumerate(nodes)},
-            edges=[(str(i), str(i + 1)) for i in range(len(nodes) - 1)],
+            nodes=node_dict,
+            edges=edges,
         )
 
 
