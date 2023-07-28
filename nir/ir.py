@@ -1,4 +1,5 @@
 import typing
+from collections import Counter
 from dataclasses import dataclass
 
 import numpy as np
@@ -31,32 +32,22 @@ class NIRGraph(NIRNode):
         """Create a sequential graph from a list of nodes by labelling them after
         indices."""
 
-        def unique_node_name(node, name_dict):
-            print(node)
+        def unique_node_name(node, counts):
             basename = node.__class__.__name__.lower()
-            print(basename)
-            idx = None
-            if basename in name_dict.keys():
-                idx = name_dict[basename]
-            if idx is not None:
-                name = basename + "_" + str(idx)
-                idx += 1
-            else:
-                name = basename
-                idx = 1
-            name_dict[basename] = idx
+            id = counts[basename]
+            name = f"{basename}{f'_{id}' if id>0 else ''}"
+            counts[basename] += 1
             return name
 
-        name_dict = {}
-        names = []
+        counts = Counter()
         node_dict = {}
         edges = []
 
         for node in nodes:
-            name = unique_node_name(node, name_dict)
+            name = unique_node_name(node, counts)
             node_dict[name] = node
-            names.append(name)
 
+        names = list(node_dict)
         for i in range(len(nodes) - 1):
             edges.append((names[i], names[i + 1]))
 
