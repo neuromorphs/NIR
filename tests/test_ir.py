@@ -117,3 +117,69 @@ def test_flatten():
     )
     assert np.allclose(ir.nodes["in"].shape, [4, 5, 2])
     assert np.allclose(ir.nodes["out"].shape, [20, 2])
+
+
+def test_from_list_naming():
+    ir = nir.NIRGraph.from_list(
+        nir.Input(shape=np.array([2])),
+        nir.Linear(weight=np.array([[3, 1], [-1, 2], [1, 2]])),
+        nir.Linear(weight=np.array([[3, 1], [-1, 4], [1, 2]]).T),
+        nir.Affine(
+            weight=np.array([[2, 1], [-1, 2], [1, 2]]), bias=np.array([1, 3, 2])
+        ),
+        nir.Affine(
+            weight=np.array([[2, 1], [-1, 4], [1, 2]]).T, bias=np.array([-2, 2])
+        ),
+        nir.Linear(weight=np.array([[3, 1], [-1, 1], [1, 2]])),
+        nir.Linear(weight=np.array([[3, 1], [-1, 3], [1, 2]]).T),
+        nir.Affine(
+            weight=np.array([[2, 1], [-1, 1], [1, 2]]), bias=np.array([1, 5, 2])
+        ),
+        nir.Affine(
+            weight=np.array([[2, 1], [-1, 3], [1, 2]]).T, bias=np.array([-2, 3])
+        ),
+        nir.Output(shape=np.array([2])),
+    )
+    assert "input" in ir.nodes.keys()
+    assert "linear" in ir.nodes.keys()
+    assert "linear_1" in ir.nodes.keys()
+    assert "linear_2" in ir.nodes.keys()
+    assert "linear_3" in ir.nodes.keys()
+    assert "affine" in ir.nodes.keys()
+    assert "affine_1" in ir.nodes.keys()
+    assert "affine_2" in ir.nodes.keys()
+    assert "affine_3" in ir.nodes.keys()
+    assert "output" in ir.nodes.keys()
+    assert np.allclose(ir.nodes["input"].shape, [2])
+    assert np.allclose(ir.nodes["linear"].weight, np.array([[3, 1], [-1, 2], [1, 2]]))
+    assert np.allclose(
+        ir.nodes["linear_1"].weight, np.array([[3, 1], [-1, 4], [1, 2]]).T
+    )
+    assert np.allclose(ir.nodes["affine"].weight, np.array([[2, 1], [-1, 2], [1, 2]]))
+    assert np.allclose(ir.nodes["affine"].bias, np.array([1, 3, 2]))
+    assert np.allclose(
+        ir.nodes["affine_1"].weight, np.array([[2, 1], [-1, 4], [1, 2]]).T
+    )
+    assert np.allclose(ir.nodes["affine_1"].bias, np.array([-2, 2]))
+    assert np.allclose(ir.nodes["linear_2"].weight, np.array([[3, 1], [-1, 1], [1, 2]]))
+    assert np.allclose(
+        ir.nodes["linear_3"].weight, np.array([[3, 1], [-1, 3], [1, 2]]).T
+    )
+    assert np.allclose(ir.nodes["affine_2"].weight, np.array([[2, 1], [-1, 1], [1, 2]]))
+    assert np.allclose(ir.nodes["affine_2"].bias, np.array([1, 5, 2]))
+    assert np.allclose(
+        ir.nodes["affine_3"].weight, np.array([[2, 1], [-1, 3], [1, 2]]).T
+    )
+    assert np.allclose(ir.nodes["affine_3"].bias, np.array([-2, 3]))
+    assert np.allclose(ir.nodes["output"].shape, [2])
+    assert ir.edges == [
+        ("input", "linear"),
+        ("linear", "linear_1"),
+        ("linear_1", "affine"),
+        ("affine", "affine_1"),
+        ("affine_1", "linear_2"),
+        ("linear_2", "linear_3"),
+        ("linear_3", "affine_2"),
+        ("affine_2", "affine_3"),
+        ("affine_3", "output"),
+    ]
