@@ -3,7 +3,7 @@ root: index
 parts:
 - caption: Introduction
   chapters:
-  - file: intro
+  - file: what
     title: What is NIR?
   - file: about
     title: About NIR
