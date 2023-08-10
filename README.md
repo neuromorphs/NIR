@@ -1,13 +1,12 @@
 <picture>
-<source media="(prefers-color-scheme: dark)" srcset="docs/logo_dark.png">
-<img alt="NIR Logo" src="docs/logo_light.png">
+<source media="(prefers-color-scheme: dark)" srcset="https://github.com/neuromorphs/NIR/raw/main/docs/logo_dark.png">
+<img alt="NIR Logo" src="https://github.com/neuromorphs/NIR/raw/main/docs/logo_light.png">
 </picture>
 
 # NIR: Neuromorphic Intermediate Representation
 
 NIR provides a standard way to describe arbitrary **physical** networks.
-**NIR is currently supported by 9 simulators and hardware platforms**, allowing users to seamlessly move between any of these platforms.
-See 
+**NIR is currently supported by 6 simulators and 4 hardware platforms**, allowing users to seamlessly move between any of these platforms.
 
 Neuron models in NIR are defined as dynamical system equations, because time is an essential component of neuromorphic systems.
 
