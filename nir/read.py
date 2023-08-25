@@ -78,7 +78,7 @@ def read_node(node: typing.Any) -> nir.NIRNode:
             threshold=node["threshold"][()],
         )
     elif node["type"][()] == b"Project":
-        return nir.Project(
+        return nir.Projection(
             output_indices=node["output_indices"][()],
         )
     else:

@@ -71,13 +71,13 @@ def merge_and_split_single_output():
     c = nir.Affine(weight=[[1, 0], [0, 2], [1, 1]], bias=[1, 1])
     d = nir.LIF(tau=[10, 20], r=[1, 1], v_leak=[0, 0], v_threshold=[1, 2])
     branch_1 = nir.NIRGraph.from_list(c, d)
-    expand_1 = nir.Project(output_indices=[0, float("nan")])
+    expand_1 = nir.Projection(output_indices=[0, float("nan")])
 
     # Branch 2
     e = nir.Affine(weight=[[2, 4], [1, 0], [0, 1]], bias=[2, 1])
     f = nir.LIF(tau=[15, 5], r=[1, 1], v_leak=[0, 0], v_threshold=[1, 1])
     branch_2 = nir.NIRGraph.from_list([e, f])
-    expand_2 = nir.Project(output_indices=[float("nan"), 1])
+    expand_2 = nir.Projection(output_indices=[float("nan"), 1])
 
     # Junction
     # TODO: This should be a node that accepts two inputs
@@ -110,18 +110,18 @@ def merge_and_split_different_outputs():
     pre_split = nir.NIRGraph.from_list([a, b])
 
     # Branch 1 
-    reduce_1 = nir.Project(output_indices=[0])
+    reduce_1 = nir.Projection(output_indices=[0])
     c = nir.Affine(weight=[[1, 0], [0, 2], [1, 1]], bias=[1, 1])
     d = nir.LIF(tau=[10, 20], r=[1, 1], v_leak=[0, 0], v_threshold=[1, 2])
     branch_1 = nir.NIRGraph.from_list([c, d])
-    expand_1 = nir.Project(output_indices=[0, float("nan")])
+    expand_1 = nir.Projection(output_indices=[0, float("nan")])
 
     # Branch 2
-    reduce_2 = nir.Project(output_indices=[1])
+    reduce_2 = nir.Projection(output_indices=[1])
     e = nir.Affine(weight=[[2, 4], [1, 0], [0, 1]], bias=[2, 1])
     f = nir.LIF(tau=[15, 5], r=[1, 1], v_leak=[0, 0], v_threshold=[1, 1])
     branch_2 = nir.NIRGraph.from_list([e, f])
-    expand_2 = nir.Project(output_indices=[float("nan"), 1])
+    expand_2 = nir.Projection(output_indices=[float("nan"), 1])
 
     # Junction
     # TODO: This should be a node that accepts two inputs
@@ -160,8 +160,8 @@ def test_residual():
     d = nir.LIF(tau=[10, 20], r=[1, 1], v_leak=[0, 0], v_threshold=[1, 2])
 
     # Junction
-    expand_a = nir.Project(output_indices=[0, float("nan")])
-    expand_d = nir.Project(output_indices=[float("nan"), 1])
+    expand_a = nir.Projection(output_indices=[0, float("nan")])
+    expand_d = nir.Projection(output_indices=[float("nan"), 1])
     # TODO: This should be a node that accepts two inputs
     e = nir.Affine(weight=[[2, 4], [1, 0], [0, 1]], bias=[2, 1])
     f = nir.LIF(tau=[15, 5], r=[1, 1], v_leak=[0, 0], v_threshold=[1, 1])
@@ -193,19 +193,19 @@ def test_residual():
 def test_complex():
     a = nir.Affine(weight=[1, 2, 3], bias=[0, 0, 0])
     b = nir.LIF(tau=[10, 20, 30], r=[1, 1, 1], v_leak=[0, 0, 0], v_threshold=[1, 2, 3])
-    expand_b = nir.Project([0, float("nan")])
+    expand_b = nir.Projection([0, float("nan")])
     c = nir.LIF(tau=[5, 20, 1], r=[1, 1, 1], v_leak=[0, 0, 0], v_threshold=[1, 1, 1])
-    c_first = nir.Project([0])
-    c_second = nir.Project([1])
-    expand_c = nir.Project([float("nan"), 1])
+    c_first = nir.Projection([0])
+    c_second = nir.Projection([1])
+    expand_c = nir.Projection([float("nan"), 1])
     # TODO: This should be a node that accepts two inputs
     d = nir.Affine(
         weight=[[[1, 3], [2, 3], [1, 4]], [[2, 3], [1, 2], [1, 4]]],
         bias=[0, 0]
     )
-    expand_d = nir.Project([0, float("nan")])
+    expand_d = nir.Projection([0, float("nan")])
     e = nir.Affine(weight=[[1, 3], [2, 3], [1, 4]], bias=[0, 0])
-    expand_e = nir.Project([float("nan"), 1])
+    expand_e = nir.Projection([float("nan"), 1])
     # TODO: This should be a node that accepts two inputs
     f = nir.Affine(
         weight=[[[1, 3], [1, 4]], [[2, 3], [3, 4]]],

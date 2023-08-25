@@ -303,22 +303,22 @@ class Threshold(NIRNode):
 
 
 @dataclass
-class Project(NIRNode):
+class Projection(NIRNode):
     r"""Projects the input data to a different dimension.
 
     For instance:
 
-    Project(output_indices=np.array([np.nan, 0, np.nan, np.nan, 1]))
+    Projection(output_indices=np.array([np.nan, 0, np.nan, np.nan, 1]))
 
     (x, y) -> (0, x, 0, 0, y)
 
     Tuples of size one are considered individual values and not as tuples.
 
-    Project(output_indices=np.array([0]))
+    Projection(output_indices=np.array([0]))
 
     (x, y, z) -> x
 
-    Project(output_indices=np.array([np.nan, 0, np.nan, 0])
+    Projection(output_indices=np.array([np.nan, 0, np.nan, 0])
 
     x -> (0, x, 0, x)
     """

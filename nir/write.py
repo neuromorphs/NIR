@@ -95,7 +95,7 @@ def _convert_node(node: nir.NIRNode) -> dict:
         }
     elif isinstance(node, nir.Threshold):
         return {"type": "Threshold", "threshold": node.threshold}
-    elif isinstance(node, nir.Project):
+    elif isinstance(node, nir.Projection):
         return {"type": "Project", "output_indices": node.output_indices}
     else:
         raise ValueError(f"Unknown node type: {node}")
