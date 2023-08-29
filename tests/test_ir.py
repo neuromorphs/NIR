@@ -123,10 +123,10 @@ def test_project():
     ir = nir.NIRGraph(
         nodes={
             "in": nir.Input(np.array([4, 5, 2])),
-            "project_out": nir.Projection(
+            "project_out": nir.Braid(
                 output_indices=np.array([np.nan, 0, 0, np.nan, np.nan])
             ),
-            "project_in": nir.Projection(output_indices=np.array([1])),
+            "project_in": nir.Braid(output_indices=np.array([1])),
             "out": nir.Output(np.array([4, 5, 2])),
         },
         edges=[("in", "project_out"), ("project_in", "out")],

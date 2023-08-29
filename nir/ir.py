@@ -303,24 +303,29 @@ class Threshold(NIRNode):
 
 
 @dataclass
-class Projection(NIRNode):
-    r"""Projects the input data to a different dimension.
+class Braid(NIRNode):
+    r"""Braids the input signals (wires) by providing a mapping from input indices to output indices.
+    The mapping does not have to be 1:1 (bijective): 
+    it can ignore signals (terminal objects), or duplicate signals, but it cannot create new signals
+    (initial objects).
+    Note that we assume the input signals are ordered. That is, an input signal will have a 
+    set of inputs that are numbered from 0 to N-1, where N is the total number of inputs.
 
     For instance:
 
-    Projection(output_indices=np.array([np.nan, 0, np.nan, np.nan, 1]))
+    >>> Braid(output_indices=np.array([np.nan, 0, np.nan, np.nan, 1]))
+    >>> (x, y) -> (0, x, 0, 0, y)
 
-    (x, y) -> (0, x, 0, 0, y)
+    If the given mapping contains a single number, it is interpreted to take the first value of *any*-size input.
+    That is, tuples of size one are considered individual values and not as tuples.
 
-    Tuples of size one are considered individual values and not as tuples.
+    >>> Braid(output_indices=np.array([0]))
+    >>> (x, y, z) -> x
 
-    Projection(output_indices=np.array([0]))
+    We can also duplicate the same signal twice:
 
-    (x, y, z) -> x
-
-    Projection(output_indices=np.array([np.nan, 0, np.nan, 0])
-
-    x -> (0, x, 0, x)
+    >>> Braid(output_indices=np.array([np.nan, 0, np.nan, 0])
+    >>> x -> (0, x, 0, x)
     """
 
     output_indices: np.ndarray
