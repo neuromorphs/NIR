@@ -41,6 +41,8 @@ def _convert_node(node: nir.NIRNode) -> dict:
             "type": "Flatten",
             "start_dim": node.start_dim,
             "end_dim": node.end_dim,
+            "input_shape": node.input_shape,
+            "output_shape": node.output_shape,
         }
     elif isinstance(node, nir.I):
         return {"type": "I", "r": node.r}

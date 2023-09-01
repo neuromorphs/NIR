@@ -109,9 +109,14 @@ def test_linear():
 def test_flatten():
     ir = nir.NIRGraph(
         nodes={
-            "in": nir.Input(np.array([4, 5, 2])),
-            "flat": nir.Flatten(0),
-            "out": nir.Output(np.array([20, 2])),
+            "in": nir.Input(shape=np.array([4, 5, 2])),
+            "flat": nir.Flatten(
+                start_dim=0,
+                end_dim=0,
+                input_shape=np.array([4, 5, 2]),
+                output_shape=np.array([20, 2]),
+            ),
+            "out": nir.Output(shape=np.array([20, 2])),
         },
         edges=[("in", "flat"), ("flat", "out")],
     )

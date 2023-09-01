@@ -5,6 +5,8 @@ from dataclasses import dataclass
 import numpy as np
 
 Edges = typing.NewType("Edges", typing.List[typing.Tuple[str, str]])
+# shape is either simple array shape or dictionary mapping port name to array shape
+Shape = typing.NewType("Shape", typing.Union[np.ndarray, typing.Dict[str, np.ndarray]])
 
 
 @dataclass
@@ -26,6 +28,9 @@ class NIRGraph(NIRNode):
 
     nodes: typing.Dict[str, NIRNode]  # List of computational nodes
     edges: Edges
+
+    input_shape: typing.Optional[Shape] = None
+    output_shape: typing.Optional[Shape] = None
 
     @staticmethod
     def from_list(*nodes: NIRNode) -> "NIRGraph":
@@ -56,18 +61,51 @@ class NIRGraph(NIRNode):
             edges=edges,
         )
 
+    def __post_init__(self):
+        # if unspecified, set input and output shapes based on the graph's input and output nodes
+        if self.input_shape is None:
+            input_node_keys = [
+                k for k, node in self.nodes.items() if isinstance(node, Input)
+            ]
+            self.input_shape = (
+                {node_key: self.nodes[node_key].shape for node_key in input_node_keys}
+                if len(input_node_keys) > 0
+                else None
+            )
+        if self.output_shape is None:
+            output_node_keys = [
+                k for k, node in self.nodes.items() if isinstance(node, Output)
+            ]
+            self.output_shape = {
+                node_key: self.nodes[node_key].shape for node_key in output_node_keys
+            }
+
 
 @dataclass
 class Affine(NIRNode):
     r"""Affine transform that linearly maps and translates the input signal.
 
-    This is equivalent to the `Affine transformation <https://en.wikipedia.org/wiki/Affine_transformation>`_
+    This is equivalent to the
+    `Affine transformation <https://en.wikipedia.org/wiki/Affine_transformation>`_
+
+    Assumes a one-dimensional input vector of shape (N,).
 
     .. math::
         y(t) = W*x(t) + b
     """
     weight: np.ndarray  # Weight term
     bias: np.ndarray  # Bias term
+
+    input_shape: typing.Optional[Shape] = None
+    output_shape: typing.Optional[Shape] = None
+
+    def __post_init__(self):
+        # set input and output shape, if not set by user
+        if self.input_shape is None:
+            out_dim = 1 if len(self.weight.shape) == 1 else self.weight.shape[1]
+            self.input_shape = np.array([out_dim])
+        if self.output_shape is None:
+            self.output_shape = np.array([self.weight.shape[0]])
 
 
 @dataclass
@@ -81,6 +119,16 @@ class Conv1d(NIRNode):
     groups: int  # Groups
     bias: np.ndarray  # Bias C_out
 
+    input_shape: typing.Optional[Shape] = None
+    output_shape: typing.Optional[Shape] = None
+
+    def __post_init__(self):
+        # set input and output shape, if not set by user
+        if self.input_shape is None:
+            self.input_shape = np.array(self.weight.shape)[1:]
+        if self.output_shape is None:
+            self.output_shape = np.array(self.weight.shape)[[0, 2]]
+
 
 @dataclass
 class Conv2d(NIRNode):
@@ -93,6 +141,9 @@ class Conv2d(NIRNode):
     groups: int  # Groups
     bias: np.ndarray  # Bias C_out
 
+    input_shape: typing.Optional[Shape] = None
+    output_shape: typing.Optional[Shape] = None
+
     def __post_init__(self):
         if isinstance(self.stride, int):
             self.stride = (self.stride, self.stride)
@@ -100,6 +151,11 @@ class Conv2d(NIRNode):
             self.padding = (self.padding, self.padding)
         if isinstance(self.dilation, int):
             self.dilation = (self.dilation, self.dilation)
+        # set input and output shape, if not set by user
+        if self.input_shape is None:
+            self.input_shape = np.array(self.weight.shape)[1:]
+        if self.output_shape is None:
+            self.output_shape = np.array(self.weight.shape)[[0, 2, 3]]
 
 
 @dataclass
@@ -144,9 +200,14 @@ class CubaLIF(NIRNode):
     v_threshold: np.ndarray  # Firing threshold
     w_in: np.ndarray = 1.0  # Input current weight
 
+    input_shape: typing.Optional[Shape] = None
+    output_shape: typing.Optional[Shape] = None
+
     def __post_init__(self):
         # If w_in is a scalar, make it an array of same shape as v_threshold
         self.w_in = np.ones_like(self.v_threshold) * self.w_in
+        # set input and output shape, if not set by user
+        self.input_shape = self.output_shape = np.array(self.v_threshold.shape)
 
 
 @dataclass
@@ -161,6 +222,13 @@ class Delay(NIRNode):
 
     delay: np.ndarray  # Delay
 
+    input_shape: typing.Optional[Shape] = None
+    output_shape: typing.Optional[Shape] = None
+
+    def __post_init__(self):
+        # set input and output shape, if not set by user
+        self.input_shape = self.output_shape = np.array(self.delay.shape)
+
 
 @dataclass
 class Flatten(NIRNode):
@@ -171,6 +239,19 @@ class Flatten(NIRNode):
 
     start_dim: int = 1  # First dimension to flatten
     end_dim: int = -1  # Last dimension to flatten
+
+    input_shape: typing.Optional[Shape] = None
+    output_shape: typing.Optional[Shape] = None
+
+    def __post_init__(self):
+        # force shape annotation
+        if self.input_shape is None or self.output_shape is None:
+            raise ValueError(
+                "must provide input and output shape for flatten (cannot infer)"
+            )
+        # make sure input and output shape are valid
+        if np.prod(self.input_shape) != np.prod(self.output_shape):
+            raise ValueError("input and output shape must have same number of elements")
 
 
 @dataclass
@@ -184,6 +265,12 @@ class I(NIRNode):  # noqa: E742
     """
 
     r: np.ndarray
+
+    input_shape: typing.Optional[Shape] = None
+    output_shape: typing.Optional[Shape] = None
+
+    def __post_init__(self):
+        self.input_shape = self.output_shape = np.array(self.r.shape)
 
 
 @dataclass
@@ -211,6 +298,12 @@ class IF(NIRNode):
     r: np.ndarray  # Resistance
     v_threshold: np.ndarray  # Firing threshold
 
+    input_shape: typing.Optional[Shape] = None
+    output_shape: typing.Optional[Shape] = None
+
+    def __post_init__(self):
+        self.input_shape = self.output_shape = np.array(self.r.shape)
+
 
 @dataclass
 class Input(NIRNode):
@@ -220,6 +313,12 @@ class Input(NIRNode):
     """
 
     shape: np.ndarray  # Shape of input data
+
+    input_shape: typing.Optional[Shape] = None
+    output_shape: typing.Optional[Shape] = None
+
+    def __post_init__(self):
+        self.input_shape = self.output_shape = self.shape
 
 
 @dataclass
@@ -240,6 +339,12 @@ class LI(NIRNode):
     r: np.ndarray  # Resistance
     v_leak: np.ndarray  # Leak voltage
 
+    input_shape: typing.Optional[Shape] = None
+    output_shape: typing.Optional[Shape] = None
+
+    def __post_init__(self):
+        self.input_shape = self.output_shape = np.array(self.r.shape)
+
 
 @dataclass
 class Linear(NIRNode):
@@ -249,6 +354,17 @@ class Linear(NIRNode):
         y(t) = W*x(t)
     """
     weight: np.ndarray  # Weight term
+
+    input_shape: typing.Optional[Shape] = None
+    output_shape: typing.Optional[Shape] = None
+
+    def __post_init__(self):
+        # set input and output shape, if not set by user
+        if self.input_shape is None:
+            out_dim = 1 if len(self.weight.shape) == 1 else self.weight.shape[1]
+            self.input_shape = np.array([out_dim])
+        if self.output_shape is None:
+            self.output_shape = np.array([self.weight.shape[0]])
 
 
 @dataclass
@@ -282,6 +398,12 @@ class LIF(NIRNode):
     v_leak: np.ndarray  # Leak voltage
     v_threshold: np.ndarray  # Firing threshold
 
+    input_shape: typing.Optional[Shape] = None
+    output_shape: typing.Optional[Shape] = None
+
+    def __post_init__(self):
+        self.input_shape = self.output_shape = np.array(self.r.shape)
+
 
 @dataclass
 class Output(NIRNode):
@@ -291,6 +413,12 @@ class Output(NIRNode):
     """
 
     shape: int  # Size of output
+
+    input_shape: typing.Optional[Shape] = None
+    output_shape: typing.Optional[Shape] = None
+
+    def __post_init__(self):
+        self.input_shape = self.output_shape = self.shape
 
 
 @dataclass
@@ -305,6 +433,12 @@ class Scale(NIRNode):
     """
 
     scale: np.ndarray  # Scaling factor
+
+    input_shape: typing.Optional[Shape] = None
+    output_shape: typing.Optional[Shape] = None
+
+    def __post_init__(self):
+        self.input_shape = self.output_shape = np.array(self.scale.shape)
 
 
 @dataclass
@@ -321,3 +455,9 @@ class Threshold(NIRNode):
     """
 
     threshold: np.ndarray  # Firing threshold
+
+    input_shape: typing.Optional[Shape] = None
+    output_shape: typing.Optional[Shape] = None
+
+    def __post_init__(self):
+        self.input_shape = self.output_shape = np.array(self.threshold.shape)

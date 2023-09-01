@@ -40,7 +40,7 @@ def test_nested():
     i = np.array([1, 1])
     nested = nir.NIRGraph(
         nodes={
-            "a": nir.I(r=[1, 1]),
+            "a": nir.I(r=np.array([1, 1])),
             "b": nir.NIRGraph(
                 nodes={
                     "a": nir.Input(i),
@@ -172,7 +172,12 @@ def test_threshold():
 def test_flatten():
     ir = nir.NIRGraph.from_list(
         nir.Input(shape=np.array([2, 3])),
-        nir.Flatten(),
+        nir.Flatten(
+            start_dim=0,
+            end_dim=0,
+            input_shape=np.array([2, 3]),
+            output_shape=np.array([6]),
+        ),
         nir.Output(shape=np.array([6])),
     )
     factory_test_graph(ir)

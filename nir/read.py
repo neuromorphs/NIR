@@ -34,6 +34,8 @@ def read_node(node: typing.Any) -> nir.NIRNode:
         return nir.Flatten(
             start_dim=node["start_dim"][()],
             end_dim=node["end_dim"][()],
+            input_shape=node["input_shape"][()],
+            output_shape=node["output_shape"][()],
         )
     elif node["type"][()] == b"I":
         return nir.I(r=node["r"][()])
