@@ -1,6 +1,31 @@
 import numpy as np
 
 import nir
+from tests import *
+
+
+def mock_linear(*shape):
+    return nir.Linear(weight=np.random.randn(*shape).T)
+
+
+def mock_affine(*shape):
+    return nir.Affine(weight=np.random.randn(*shape).T, bias=np.random.randn(shape[1]))
+
+
+def mock_input(*shape):
+    return nir.Input(input_shape=np.array(shape))
+
+
+def mock_integrator(*shape):
+    return nir.I(r=np.random.randn(*shape))
+
+
+def mock_output(*shape):
+    return nir.Output(output_shape=np.array(shape))
+
+
+def mock_delay(*shape):
+    return nir.Delay(delay=np.random.randn(*shape))
 
 
 def test_has_version():
@@ -9,70 +34,68 @@ def test_has_version():
 
 
 def test_simple():
-    w = np.array([1, 2, 3])
-    b = np.array([4, 4, 4])
-    ir = nir.NIRGraph(nodes={"a": nir.Affine(weight=w, bias=b)}, edges=[("a", "a")])
-    assert np.allclose(ir.nodes["a"].weight, w)
-    assert np.allclose(ir.nodes["a"].bias, b)
+    l = mock_affine(4, 3)
+    ir = nir.NIRGraph(nodes={"a": l}, edges=[("a", "a")])
+    assert np.allclose(ir.nodes["a"].weight, l.weight)
+    assert np.allclose(ir.nodes["a"].bias, l.bias)
     assert ir.edges == [("a", "a")]
 
 
 def test_nested():
-    r = np.array([1, 1])
-    delay = np.array([2, 2])
-    w = np.array([1, 2])
-    b = np.array([4, 4])
+    i = mock_integrator(3)
+    d = mock_delay(3)
+    a = mock_affine(3, 3)
+
     nested = nir.NIRGraph(
         nodes={
-            "integrator": nir.I(r=r),
-            "delay": nir.Delay(delay),
+            "integrator": i,
+            "delay": d,
         },
         edges=[("integrator", "delay"), ("delay", "integrator")],
     )
     ir = nir.NIRGraph(
-        nodes={"affine": nir.Affine(weight=w, bias=b), "inner": nested},
+        nodes={"affine": a, "inner": nested},
         edges=[("affine", "inner")],
     )
-    assert np.allclose(ir.nodes["affine"].weight, w)
-    assert np.allclose(ir.nodes["affine"].bias, b)
-    assert np.allclose(ir.nodes["inner"].nodes["integrator"].r, r)
-    assert np.allclose(ir.nodes["inner"].nodes["delay"].delay, delay)
+    assert np.allclose(ir.nodes["affine"].weight, a.weight)
+    assert np.allclose(ir.nodes["affine"].bias, a.bias)
+    assert np.allclose(ir.nodes["inner"].nodes["integrator"].r, i.r)
+    assert np.allclose(ir.nodes["inner"].nodes["delay"].delay, d.delay)
     assert ir.nodes["inner"].edges == [("integrator", "delay"), ("delay", "integrator")]
 
 
 def test_simple_with_input_output():
-    w = np.array([1, 2, 3])
-    b = np.array([4, 4, 4])
+    a = mock_affine(3, 3)
     ir = nir.NIRGraph(
         nodes={
             "in": nir.Input(np.array([3])),
-            "w": nir.Affine(weight=w, bias=b),
+            "w": a,
             "out": nir.Output(np.array([3])),
         },
         edges=[("in", "w"), ("w", "out")],
     )
-    assert ir.nodes["in"].shape == [
+    assert ir.nodes["in"].input_shape == [
         3,
     ]
-    assert np.allclose(ir.nodes["w"].weight, w)
-    assert np.allclose(ir.nodes["w"].bias, b)
+    assert np.allclose(ir.nodes["w"].weight, a.weight)
+    assert np.allclose(ir.nodes["w"].bias, a.bias)
     assert ir.edges == [("in", "w"), ("w", "out")]
 
 
 def test_delay():
-    delay = np.array([1, 2, 3])
+    d = mock_delay(3)
     ir = nir.NIRGraph(
         nodes={
             "in": nir.Input(np.array([3])),
-            "d": nir.Delay(delay=delay),
+            "d": d,
             "out": nir.Output(np.array([3])),
         },
         edges=[("in", "d"), ("d", "out")],
     )
-    assert ir.nodes["in"].shape == [
+    assert ir.nodes["in"].input_shape == [
         3,
     ]
-    assert np.allclose(ir.nodes["d"].delay, delay)
+    assert np.allclose(ir.nodes["d"].delay, d.delay)
     assert ir.edges == [("in", "d"), ("d", "out")]
 
 
@@ -92,7 +115,7 @@ def test_threshold():
         },
         edges=[("in", "thr"), ("thr", "out")],
     )
-    assert ir.nodes["in"].shape == [
+    assert ir.nodes["in"].input_shape == [
         3,
     ]
     assert np.allclose(ir.nodes["thr"].threshold, threshold)
@@ -100,33 +123,31 @@ def test_threshold():
 
 
 def test_linear():
-    w = np.array([1, 2, 3])
-    ir = nir.NIRGraph(nodes={"a": nir.Linear(weight=w)}, edges=[("a", "a")])
-    assert np.allclose(ir.nodes["a"].weight, w)
+    l = mock_linear(3, 3)
+    ir = nir.NIRGraph(nodes={"a": l}, edges=[("a", "a")])
+    assert np.allclose(ir.nodes["a"].weight, l.weight)
     assert ir.edges == [("a", "a")]
 
 
 def test_flatten():
     ir = nir.NIRGraph(
         nodes={
-            "in": nir.Input(shape=np.array([4, 5, 2])),
+            "in": nir.Input(input_shape=np.array([4, 5, 2])),
             "flat": nir.Flatten(
                 start_dim=0,
                 end_dim=0,
                 input_shape=np.array([4, 5, 2]),
-                output_shape=np.array([20, 2]),
             ),
-            "out": nir.Output(shape=np.array([20, 2])),
+            "out": nir.Output(output_shape=np.array([20, 2])),
         },
         edges=[("in", "flat"), ("flat", "out")],
     )
-    assert np.allclose(ir.nodes["in"].shape, [4, 5, 2])
-    assert np.allclose(ir.nodes["out"].shape, [20, 2])
+    assert np.allclose(ir.nodes["in"].input_shape, [4, 5, 2])
+    assert np.allclose(ir.nodes["out"].input_shape, [20, 2])
 
 
 def test_from_list_naming():
     ir = nir.NIRGraph.from_list(
-        nir.Input(shape=np.array([2])),
         nir.Linear(weight=np.array([[3, 1], [-1, 2], [1, 2]])),
         nir.Linear(weight=np.array([[3, 1], [-1, 4], [1, 2]]).T),
         nir.Affine(
@@ -143,7 +164,6 @@ def test_from_list_naming():
         nir.Affine(
             weight=np.array([[2, 1], [-1, 3], [1, 2]]).T, bias=np.array([-2, 3])
         ),
-        nir.Output(shape=np.array([2])),
     )
     assert "input" in ir.nodes.keys()
     assert "linear" in ir.nodes.keys()
@@ -155,7 +175,7 @@ def test_from_list_naming():
     assert "affine_2" in ir.nodes.keys()
     assert "affine_3" in ir.nodes.keys()
     assert "output" in ir.nodes.keys()
-    assert np.allclose(ir.nodes["input"].shape, [2])
+    assert np.allclose(ir.nodes["input"].input_shape, [3, 2])
     assert np.allclose(ir.nodes["linear"].weight, np.array([[3, 1], [-1, 2], [1, 2]]))
     assert np.allclose(
         ir.nodes["linear_1"].weight, np.array([[3, 1], [-1, 4], [1, 2]]).T
@@ -176,7 +196,7 @@ def test_from_list_naming():
         ir.nodes["affine_3"].weight, np.array([[2, 1], [-1, 3], [1, 2]]).T
     )
     assert np.allclose(ir.nodes["affine_3"].bias, np.array([-2, 3]))
-    assert np.allclose(ir.nodes["output"].shape, [2])
+    assert np.allclose(ir.nodes["output"].input_shape, [2])
     assert ir.edges == [
         ("input", "linear"),
         ("linear", "linear_1"),
@@ -188,3 +208,39 @@ def test_from_list_naming():
         ("affine_2", "affine_3"),
         ("affine_3", "output"),
     ]
+
+
+def test_subgraph_merge():
+    """
+    ```mermaid
+    graph TD;
+    A --> B;
+    C --> D;
+    D --> E;
+    B --> E;
+    ```
+    """
+    g1 = nir.NIRGraph.from_list(mock_linear(2, 3), mock_linear(3, 2))
+    g2 = nir.NIRGraph.from_list(mock_linear(1, 3), mock_linear(3, 2))
+    end = mock_output(2)
+    g = nir.NIRGraph(
+        nodes={"L": g1, "R": g2, "E": end},
+        edges=[("L.output", "E.input"), ("R.output", "E.input")],
+    )
+    assert np.allclose(g.nodes["L"].nodes["linear"].input_shape, (3, 2))
+    assert np.allclose(g.nodes["L"].nodes["linear_1"].input_shape, (2, 3))
+    assert np.allclose(g.nodes["R"].nodes["linear"].input_shape, (3, 1))
+    assert np.allclose(g.nodes["R"].nodes["linear_1"].input_shape, (2, 3))
+    assert np.allclose(g.nodes["E"].input_shape,  (2,))
+    assert g.edges == [("L.output", "E.input"), ("R.output", "E.input")]
+    assert g.nodes["L"].edges == [
+        ("input", "linear"),
+        ("linear", "linear_1"),
+        ("linear_1", "output"),
+    ]
+    assert g.nodes["R"].edges == [
+        ("input", "linear"),
+        ("linear", "linear_1"),
+        ("linear_1", "output"),
+    ]
+

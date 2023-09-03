@@ -1,12 +1,15 @@
 import typing
 from collections import Counter
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 import numpy as np
 
-Edges = typing.NewType("Edges", typing.List[typing.Tuple[str, str]])
-# shape is either simple array shape or dictionary mapping port name to array shape
-Shape = typing.NewType("Shape", typing.Union[np.ndarray, typing.Dict[str, np.ndarray]])
+# Nodes are uniquely named computational units
+Nodes = typing.Dict[str, "NIRNode"]
+# Edges map one node id to another via the identity
+Edges = typing.List[typing.Tuple[str, str]]
+# Shape is a dict mapping strings to shapes
+Shape = typing.Dict[str, np.ndarray]
 
 
 @dataclass
@@ -17,6 +20,9 @@ class NIRNode:
     instantiated.
     """
 
+    input_shape: Shape = field(init=False, kw_only=True)
+    output_shape: Shape = field(init=False, kw_only=True)
+
 
 @dataclass
 class NIRGraph(NIRNode):
@@ -26,11 +32,8 @@ class NIRGraph(NIRNode):
     A graph of computational nodes and identity edges.
     """
 
-    nodes: typing.Dict[str, NIRNode]  # List of computational nodes
-    edges: Edges
-
-    input_shape: typing.Optional[Shape] = None
-    output_shape: typing.Optional[Shape] = None
+    nodes: Nodes  # List of computational nodes
+    edges: Edges  # List of edges between nodes
 
     @staticmethod
     def from_list(*nodes: NIRNode) -> "NIRGraph":
@@ -45,15 +48,17 @@ class NIRGraph(NIRNode):
             return name
 
         counts = Counter()
-        node_dict = {}
+        node_dict = {"input": Input(input_shape=nodes[0].input_shape)}
         edges = []
 
         for node in nodes:
             name = unique_node_name(node, counts)
             node_dict[name] = node
 
+        node_dict["output"] = Output(output_shape=nodes[-1].output_shape)
+
         names = list(node_dict)
-        for i in range(len(nodes) - 1):
+        for i in range(len(names) - 1):
             edges.append((names[i], names[i + 1]))
 
         return NIRGraph(
@@ -62,23 +67,20 @@ class NIRGraph(NIRNode):
         )
 
     def __post_init__(self):
-        # if unspecified, set input and output shapes based on the graph's input and output nodes
-        if self.input_shape is None:
-            input_node_keys = [
-                k for k, node in self.nodes.items() if isinstance(node, Input)
-            ]
-            self.input_shape = (
-                {node_key: self.nodes[node_key].shape for node_key in input_node_keys}
-                if len(input_node_keys) > 0
-                else None
-            )
-        if self.output_shape is None:
-            output_node_keys = [
-                k for k, node in self.nodes.items() if isinstance(node, Output)
-            ]
-            self.output_shape = {
-                node_key: self.nodes[node_key].shape for node_key in output_node_keys
-            }
+        input_node_keys = [
+            k for k, node in self.nodes.items() if isinstance(node, Input)
+        ]
+        self.input_shape = (
+            {node_key: self.nodes[node_key].input_shape for node_key in input_node_keys}
+            if len(input_node_keys) > 0
+            else None
+        )
+        output_node_keys = [
+            k for k, node in self.nodes.items() if isinstance(node, Output)
+        ]
+        self.output_shape = {
+            node_key: self.nodes[node_key].output_shape for node_key in output_node_keys
+        }
 
 
 @dataclass
@@ -96,16 +98,12 @@ class Affine(NIRNode):
     weight: np.ndarray  # Weight term
     bias: np.ndarray  # Bias term
 
-    input_shape: typing.Optional[Shape] = None
-    output_shape: typing.Optional[Shape] = None
-
     def __post_init__(self):
-        # set input and output shape, if not set by user
-        if self.input_shape is None:
-            out_dim = 1 if len(self.weight.shape) == 1 else self.weight.shape[1]
-            self.input_shape = np.array([out_dim])
-        if self.output_shape is None:
-            self.output_shape = np.array([self.weight.shape[0]])
+        assert len(self.weight.shape) >= 2, "Weight must be at least 2D"
+        self.input_shape = self.weight.shape[:-2] + tuple(
+            np.array(self.weight.shape[-2:]).T
+        )
+        self.output_shape = self.weight.shape[:-2] + (self.weight.shape[-2],)
 
 
 @dataclass
@@ -119,15 +117,9 @@ class Conv1d(NIRNode):
     groups: int  # Groups
     bias: np.ndarray  # Bias C_out
 
-    input_shape: typing.Optional[Shape] = None
-    output_shape: typing.Optional[Shape] = None
-
     def __post_init__(self):
-        # set input and output shape, if not set by user
-        if self.input_shape is None:
-            self.input_shape = np.array(self.weight.shape)[1:]
-        if self.output_shape is None:
-            self.output_shape = np.array(self.weight.shape)[[0, 2]]
+        self.input_shape = np.array(self.weight.shape)[1:]
+        self.output_shape = np.array(self.weight.shape)[[0, 2]]
 
 
 @dataclass
@@ -141,9 +133,6 @@ class Conv2d(NIRNode):
     groups: int  # Groups
     bias: np.ndarray  # Bias C_out
 
-    input_shape: typing.Optional[Shape] = None
-    output_shape: typing.Optional[Shape] = None
-
     def __post_init__(self):
         if isinstance(self.stride, int):
             self.stride = (self.stride, self.stride)
@@ -151,11 +140,8 @@ class Conv2d(NIRNode):
             self.padding = (self.padding, self.padding)
         if isinstance(self.dilation, int):
             self.dilation = (self.dilation, self.dilation)
-        # set input and output shape, if not set by user
-        if self.input_shape is None:
-            self.input_shape = np.array(self.weight.shape)[1:]
-        if self.output_shape is None:
-            self.output_shape = np.array(self.weight.shape)[[0, 2, 3]]
+        self.input_shape = np.array(self.weight.shape)[1:]
+        self.output_shape = np.array(self.weight.shape)[[0, 2, 3]]
 
 
 @dataclass
@@ -200,10 +186,14 @@ class CubaLIF(NIRNode):
     v_threshold: np.ndarray  # Firing threshold
     w_in: np.ndarray = 1.0  # Input current weight
 
-    input_shape: typing.Optional[Shape] = None
-    output_shape: typing.Optional[Shape] = None
-
     def __post_init__(self):
+        assert (
+            self.tau_syn.shape
+            == self.tau_mem.shape
+            == self.r.shape
+            == self.v_leak.shape
+            == self.v_threshold.shape
+        ), "All parameters must have the same shape"
         # If w_in is a scalar, make it an array of same shape as v_threshold
         self.w_in = np.ones_like(self.v_threshold) * self.w_in
         # set input and output shape, if not set by user
@@ -222,9 +212,6 @@ class Delay(NIRNode):
 
     delay: np.ndarray  # Delay
 
-    input_shape: typing.Optional[Shape] = None
-    output_shape: typing.Optional[Shape] = None
-
     def __post_init__(self):
         # set input and output shape, if not set by user
         self.input_shape = self.output_shape = np.array(self.delay.shape)
@@ -237,18 +224,20 @@ class Flatten(NIRNode):
     This node flattens its input tensor.
     """
 
+    # Shape of input tensor (overrrides input_shape from NIRNode to allow for non-keyword (positional) initialization)
+    input_shape: np.ndarray = field(kw_only=False)
     start_dim: int = 1  # First dimension to flatten
     end_dim: int = -1  # Last dimension to flatten
 
-    input_shape: typing.Optional[Shape] = None
-    output_shape: typing.Optional[Shape] = None
-
     def __post_init__(self):
-        # force shape annotation
-        if self.input_shape is None or self.output_shape is None:
-            raise ValueError(
-                "must provide input and output shape for flatten (cannot infer)"
-            )
+        concat = self.input_shape[self.start_dim : self.end_dim].prod()
+        self.output_shape = np.array(
+            [
+                *self.input_shape[: self.start_dim],
+                concat,
+                *self.input_shape[self.end_dim :],
+            ]
+        )
         # make sure input and output shape are valid
         if np.prod(self.input_shape) != np.prod(self.output_shape):
             raise ValueError("input and output shape must have same number of elements")
@@ -265,9 +254,6 @@ class I(NIRNode):  # noqa: E742
     """
 
     r: np.ndarray
-
-    input_shape: typing.Optional[Shape] = None
-    output_shape: typing.Optional[Shape] = None
 
     def __post_init__(self):
         self.input_shape = self.output_shape = np.array(self.r.shape)
@@ -298,10 +284,10 @@ class IF(NIRNode):
     r: np.ndarray  # Resistance
     v_threshold: np.ndarray  # Firing threshold
 
-    input_shape: typing.Optional[Shape] = None
-    output_shape: typing.Optional[Shape] = None
-
     def __post_init__(self):
+        assert (
+            self.r.shape == self.v_threshold.shape
+        ), "All parameters must have the same shape"
         self.input_shape = self.output_shape = np.array(self.r.shape)
 
 
@@ -312,13 +298,11 @@ class Input(NIRNode):
     This is a virtual node, which allows feeding in data into the graph.
     """
 
-    shape: np.ndarray  # Shape of input data
-
-    input_shape: typing.Optional[Shape] = None
-    output_shape: typing.Optional[Shape] = None
+    # Shape of incoming data (overrrides input_shape from NIRNode to allow for non-keyword (positional) initialization)
+    input_shape: np.ndarray = field(kw_only=False)
 
     def __post_init__(self):
-        self.input_shape = self.output_shape = self.shape
+        self.output_shape = self.input_shape
 
 
 @dataclass
@@ -339,10 +323,10 @@ class LI(NIRNode):
     r: np.ndarray  # Resistance
     v_leak: np.ndarray  # Leak voltage
 
-    input_shape: typing.Optional[Shape] = None
-    output_shape: typing.Optional[Shape] = None
-
     def __post_init__(self):
+        assert (
+            self.tau.shape == self.r.shape == self.v_leak.shape
+        ), "All parameters must have the same shape"
         self.input_shape = self.output_shape = np.array(self.r.shape)
 
 
@@ -355,16 +339,12 @@ class Linear(NIRNode):
     """
     weight: np.ndarray  # Weight term
 
-    input_shape: typing.Optional[Shape] = None
-    output_shape: typing.Optional[Shape] = None
-
     def __post_init__(self):
-        # set input and output shape, if not set by user
-        if self.input_shape is None:
-            out_dim = 1 if len(self.weight.shape) == 1 else self.weight.shape[1]
-            self.input_shape = np.array([out_dim])
-        if self.output_shape is None:
-            self.output_shape = np.array([self.weight.shape[0]])
+        assert len(self.weight.shape) >= 2, "Weight must be at least 2D"
+        self.input_shape = np.array(
+            self.weight.shape[:-2] + tuple(np.array(self.weight.shape[-2:]).T)
+        )
+        self.output_shape = self.weight.shape[:-2] + (self.weight.shape[-2], )
 
 
 @dataclass
@@ -398,10 +378,13 @@ class LIF(NIRNode):
     v_leak: np.ndarray  # Leak voltage
     v_threshold: np.ndarray  # Firing threshold
 
-    input_shape: typing.Optional[Shape] = None
-    output_shape: typing.Optional[Shape] = None
-
     def __post_init__(self):
+        assert (
+            self.tau.shape
+            == self.r.shape
+            == self.v_leak.shape
+            == self.v_threshold.shape
+        ), "All parameters must have the same shape"
         self.input_shape = self.output_shape = np.array(self.r.shape)
 
 
@@ -412,13 +395,11 @@ class Output(NIRNode):
     Defines an output of the graph.
     """
 
-    shape: int  # Size of output
-
-    input_shape: typing.Optional[Shape] = None
-    output_shape: typing.Optional[Shape] = None
+    # Shape of incoming data (overrrides input_shape from NIRNode to allow for non-keyword (positional) initialization)
+    output_shape: np.ndarray = field(kw_only=False)
 
     def __post_init__(self):
-        self.input_shape = self.output_shape = self.shape
+        self.input_shape = self.output_shape
 
 
 @dataclass
@@ -433,9 +414,6 @@ class Scale(NIRNode):
     """
 
     scale: np.ndarray  # Scaling factor
-
-    input_shape: typing.Optional[Shape] = None
-    output_shape: typing.Optional[Shape] = None
 
     def __post_init__(self):
         self.input_shape = self.output_shape = np.array(self.scale.shape)
@@ -455,9 +433,6 @@ class Threshold(NIRNode):
     """
 
     threshold: np.ndarray  # Firing threshold
-
-    input_shape: typing.Optional[Shape] = None
-    output_shape: typing.Optional[Shape] = None
 
     def __post_init__(self):
         self.input_shape = self.output_shape = np.array(self.threshold.shape)

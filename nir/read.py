@@ -35,14 +35,13 @@ def read_node(node: typing.Any) -> nir.NIRNode:
             start_dim=node["start_dim"][()],
             end_dim=node["end_dim"][()],
             input_shape=node["input_shape"][()],
-            output_shape=node["output_shape"][()],
         )
     elif node["type"][()] == b"I":
         return nir.I(r=node["r"][()])
     elif node["type"][()] == b"IF":
         return nir.IF(r=node["r"][()], v_threshold=node["v_threshold"][()])
     elif node["type"][()] == b"Input":
-        return nir.Input(shape=node["shape"][()])
+        return nir.Input(input_shape=node["shape"][()])
     elif node["type"][()] == b"LI":
         return nir.LI(
             tau=node["tau"][()],
@@ -72,7 +71,7 @@ def read_node(node: typing.Any) -> nir.NIRNode:
             edges=node["edges"].asstr()[()],
         )
     elif node["type"][()] == b"Output":
-        return nir.Output(shape=node["shape"][()])
+        return nir.Output(output_shape=node["shape"][()])
     elif node["type"][()] == b"Scale":
         return nir.Scale(scale=node["scale"][()])
     elif node["type"][()] == b"Threshold":

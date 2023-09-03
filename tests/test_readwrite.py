@@ -3,6 +3,7 @@ import tempfile
 import numpy as np
 
 import nir
+from tests import *
 
 
 def assert_equivalence(ir: nir.NIRGraph, ir2: nir.NIRGraph):
@@ -13,7 +14,7 @@ def assert_equivalence(ir: nir.NIRGraph, ir2: nir.NIRGraph):
             assert_equivalence(ir.nodes[ik], ir2.nodes[ik])
         else:
             for k, v in ir.nodes[ik].__dict__.items():
-                if isinstance(v, np.ndarray) or isinstance(v, list):
+                if isinstance(v, np.ndarray) or isinstance(v, list) or isinstance(v, tuple):
                     assert np.array_equal(v, getattr(ir2.nodes[ik], k))
                 else:
                     assert v == getattr(ir2.nodes[ik], k)
@@ -30,9 +31,7 @@ def factory_test_graph(ir: nir.NIRGraph):
 
 
 def test_simple():
-    w = np.array([1, 2, 3])
-    b = np.array([4, 4, 4])
-    ir = nir.NIRGraph(nodes={"a": nir.Affine(weight=w, bias=b)}, edges=[("a", "a")])
+    ir = nir.NIRGraph(nodes={"a": mock_affine(2, 2)}, edges=[("a", "a")])
     factory_test_graph(ir)
 
 
@@ -57,73 +56,61 @@ def test_nested():
 
 
 def test_integrator():
-    w = np.array([1, 2, 3])
-    b = np.array([4, 4, 4])
     r = np.array([1, 1, 1])
     ir = nir.NIRGraph(
-        nodes={"a": nir.Affine(weight=w, bias=b), "b": nir.I(r)},
+        nodes={"a": mock_affine(2, 2), "b": nir.I(r)},
         edges=[("a", "b")],
     )
     factory_test_graph(ir)
 
 
 def test_integrate_and_fire():
-    w = np.array([1, 2, 3])
-    b = np.array([4, 4, 4])
     r = np.array([1, 1, 1])
     v_threshold = np.array([1, 1, 1])
     ir = nir.NIRGraph(
-        nodes={"a": nir.Affine(weight=w, bias=b), "b": nir.IF(r, v_threshold)},
+        nodes={"a": mock_affine(2, 2), "b": nir.IF(r, v_threshold)},
         edges=[("a", "b")],
     )
     factory_test_graph(ir)
 
 
 def test_leaky_integrator():
-    w = np.array([1, 2, 3])
-    b = np.array([4, 4, 4])
     tau = np.array([1, 1, 1])
     r = np.array([1, 1, 1])
     v_leak = np.array([1, 1, 1])
 
-    ir = nir.NIRGraph.from_list(nir.Affine(weight=w, bias=b), nir.LI(tau, r, v_leak))
+    ir = nir.NIRGraph.from_list(mock_affine(2, 2), nir.LI(tau, r, v_leak))
     factory_test_graph(ir)
 
 
 def test_linear():
-    w = np.array([1, 2, 3])
-    b = np.array([4, 4, 4])
     tau = np.array([1, 1, 1])
     r = np.array([1, 1, 1])
     v_leak = np.array([1, 1, 1])
-    ir = nir.NIRGraph.from_list(nir.Affine(w, b), nir.LI(tau, r, v_leak))
+    ir = nir.NIRGraph.from_list(mock_affine(2, 2), nir.LI(tau, r, v_leak))
     factory_test_graph(ir)
 
 
 def test_leaky_integrator_and_fire():
-    w = np.array([1, 2, 3])
-    b = np.array([4, 4, 4])
     tau = np.array([1, 1, 1])
     r = np.array([1, 1, 1])
     v_leak = np.array([1, 1, 1])
     v_threshold = np.array([3, 3, 3])
     ir = nir.NIRGraph.from_list(
-        nir.Affine(w, b),
+        mock_affine(2, 2),
         nir.LIF(tau, r, v_leak, v_threshold),
     )
     factory_test_graph(ir)
 
 
 def test_current_based_leaky_integrator_and_fire():
-    w = np.array([1, 2, 3])
-    b = np.array([4, 4, 4])
     tau_mem = np.array([1, 1, 1])
     tau_syn = np.array([2, 2, 2])
     r = np.array([1, 1, 1])
     v_leak = np.array([1, 1, 1])
     v_threshold = np.array([3, 3, 3])
     ir = nir.NIRGraph.from_list(
-        nir.Affine(w, b),
+        mock_affine(2, 2),
         nir.CubaLIF(tau_mem, tau_syn, r, v_leak, v_threshold),
     )
     factory_test_graph(ir)
@@ -131,20 +118,18 @@ def test_current_based_leaky_integrator_and_fire():
 
 def test_scale():
     ir = nir.NIRGraph.from_list(
-        nir.Input(shape=np.array([3])),
+        nir.Input(input_shape=np.array([3])),
         nir.Scale(scale=np.array([1, 2, 3])),
-        nir.Output(shape=np.array([3])),
+        nir.Output(output_shape=np.array([3])),
     )
     factory_test_graph(ir)
 
 
 def test_simple_with_read_write():
-    w = np.array([1, 2, 3])
-    b = np.array([4, 4, 4])
     ir = nir.NIRGraph.from_list(
-        nir.Input(shape=np.array([3])),
-        nir.Affine(w, b),
-        nir.Output(shape=np.array([3])),
+        nir.Input(input_shape=np.array([3])),
+        mock_affine(2, 2),
+        nir.Output(output_shape=np.array([3])),
     )
     factory_test_graph(ir)
 
@@ -171,13 +156,12 @@ def test_threshold():
 
 def test_flatten():
     ir = nir.NIRGraph.from_list(
-        nir.Input(shape=np.array([2, 3])),
+        nir.Input(input_shape=np.array([2, 3])),
         nir.Flatten(
             start_dim=0,
             end_dim=0,
             input_shape=np.array([2, 3]),
-            output_shape=np.array([6]),
         ),
-        nir.Output(shape=np.array([6])),
+        nir.Output(output_shape=np.array([6])),
     )
     factory_test_graph(ir)
