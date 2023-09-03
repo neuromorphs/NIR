@@ -1,6 +1,8 @@
+import numpy as np
+
 import nir
 from .test_readwrite import factory_test_graph
-from tests import *
+from tests import mock_affine
 
 
 def test_sequential():

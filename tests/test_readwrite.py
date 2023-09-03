@@ -3,7 +3,7 @@ import tempfile
 import numpy as np
 
 import nir
-from tests import *
+from tests import mock_affine
 
 
 def assert_equivalence(ir: nir.NIRGraph, ir2: nir.NIRGraph):

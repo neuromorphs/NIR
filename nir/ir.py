@@ -40,7 +40,9 @@ class NIRGraph(NIRNode):
         """Create a sequential graph from a list of nodes by labelling them after
         indices."""
 
-        if len(nodes) > 0 and (isinstance(nodes[0], list) or isinstance(nodes[0], tuple)):
+        if len(nodes) > 0 and (
+            isinstance(nodes[0], list) or isinstance(nodes[0], tuple)
+        ):
             nodes = [*nodes[0]]
 
         def unique_node_name(node, counts):
@@ -227,7 +229,8 @@ class Flatten(NIRNode):
     This node flattens its input tensor.
     """
 
-    # Shape of input tensor (overrrides input_shape from NIRNode to allow for non-keyword (positional) initialization)
+    # Shape of input tensor (overrrides input_shape from
+    # NIRNode to allow for non-keyword (positional) initialization)
     input_shape: np.ndarray = field(kw_only=False)
     start_dim: int = 1  # First dimension to flatten
     end_dim: int = -1  # Last dimension to flatten
@@ -301,7 +304,8 @@ class Input(NIRNode):
     This is a virtual node, which allows feeding in data into the graph.
     """
 
-    # Shape of incoming data (overrrides input_shape from NIRNode to allow for non-keyword (positional) initialization)
+    # Shape of incoming data (overrrides input_shape from
+    # NIRNode to allow for non-keyword (positional) initialization)
     input_shape: np.ndarray = field(kw_only=False)
 
     def __post_init__(self):
@@ -398,7 +402,8 @@ class Output(NIRNode):
     Defines an output of the graph.
     """
 
-    # Shape of incoming data (overrrides input_shape from NIRNode to allow for non-keyword (positional) initialization)
+    # Shape of incoming data (overrrides input_shape from
+    # NIRNode to allow for non-keyword (positional) initialization)
     output_shape: np.ndarray = field(kw_only=False)
 
     def __post_init__(self):
