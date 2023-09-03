@@ -23,9 +23,19 @@ Each computational unit is a node in a static graph.
 Given 3 nodes $A$ which is a LIF node, $B$ which is a Linear node and $C$ which is another LIF node, we can define edges in the graph such as:
 
 ```mermaid
-graph RL;
+graph LR;
 A --> B;
 B --> C;
+```
+
+Or more complicated graphs, such as
+
+```mermaid
+graph LR;
+A --> A;
+A --> B;
+B --> C;
+A --> C;
 ```
 
 ## Format
