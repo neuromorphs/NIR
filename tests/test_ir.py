@@ -56,9 +56,7 @@ def test_simple_with_input_output():
         },
         edges=[("in", "w"), ("w", "out")],
     )
-    assert ir.nodes["in"].input_shape == [
-        3,
-    ]
+    assert ir.nodes["in"].input_shape == {"input": np.array([3])}
     assert np.allclose(ir.nodes["w"].weight, a.weight)
     assert np.allclose(ir.nodes["w"].bias, a.bias)
     assert ir.edges == [("in", "w"), ("w", "out")]
@@ -74,9 +72,7 @@ def test_delay():
         },
         edges=[("in", "d"), ("d", "out")],
     )
-    assert ir.nodes["in"].input_shape == [
-        3,
-    ]
+    assert ir.nodes["in"].input_shape == {"input": np.array([3])}
     assert np.allclose(ir.nodes["d"].delay, d.delay)
     assert ir.edges == [("in", "d"), ("d", "out")]
 
@@ -97,9 +93,7 @@ def test_threshold():
         },
         edges=[("in", "thr"), ("thr", "out")],
     )
-    assert ir.nodes["in"].input_shape == [
-        3,
-    ]
+    assert ir.nodes["in"].input_shape == {"input": np.array([3])}
     assert np.allclose(ir.nodes["thr"].threshold, threshold)
     assert ir.edges == [("in", "thr"), ("thr", "out")]
 
@@ -124,8 +118,8 @@ def test_flatten():
         },
         edges=[("in", "flat"), ("flat", "out")],
     )
-    assert np.allclose(ir.nodes["in"].input_shape, [4, 5, 2])
-    assert np.allclose(ir.nodes["out"].input_shape, [20, 2])
+    assert np.allclose(ir.nodes["in"].input_shape["input"], np.array([4, 5, 2]))
+    assert np.allclose(ir.nodes["out"].input_shape["input"], np.array([20, 2]))
 
 
 def test_from_list_naming():
@@ -157,7 +151,7 @@ def test_from_list_naming():
     assert "affine_2" in ir.nodes.keys()
     assert "affine_3" in ir.nodes.keys()
     assert "output" in ir.nodes.keys()
-    assert np.allclose(ir.nodes["input"].input_shape, [3, 2])
+    assert np.allclose(ir.nodes["input"].input_shape["input"], [3, 2])
     assert np.allclose(ir.nodes["linear"].weight, np.array([[3, 1], [-1, 2], [1, 2]]))
     assert np.allclose(
         ir.nodes["linear_1"].weight, np.array([[3, 1], [-1, 4], [1, 2]]).T
@@ -178,7 +172,7 @@ def test_from_list_naming():
         ir.nodes["affine_3"].weight, np.array([[2, 1], [-1, 3], [1, 2]]).T
     )
     assert np.allclose(ir.nodes["affine_3"].bias, np.array([-2, 3]))
-    assert np.allclose(ir.nodes["output"].input_shape, [2])
+    assert np.allclose(ir.nodes["output"].input_shape["input"], [2])
     assert ir.edges == [
         ("input", "linear"),
         ("linear", "linear_1"),
@@ -219,11 +213,11 @@ def test_subgraph_merge():
         nodes={"L": g1, "R": g2, "E": end},
         edges=[("L.output", "E.input"), ("R.output", "E.input")],
     )
-    assert np.allclose(g.nodes["L"].nodes["linear"].input_shape, (3, 2))
-    assert np.allclose(g.nodes["L"].nodes["linear_1"].input_shape, (2, 3))
-    assert np.allclose(g.nodes["R"].nodes["linear"].input_shape, (3, 1))
-    assert np.allclose(g.nodes["R"].nodes["linear_1"].input_shape, (2, 3))
-    assert np.allclose(g.nodes["E"].input_shape, (2,))
+    assert np.allclose(g.nodes["L"].nodes["linear"].input_shape["input"], (3, 2))
+    assert np.allclose(g.nodes["L"].nodes["linear_1"].input_shape["input"], (2, 3))
+    assert np.allclose(g.nodes["R"].nodes["linear"].input_shape["input"], (3, 1))
+    assert np.allclose(g.nodes["R"].nodes["linear_1"].input_shape["input"], (2, 3))
+    assert np.allclose(g.nodes["E"].input_shape["input"], (2,))
     assert g.edges == [("L.output", "E.input"), ("R.output", "E.input")]
     assert g.nodes["L"].edges == [
         ("input", "linear"),

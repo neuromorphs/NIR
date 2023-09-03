@@ -105,10 +105,12 @@ class Affine(NIRNode):
 
     def __post_init__(self):
         assert len(self.weight.shape) >= 2, "Weight must be at least 2D"
-        self.input_shape = self.weight.shape[:-2] + tuple(
-            np.array(self.weight.shape[-2:]).T
-        )
-        self.output_shape = self.weight.shape[:-2] + (self.weight.shape[-2],)
+        self.input_shape = {
+            "input": self.weight.shape[:-2] + tuple(np.array(self.weight.shape[-2:]).T)
+        }
+        self.output_shape = {
+            "output": self.weight.shape[:-2] + (self.weight.shape[-2],)
+        }
 
 
 @dataclass
@@ -123,8 +125,8 @@ class Conv1d(NIRNode):
     bias: np.ndarray  # Bias C_out
 
     def __post_init__(self):
-        self.input_shape = np.array(self.weight.shape)[1:]
-        self.output_shape = np.array(self.weight.shape)[[0, 2]]
+        self.input_shape = {"input": np.array(self.weight.shape)[1:]}
+        self.output_shape = {"output": np.array(self.weight.shape)[[0, 2]]}
 
 
 @dataclass
@@ -145,8 +147,8 @@ class Conv2d(NIRNode):
             self.padding = (self.padding, self.padding)
         if isinstance(self.dilation, int):
             self.dilation = (self.dilation, self.dilation)
-        self.input_shape = np.array(self.weight.shape)[1:]
-        self.output_shape = np.array(self.weight.shape)[[0, 2, 3]]
+        self.input_shape = {"input": np.array(self.weight.shape)[1:]}
+        self.output_shape = {"output": np.array(self.weight.shape)[[0, 2, 3]]}
 
 
 @dataclass
@@ -202,7 +204,8 @@ class CubaLIF(NIRNode):
         # If w_in is a scalar, make it an array of same shape as v_threshold
         self.w_in = np.ones_like(self.v_threshold) * self.w_in
         # set input and output shape, if not set by user
-        self.input_shape = self.output_shape = np.array(self.v_threshold.shape)
+        self.input_shape = {"input": np.array(self.v_threshold.shape)}
+        self.output_shape = {"output": np.array(self.v_threshold.shape)}
 
 
 @dataclass
@@ -219,7 +222,8 @@ class Delay(NIRNode):
 
     def __post_init__(self):
         # set input and output shape, if not set by user
-        self.input_shape = self.output_shape = np.array(self.delay.shape)
+        self.input_shape = {"input": np.array(self.delay.shape)}
+        self.output_shape = {"output": np.array(self.delay.shape)}
 
 
 @dataclass
@@ -231,21 +235,25 @@ class Flatten(NIRNode):
 
     # Shape of input tensor (overrrides input_shape from
     # NIRNode to allow for non-keyword (positional) initialization)
-    input_shape: np.ndarray = field(kw_only=False)
+    input_shape: Shape = field(kw_only=False)
     start_dim: int = 1  # First dimension to flatten
     end_dim: int = -1  # Last dimension to flatten
 
     def __post_init__(self):
-        concat = self.input_shape[self.start_dim : self.end_dim].prod()
-        self.output_shape = np.array(
-            [
-                *self.input_shape[: self.start_dim],
-                concat,
-                *self.input_shape[self.end_dim :],
-            ]
-        )
+        if isinstance(self.input_shape, np.ndarray):
+            self.input_shape = {"input": self.input_shape}
+        concat = self.input_shape["input"][self.start_dim : self.end_dim].prod()
+        self.output_shape = {
+            "output": np.array(
+                [
+                    *self.input_shape["input"][: self.start_dim],
+                    concat,
+                    *self.input_shape["input"][self.end_dim :],
+                ]
+            )
+        }
         # make sure input and output shape are valid
-        if np.prod(self.input_shape) != np.prod(self.output_shape):
+        if np.prod(self.input_shape["input"]) != np.prod(self.output_shape["output"]):
             raise ValueError("input and output shape must have same number of elements")
 
 
@@ -262,7 +270,8 @@ class I(NIRNode):  # noqa: E742
     r: np.ndarray
 
     def __post_init__(self):
-        self.input_shape = self.output_shape = np.array(self.r.shape)
+        self.input_shape = {"input": np.array(self.r.shape)}
+        self.output_shape = {"output": np.array(self.r.shape)}
 
 
 @dataclass
@@ -294,7 +303,8 @@ class IF(NIRNode):
         assert (
             self.r.shape == self.v_threshold.shape
         ), "All parameters must have the same shape"
-        self.input_shape = self.output_shape = np.array(self.r.shape)
+        self.input_shape = {"input": np.array(self.r.shape)}
+        self.output_shape = {"output": np.array(self.r.shape)}
 
 
 @dataclass
@@ -306,10 +316,12 @@ class Input(NIRNode):
 
     # Shape of incoming data (overrrides input_shape from
     # NIRNode to allow for non-keyword (positional) initialization)
-    input_shape: np.ndarray = field(kw_only=False)
+    input_shape: Shape = field(kw_only=False)
 
     def __post_init__(self):
-        self.output_shape = self.input_shape
+        if isinstance(self.input_shape, np.ndarray):
+            self.input_shape = {"input": self.input_shape}
+        self.output_shape = {"output": self.input_shape["input"]}
 
 
 @dataclass
@@ -334,7 +346,8 @@ class LI(NIRNode):
         assert (
             self.tau.shape == self.r.shape == self.v_leak.shape
         ), "All parameters must have the same shape"
-        self.input_shape = self.output_shape = np.array(self.r.shape)
+        self.input_shape = {"input": np.array(self.r.shape)}
+        self.output_shape = {"output": np.array(self.r.shape)}
 
 
 @dataclass
@@ -348,10 +361,14 @@ class Linear(NIRNode):
 
     def __post_init__(self):
         assert len(self.weight.shape) >= 2, "Weight must be at least 2D"
-        self.input_shape = np.array(
-            self.weight.shape[:-2] + tuple(np.array(self.weight.shape[-2:]).T)
-        )
-        self.output_shape = self.weight.shape[:-2] + (self.weight.shape[-2],)
+        self.input_shape = {
+            "input": np.array(
+                self.weight.shape[:-2] + tuple(np.array(self.weight.shape[-2:]).T)
+            )
+        }
+        self.output_shape = {
+            "output": self.weight.shape[:-2] + (self.weight.shape[-2],)
+        }
 
 
 @dataclass
@@ -392,7 +409,8 @@ class LIF(NIRNode):
             == self.v_leak.shape
             == self.v_threshold.shape
         ), "All parameters must have the same shape"
-        self.input_shape = self.output_shape = np.array(self.r.shape)
+        self.input_shape = {"input": np.array(self.r.shape)}
+        self.output_shape = {"output": np.array(self.r.shape)}
 
 
 @dataclass
@@ -404,10 +422,12 @@ class Output(NIRNode):
 
     # Shape of incoming data (overrrides input_shape from
     # NIRNode to allow for non-keyword (positional) initialization)
-    output_shape: np.ndarray = field(kw_only=False)
+    output_shape: Shape = field(kw_only=False)
 
     def __post_init__(self):
-        self.input_shape = self.output_shape
+        if isinstance(self.output_shape, np.ndarray):
+            self.output_shape = {"output": self.output_shape}
+        self.input_shape = {"input": self.output_shape["output"]}
 
 
 @dataclass
@@ -424,7 +444,8 @@ class Scale(NIRNode):
     scale: np.ndarray  # Scaling factor
 
     def __post_init__(self):
-        self.input_shape = self.output_shape = np.array(self.scale.shape)
+        self.input_shape = {"input": np.array(self.scale.shape)}
+        self.output_shape = {"output": np.array(self.scale.shape)}
 
 
 @dataclass
@@ -443,4 +464,5 @@ class Threshold(NIRNode):
     threshold: np.ndarray  # Firing threshold
 
     def __post_init__(self):
-        self.input_shape = self.output_shape = np.array(self.threshold.shape)
+        self.input_shape = {"input": np.array(self.threshold.shape)}
+        self.output_shape = {"output": np.array(self.threshold.shape)}

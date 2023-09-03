@@ -20,6 +20,10 @@ def assert_equivalence(ir: nir.NIRGraph, ir2: nir.NIRGraph):
                     or isinstance(v, tuple)
                 ):
                     assert np.array_equal(v, getattr(ir2.nodes[ik], k))
+                elif isinstance(v, dict):
+                    d = getattr(ir2.nodes[ik], k)
+                    for a, b in d.items():
+                        assert np.array_equal(v[a], b)
                 else:
                     assert v == getattr(ir2.nodes[ik], k)
     for i, _ in enumerate(ir.edges):
