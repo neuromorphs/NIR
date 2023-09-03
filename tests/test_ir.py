@@ -210,6 +210,16 @@ def test_from_list_naming():
     ]
 
 
+def test_from_list_tuple_or_list():
+    nodes = [mock_affine(2, 3), mock_delay(1)]
+    assert len(nir.NIRGraph.from_list(*nodes).nodes) == 4
+    assert len(nir.NIRGraph.from_list(*nodes).edges) == 3
+    assert len(nir.NIRGraph.from_list(tuple(nodes)).nodes) == 4
+    assert len(nir.NIRGraph.from_list(tuple(nodes)).nodes) == 4
+    assert len(nir.NIRGraph.from_list(nodes[0], nodes[1]).edges) == 3
+    assert len(nir.NIRGraph.from_list(nodes[0], nodes[1]).edges) == 3
+
+
 def test_subgraph_merge():
     """
     ```mermaid
@@ -231,7 +241,7 @@ def test_subgraph_merge():
     assert np.allclose(g.nodes["L"].nodes["linear_1"].input_shape, (2, 3))
     assert np.allclose(g.nodes["R"].nodes["linear"].input_shape, (3, 1))
     assert np.allclose(g.nodes["R"].nodes["linear_1"].input_shape, (2, 3))
-    assert np.allclose(g.nodes["E"].input_shape,  (2,))
+    assert np.allclose(g.nodes["E"].input_shape, (2,))
     assert g.edges == [("L.output", "E.input"), ("R.output", "E.input")]
     assert g.nodes["L"].edges == [
         ("input", "linear"),
@@ -243,4 +253,3 @@ def test_subgraph_merge():
         ("linear", "linear_1"),
         ("linear_1", "output"),
     ]
-

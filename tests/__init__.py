@@ -2,6 +2,7 @@ import numpy as np
 
 import nir
 
+
 def mock_linear(*shape):
     return nir.Linear(weight=np.random.randn(*shape).T)
 
@@ -24,4 +25,3 @@ def mock_output(*shape):
 
 def mock_delay(*shape):
     return nir.Delay(delay=np.random.randn(*shape))
-

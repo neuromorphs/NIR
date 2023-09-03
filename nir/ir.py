@@ -40,6 +40,9 @@ class NIRGraph(NIRNode):
         """Create a sequential graph from a list of nodes by labelling them after
         indices."""
 
+        if len(nodes) > 0 and (isinstance(nodes[0], list) or isinstance(nodes[0], tuple)):
+            nodes = [*nodes[0]]
+
         def unique_node_name(node, counts):
             basename = node.__class__.__name__.lower()
             id = counts[basename]
@@ -344,7 +347,7 @@ class Linear(NIRNode):
         self.input_shape = np.array(
             self.weight.shape[:-2] + tuple(np.array(self.weight.shape[-2:]).T)
         )
-        self.output_shape = self.weight.shape[:-2] + (self.weight.shape[-2], )
+        self.output_shape = self.weight.shape[:-2] + (self.weight.shape[-2],)
 
 
 @dataclass
