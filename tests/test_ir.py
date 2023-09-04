@@ -112,7 +112,9 @@ def test_flatten():
             "flat": nir.Flatten(
                 start_dim=0,
                 end_dim=0,
-                input_shape=np.array([4, 5, 2]),
+                input_shape={
+                    'input': np.array([4, 5, 2])
+                }
             ),
             "out": nir.Output(output_shape=np.array([20, 2])),
         },
@@ -151,7 +153,7 @@ def test_from_list_naming():
     assert "affine_2" in ir.nodes.keys()
     assert "affine_3" in ir.nodes.keys()
     assert "output" in ir.nodes.keys()
-    assert np.allclose(ir.nodes["input"].input_shape["input"], [3, 2])
+    assert np.allclose(ir.nodes["input"].input_shape["input"], [2])
     assert np.allclose(ir.nodes["linear"].weight, np.array([[3, 1], [-1, 2], [1, 2]]))
     assert np.allclose(
         ir.nodes["linear_1"].weight, np.array([[3, 1], [-1, 4], [1, 2]]).T
@@ -172,6 +174,7 @@ def test_from_list_naming():
         ir.nodes["affine_3"].weight, np.array([[2, 1], [-1, 3], [1, 2]]).T
     )
     assert np.allclose(ir.nodes["affine_3"].bias, np.array([-2, 3]))
+    print(ir.nodes['output'].input_shape['input'])
     assert np.allclose(ir.nodes["output"].input_shape["input"], [2])
     assert ir.edges == [
         ("input", "linear"),
@@ -213,11 +216,11 @@ def test_subgraph_merge():
         nodes={"L": g1, "R": g2, "E": end},
         edges=[("L.output", "E.input"), ("R.output", "E.input")],
     )
-    assert np.allclose(g.nodes["L"].nodes["linear"].input_shape["input"], (3, 2))
-    assert np.allclose(g.nodes["L"].nodes["linear_1"].input_shape["input"], (2, 3))
-    assert np.allclose(g.nodes["R"].nodes["linear"].input_shape["input"], (3, 1))
-    assert np.allclose(g.nodes["R"].nodes["linear_1"].input_shape["input"], (2, 3))
-    assert np.allclose(g.nodes["E"].input_shape["input"], (2,))
+    assert np.allclose(g.nodes["L"].nodes["linear"].input_shape["input"], [2])
+    assert np.allclose(g.nodes["L"].nodes["linear_1"].input_shape["input"], [3])
+    assert np.allclose(g.nodes["R"].nodes["linear"].input_shape["input"], [1])
+    assert np.allclose(g.nodes["R"].nodes["linear_1"].input_shape["input"], [3])
+    assert np.allclose(g.nodes["E"].input_shape["input"], [2])
     assert g.edges == [("L.output", "E.input"), ("R.output", "E.input")]
     assert g.nodes["L"].edges == [
         ("input", "linear"),

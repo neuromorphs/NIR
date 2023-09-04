@@ -168,7 +168,7 @@ def test_flatten():
         nir.Flatten(
             start_dim=0,
             end_dim=0,
-            input_shape=np.array([2, 3]),
+            input_shape={'input': np.array([2, 3])},
         ),
         nir.Output(output_shape=np.array([6])),
     )
