@@ -15,15 +15,28 @@ The goal of NIR is to provide a common format that different neuromorphic framew
 ## Computational primitives
 > Read more about in our [documentation about NIR primitives](https://nnir.readthedocs.io/en/latest/primitives.html)
 
-On top of popular primitives such as convolutional or fully connected/linear computations, we define additional compuational primitives that are specific to neuromorphic computing and hardware implementations thereof. Computational units that are not specifically neuromorphic take inspiration from the Pytorch ecosystem in terms of naming and parameters (such as Conv2d that uses groups/strides).
+On top of popular primitives such as convolutional or fully connected/linear computations, we define additional compuational primitives that are specific to neuromorphic computing and hardware implementations thereof. 
+Computational units that are not specifically neuromorphic take inspiration from the Pytorch ecosystem in terms of naming and parameters (such as Conv2d that uses groups/strides).
 
 ## Connectivity 
-Each computational unit is a node in a static graph. Given 3 nodes $A$ which is a LIF node, $B$ which is a Linear node and $C$ which is another LIF node, we can define edges in the graph such as:
+Each computational unit is a node in a static graph.
+Given 3 nodes $A$ which is a LIF node, $B$ which is a Linear node and $C$ which is another LIF node, we can define edges in the graph such as:
 
-$$
-A \rightarrow B \\
-B \rightarrow C
-$$
+```mermaid
+graph LR;
+A --> B;
+B --> C;
+```
+
+Or more complicated graphs, such as
+
+```mermaid
+graph LR;
+A --> A;
+A --> B;
+B --> C;
+A --> C;
+```
 
 ## Format
 The intermediate represenation can be stored as hdf5 file, which benefits from compression. 
