@@ -20,8 +20,9 @@ class NIRNode:
     instantiated.
     """
 
-    input_shape: Shape = field(init=False, kw_only=True)
-    output_shape: Shape = field(init=False, kw_only=True)
+    # Note: Adding input/output shapes as follows is ideal, but requires Python 3.10
+    # input_shape: Shape = field(init=False, kw_only=True)
+    # output_shape: Shape = field(init=False, kw_only=True)
 
 
 @dataclass
@@ -111,9 +112,7 @@ class Affine(NIRNode):
             )
         }
         self.output_shape = {
-            "output": np.array(
-                self.weight.shape[:-2] + (self.weight.shape[-2],)
-            )
+            "output": np.array(self.weight.shape[:-2] + (self.weight.shape[-2],))
         }
 
 
@@ -207,7 +206,6 @@ class CubaLIF(NIRNode):
         ), "All parameters must have the same shape"
         # If w_in is a scalar, make it an array of same shape as v_threshold
         self.w_in = np.ones_like(self.v_threshold) * self.w_in
-        # set input and output shape, if not set by user
         self.input_shape = {"input": np.array(self.v_threshold.shape)}
         self.output_shape = {"output": np.array(self.v_threshold.shape)}
 
@@ -245,16 +243,18 @@ class Flatten(NIRNode):
     end_dim: int = -1  # Last dimension to flatten
 
     def __post_init__(self):
-        assert list(self.input_shape.keys()) == ["input"], "Flatten must have one input: `input`"
+        assert list(self.input_shape.keys()) == [
+            "input"
+        ], "Flatten must have one input: `input`"
         if isinstance(self.input_shape, np.ndarray):
             self.input_shape = {"input": self.input_shape}
-        concat = self.input_shape["input"][self.start_dim:self.end_dim].prod()
+        concat = self.input_shape["input"][self.start_dim : self.end_dim].prod()
         self.output_shape = {
             "output": np.array(
                 [
-                    *self.input_shape["input"][:self.start_dim],
+                    *self.input_shape["input"][: self.start_dim],
                     concat,
-                    *self.input_shape["input"][self.end_dim:],
+                    *self.input_shape["input"][self.end_dim :],
                 ]
             )
         }

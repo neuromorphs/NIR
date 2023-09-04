@@ -110,11 +110,7 @@ def test_flatten():
         nodes={
             "in": nir.Input(input_shape=np.array([4, 5, 2])),
             "flat": nir.Flatten(
-                start_dim=0,
-                end_dim=0,
-                input_shape={
-                    'input': np.array([4, 5, 2])
-                }
+                start_dim=0, end_dim=0, input_shape={"input": np.array([4, 5, 2])}
             ),
             "out": nir.Output(output_shape=np.array([20, 2])),
         },
@@ -174,7 +170,7 @@ def test_from_list_naming():
         ir.nodes["affine_3"].weight, np.array([[2, 1], [-1, 3], [1, 2]]).T
     )
     assert np.allclose(ir.nodes["affine_3"].bias, np.array([-2, 3]))
-    print(ir.nodes['output'].input_shape['input'])
+    print(ir.nodes["output"].input_shape["input"])
     assert np.allclose(ir.nodes["output"].input_shape["input"], [2])
     assert ir.edges == [
         ("input", "linear"),
