@@ -1,6 +1,6 @@
 import typing
 from collections import Counter
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 
 import numpy as np
 
@@ -238,7 +238,7 @@ class Flatten(NIRNode):
 
     # Shape of input tensor (overrrides input_shape from
     # NIRNode to allow for non-keyword (positional) initialization)
-    input_shape: Shape = field(kw_only=False)
+    input_shape: Shape
     start_dim: int = 1  # First dimension to flatten
     end_dim: int = -1  # Last dimension to flatten
 
@@ -322,7 +322,7 @@ class Input(NIRNode):
 
     # Shape of incoming data (overrrides input_shape from
     # NIRNode to allow for non-keyword (positional) initialization)
-    input_shape: Shape = field(kw_only=False)
+    input_shape: Shape
 
     def __post_init__(self):
         if isinstance(self.input_shape, np.ndarray):
@@ -428,7 +428,7 @@ class Output(NIRNode):
 
     # Shape of incoming data (overrrides input_shape from
     # NIRNode to allow for non-keyword (positional) initialization)
-    output_shape: Shape = field(kw_only=False)
+    output_shape: Shape
 
     def __post_init__(self):
         if isinstance(self.output_shape, np.ndarray):
