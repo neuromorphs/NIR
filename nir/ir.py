@@ -106,7 +106,7 @@ class Affine(NIRNode):
     def __post_init__(self):
         assert len(self.weight.shape) >= 2, "Weight must be at least 2D"
         self.input_shape = {
-            "input": self.weight.shape[:-2] + tuple(np.array(self.weight.shape[-2:]).T)
+            "input": self.weight.shape[:-2] + tuple(np.array(self.weight.shape[-1:]).T)
         }
         self.output_shape = {
             "output": self.weight.shape[:-2] + (self.weight.shape[-2],)
@@ -240,15 +240,17 @@ class Flatten(NIRNode):
     end_dim: int = -1  # Last dimension to flatten
 
     def __post_init__(self):
+        assert len(self.input_shape.keys()) == 1, "Flatten only supports one input"
+        input_key = list(self.input_shape.keys())[0]
         if isinstance(self.input_shape, np.ndarray):
-            self.input_shape = {"input": self.input_shape}
-        concat = self.input_shape["input"][self.start_dim : self.end_dim].prod()
+            self.input_shape = {input_key: self.input_shape}
+        concat = self.input_shape[input_key][self.start_dim:self.end_dim].prod()
         self.output_shape = {
             "output": np.array(
                 [
-                    *self.input_shape["input"][: self.start_dim],
+                    *self.input_shape[input_key][:self.start_dim],
                     concat,
-                    *self.input_shape["input"][self.end_dim :],
+                    *self.input_shape[input_key][self.end_dim:],
                 ]
             )
         }
@@ -363,7 +365,7 @@ class Linear(NIRNode):
         assert len(self.weight.shape) >= 2, "Weight must be at least 2D"
         self.input_shape = {
             "input": np.array(
-                self.weight.shape[:-2] + tuple(np.array(self.weight.shape[-2:]).T)
+                self.weight.shape[:-2] + tuple(np.array(self.weight.shape[-1:]).T)
             )
         }
         self.output_shape = {
