@@ -379,9 +379,9 @@ def test_subgraph_multiple_input_output():
     )
 
     # Supgraph
-    outer = nir.NIRGraph(
+    nir.NIRGraph(
         nodes={"a": a, "g": g, "d": d},
-        edges=[("a", "g.bi"), ("a", "g.ci"), ("g.bo", "d"), ("g.co", "d")]
+        edges=[("a", "g.bi"), ("a", "g.ci"), ("g.bo", "d"), ("g.co", "d")],
     )
 
     # TODO: Add type checking...

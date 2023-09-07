@@ -379,9 +379,7 @@ class Linear(NIRNode):
                 self.weight.shape[:-2] + tuple(np.array(self.weight.shape[-1:]).T)
             )
         }
-        self.output_type = {
-            "output": self.weight.shape[:-2] + (self.weight.shape[-2],)
-        }
+        self.output_type = {"output": self.weight.shape[:-2] + (self.weight.shape[-2],)}
 
 
 @dataclass
