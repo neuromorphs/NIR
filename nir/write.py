@@ -41,7 +41,7 @@ def _convert_node(node: nir.NIRNode) -> dict:
             "type": "Flatten",
             "start_dim": node.start_dim,
             "end_dim": node.end_dim,
-            "input_shape": node.input_shape["input"],
+            "input_type": node.input_type["input"],
         }
     elif isinstance(node, nir.I):
         return {"type": "I", "r": node.r}
@@ -52,7 +52,7 @@ def _convert_node(node: nir.NIRNode) -> dict:
             "v_threshold": node.v_threshold,
         }
     elif isinstance(node, nir.Input):
-        return {"type": "Input", "shape": node.input_shape["input"]}
+        return {"type": "Input", "shape": node.input_type["input"]}
     elif isinstance(node, nir.LI):
         return {
             "type": "LI",
@@ -86,7 +86,7 @@ def _convert_node(node: nir.NIRNode) -> dict:
             "edges": node.edges,
         }
     elif isinstance(node, nir.Output):
-        return {"type": "Output", "shape": node.output_shape["output"]}
+        return {"type": "Output", "shape": node.output_type["output"]}
     elif isinstance(node, nir.Scale):
         return {"type": "Scale", "scale": node.scale}
     elif isinstance(node, nir.Threshold):

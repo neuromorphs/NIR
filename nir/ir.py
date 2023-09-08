@@ -9,10 +9,11 @@ import numpy as np
 Nodes = typing.Dict[str, "NIRNode"]
 # Edges map one node id to another via the identity
 Edges = typing.List[typing.Tuple[str, str]]
-# Shape is a dict mapping strings to shapes
-Shape = typing.Dict[str, np.ndarray]
+# Types is a dict mapping strings to tensor shapes
+Types = typing.Dict[str, np.ndarray]
 
-def _parse_shape_argument(x: Shape, key: str):
+
+def _parse_shape_argument(x: Types, key: str):
     if isinstance(x, np.ndarray):
         return {key: x}
     elif isinstance(x, Sequence):
@@ -22,6 +23,7 @@ def _parse_shape_argument(x: Shape, key: str):
     else:
         raise ValueError("Unknown shape argument", x)
 
+
 @dataclass
 class NIRNode:
     """Base superclass of Neural Intermediate Representation Unit (NIR).
@@ -30,9 +32,9 @@ class NIRNode:
     instantiated.
     """
 
-    # Note: Adding input/output shapes as follows is ideal, but requires Python 3.10
-    # input_shape: Shape = field(init=False, kw_only=True)
-    # output_shape: Shape = field(init=False, kw_only=True)
+    # Note: Adding input/output types as follows is ideal, but requires Python 3.10
+    # input_type: Types = field(init=False, kw_only=True)
+    # output_type: Types = field(init=False, kw_only=True)
 
 
 @dataclass
@@ -64,14 +66,14 @@ class NIRGraph(NIRNode):
             return name
 
         counts = Counter()
-        node_dict = {"input": Input(input_shape=nodes[0].input_shape)}
+        node_dict = {"input": Input(input_type=nodes[0].input_type)}
         edges = []
 
         for node in nodes:
             name = unique_node_name(node, counts)
             node_dict[name] = node
 
-        node_dict["output"] = Output(output_shape=nodes[-1].output_shape)
+        node_dict["output"] = Output(output_type=nodes[-1].output_type)
 
         names = list(node_dict)
         for i in range(len(names) - 1):
@@ -86,16 +88,16 @@ class NIRGraph(NIRNode):
         input_node_keys = [
             k for k, node in self.nodes.items() if isinstance(node, Input)
         ]
-        self.input_shape = (
-            {node_key: self.nodes[node_key].input_shape for node_key in input_node_keys}
+        self.input_type = (
+            {node_key: self.nodes[node_key].input_type for node_key in input_node_keys}
             if len(input_node_keys) > 0
             else None
         )
         output_node_keys = [
             k for k, node in self.nodes.items() if isinstance(node, Output)
         ]
-        self.output_shape = {
-            node_key: self.nodes[node_key].output_shape for node_key in output_node_keys
+        self.output_type = {
+            node_key: self.nodes[node_key].output_type for node_key in output_node_keys
         }
 
 
@@ -116,12 +118,12 @@ class Affine(NIRNode):
 
     def __post_init__(self):
         assert len(self.weight.shape) >= 2, "Weight must be at least 2D"
-        self.input_shape = {
+        self.input_type = {
             "input": np.array(
                 self.weight.shape[:-2] + tuple(np.array(self.weight.shape[-1:]).T)
             )
         }
-        self.output_shape = {
+        self.output_type = {
             "output": np.array(self.weight.shape[:-2] + (self.weight.shape[-2],))
         }
 
@@ -138,8 +140,8 @@ class Conv1d(NIRNode):
     bias: np.ndarray  # Bias C_out
 
     def __post_init__(self):
-        self.input_shape = {"input": np.array(self.weight.shape)[1:]}
-        self.output_shape = {"output": np.array(self.weight.shape)[[0, 2]]}
+        self.input_type = {"input": np.array(self.weight.shape)[1:]}
+        self.output_type = {"output": np.array(self.weight.shape)[[0, 2]]}
 
 
 @dataclass
@@ -160,8 +162,8 @@ class Conv2d(NIRNode):
             self.padding = (self.padding, self.padding)
         if isinstance(self.dilation, int):
             self.dilation = (self.dilation, self.dilation)
-        self.input_shape = {"input": np.array(self.weight.shape)[1:]}
-        self.output_shape = {"output": np.array(self.weight.shape)[[0, 2, 3]]}
+        self.input_type = {"input": np.array(self.weight.shape)[1:]}
+        self.output_type = {"output": np.array(self.weight.shape)[[0, 2, 3]]}
 
 
 @dataclass
@@ -216,8 +218,8 @@ class CubaLIF(NIRNode):
         ), "All parameters must have the same shape"
         # If w_in is a scalar, make it an array of same shape as v_threshold
         self.w_in = np.ones_like(self.v_threshold) * self.w_in
-        self.input_shape = {"input": np.array(self.v_threshold.shape)}
-        self.output_shape = {"output": np.array(self.v_threshold.shape)}
+        self.input_type = {"input": np.array(self.v_threshold.shape)}
+        self.output_type = {"output": np.array(self.v_threshold.shape)}
 
 
 @dataclass
@@ -234,8 +236,8 @@ class Delay(NIRNode):
 
     def __post_init__(self):
         # set input and output shape, if not set by user
-        self.input_shape = {"input": np.array(self.delay.shape)}
-        self.output_shape = {"output": np.array(self.delay.shape)}
+        self.input_type = {"input": np.array(self.delay.shape)}
+        self.output_type = {"output": np.array(self.delay.shape)}
 
 
 @dataclass
@@ -243,30 +245,29 @@ class Flatten(NIRNode):
     """Flatten node.
 
     This node flattens its input tensor.
-    input_shape must be a dict with one key: "input".
+    input_type must be a dict with one key: "input".
     """
 
-    # Shape of input tensor (overrrides input_shape from
+    # Shape of input tensor (overrrides input_type from
     # NIRNode to allow for non-keyword (positional) initialization)
-    input_shape: Shape
+    input_type: Types
     start_dim: int = 1  # First dimension to flatten
     end_dim: int = -1  # Last dimension to flatten
 
     def __post_init__(self):
-        self.input_shape = _parse_shape_argument(self.input_shape, "input")
-        print(self.input_shape)
-        concat = self.input_shape["input"][self.start_dim : self.end_dim].prod()
-        self.output_shape = {
+        self.input_type = _parse_shape_argument(self.input_type, "input")
+        concat = self.input_type["input"][self.start_dim : self.end_dim].prod()
+        self.output_type = {
             "output": np.array(
                 [
-                    *self.input_shape["input"][: self.start_dim],
+                    *self.input_type["input"][: self.start_dim],
                     concat,
-                    *self.input_shape["input"][self.end_dim :],
+                    *self.input_type["input"][self.end_dim :],
                 ]
             )
         }
         # make sure input and output shape are valid
-        if np.prod(self.input_shape["input"]) != np.prod(self.output_shape["output"]):
+        if np.prod(self.input_type["input"]) != np.prod(self.output_type["output"]):
             raise ValueError("input and output shape must have same number of elements")
 
 
@@ -283,8 +284,8 @@ class I(NIRNode):  # noqa: E742
     r: np.ndarray
 
     def __post_init__(self):
-        self.input_shape = {"input": np.array(self.r.shape)}
-        self.output_shape = {"output": np.array(self.r.shape)}
+        self.input_type = {"input": np.array(self.r.shape)}
+        self.output_type = {"output": np.array(self.r.shape)}
 
 
 @dataclass
@@ -316,8 +317,8 @@ class IF(NIRNode):
         assert (
             self.r.shape == self.v_threshold.shape
         ), "All parameters must have the same shape"
-        self.input_shape = {"input": np.array(self.r.shape)}
-        self.output_shape = {"output": np.array(self.r.shape)}
+        self.input_type = {"input": np.array(self.r.shape)}
+        self.output_type = {"output": np.array(self.r.shape)}
 
 
 @dataclass
@@ -327,13 +328,13 @@ class Input(NIRNode):
     This is a virtual node, which allows feeding in data into the graph.
     """
 
-    # Shape of incoming data (overrrides input_shape from
+    # Shape of incoming data (overrrides input_type from
     # NIRNode to allow for non-keyword (positional) initialization)
-    input_shape: Shape
+    input_type: Types
 
     def __post_init__(self):
-        self.input_shape = _parse_shape_argument(self.input_shape, "input")
-        self.output_shape = {"output": self.input_shape["input"]}
+        self.input_type = _parse_shape_argument(self.input_type, "input")
+        self.output_type = {"output": self.input_type["input"]}
 
 
 @dataclass
@@ -358,8 +359,8 @@ class LI(NIRNode):
         assert (
             self.tau.shape == self.r.shape == self.v_leak.shape
         ), "All parameters must have the same shape"
-        self.input_shape = {"input": np.array(self.r.shape)}
-        self.output_shape = {"output": np.array(self.r.shape)}
+        self.input_type = {"input": np.array(self.r.shape)}
+        self.output_type = {"output": np.array(self.r.shape)}
 
 
 @dataclass
@@ -373,14 +374,12 @@ class Linear(NIRNode):
 
     def __post_init__(self):
         assert len(self.weight.shape) >= 2, "Weight must be at least 2D"
-        self.input_shape = {
+        self.input_type = {
             "input": np.array(
                 self.weight.shape[:-2] + tuple(np.array(self.weight.shape[-1:]).T)
             )
         }
-        self.output_shape = {
-            "output": self.weight.shape[:-2] + (self.weight.shape[-2],)
-        }
+        self.output_type = {"output": self.weight.shape[:-2] + (self.weight.shape[-2],)}
 
 
 @dataclass
@@ -421,8 +420,8 @@ class LIF(NIRNode):
             == self.v_leak.shape
             == self.v_threshold.shape
         ), "All parameters must have the same shape"
-        self.input_shape = {"input": np.array(self.r.shape)}
-        self.output_shape = {"output": np.array(self.r.shape)}
+        self.input_type = {"input": np.array(self.r.shape)}
+        self.output_type = {"output": np.array(self.r.shape)}
 
 
 @dataclass
@@ -432,13 +431,13 @@ class Output(NIRNode):
     Defines an output of the graph.
     """
 
-    # Shape of incoming data (overrrides input_shape from
+    # Type of incoming data (overrrides input_type from
     # NIRNode to allow for non-keyword (positional) initialization)
-    output_shape: Shape
+    output_type: Types
 
     def __post_init__(self):
-        self.output_shape = _parse_shape_argument(self.output_shape, "output")
-        self.input_shape = {"input": self.output_shape["output"]}
+        self.output_type = _parse_shape_argument(self.output_type, "output")
+        self.input_type = {"input": self.output_type["output"]}
 
 
 @dataclass
@@ -455,8 +454,8 @@ class Scale(NIRNode):
     scale: np.ndarray  # Scaling factor
 
     def __post_init__(self):
-        self.input_shape = {"input": np.array(self.scale.shape)}
-        self.output_shape = {"output": np.array(self.scale.shape)}
+        self.input_type = {"input": np.array(self.scale.shape)}
+        self.output_type = {"output": np.array(self.scale.shape)}
 
 
 @dataclass
@@ -475,5 +474,5 @@ class Threshold(NIRNode):
     threshold: np.ndarray  # Firing threshold
 
     def __post_init__(self):
-        self.input_shape = {"input": np.array(self.threshold.shape)}
-        self.output_shape = {"output": np.array(self.threshold.shape)}
+        self.input_type = {"input": np.array(self.threshold.shape)}
+        self.output_type = {"output": np.array(self.threshold.shape)}

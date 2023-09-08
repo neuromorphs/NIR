@@ -1,0 +1,7 @@
+title: NIR
+author: NIR team
+logo: ../logo_light.png
+
+repository:
+  url: https://github.com/neuromorphs/nir
+  branch: main

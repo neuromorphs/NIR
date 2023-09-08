@@ -25,10 +25,9 @@ parts:
   - file: examples/spinnaker
 - caption: Developer guide
   chapters:
+  - file: api_design
   - file: dev
     title: Contributing
-  - file: internals
-    title: Internals
 - caption: API
   chapters:
   - file: modindex

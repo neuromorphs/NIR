@@ -12,7 +12,7 @@ def mock_affine(*shape):
 
 
 def mock_input(*shape):
-    return nir.Input(input_shape=np.array(shape))
+    return nir.Input(input_type=np.array(shape))
 
 
 def mock_integrator(*shape):
@@ -20,7 +20,7 @@ def mock_integrator(*shape):
 
 
 def mock_output(*shape):
-    return nir.Output(output_shape=np.array(shape))
+    return nir.Output(output_type=np.array(shape))
 
 
 def mock_delay(*shape):

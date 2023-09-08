@@ -126,18 +126,18 @@ def test_current_based_leaky_integrator_and_fire():
 
 def test_scale():
     ir = nir.NIRGraph.from_list(
-        nir.Input(input_shape=np.array([3])),
+        nir.Input(input_type=np.array([3])),
         nir.Scale(scale=np.array([1, 2, 3])),
-        nir.Output(output_shape=np.array([3])),
+        nir.Output(output_type=np.array([3])),
     )
     factory_test_graph(ir)
 
 
 def test_simple_with_read_write():
     ir = nir.NIRGraph.from_list(
-        nir.Input(input_shape=np.array([3])),
+        nir.Input(input_type=np.array([3])),
         mock_affine(2, 2),
-        nir.Output(output_shape=np.array([3])),
+        nir.Output(output_type=np.array([3])),
     )
     factory_test_graph(ir)
 
@@ -164,12 +164,12 @@ def test_threshold():
 
 def test_flatten():
     ir = nir.NIRGraph.from_list(
-        nir.Input(input_shape=np.array([2, 3])),
+        nir.Input(input_type=np.array([2, 3])),
         nir.Flatten(
             start_dim=0,
             end_dim=0,
-            input_shape={"input": np.array([2, 3])},
+            input_type={"input": np.array([2, 3])},
         ),
-        nir.Output(output_shape=np.array([6])),
+        nir.Output(output_type=np.array([6])),
     )
     factory_test_graph(ir)
