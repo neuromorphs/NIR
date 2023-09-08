@@ -36,7 +36,7 @@ extensions = [
     "sphinx.ext.autosummary",
     "sphinx_external_toc",
 ]
-external_toc_path = "toc.yml"
+external_toc_path = "_toc.yml"
 
 myst_enable_extensions = [
     "amsmath",
