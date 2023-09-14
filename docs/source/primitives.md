@@ -15,7 +15,7 @@ $$
 \text{Linear} &:  \mathbb{R}^{m \times n} \\
 \text{Conv1d} &:  \mathbb{R}^{c_{out} \times c_{in} \times x},  \text{Strides}, \text{Groups}, ... \\
 \text{Conv2d} &:  \mathbb{R}^{c_{out} \times c_{in} \times y \times x},  \text{Strides}, \text{Groups}, ... \\
-\text{SumPool2d} &: \matchbb{R}^{c \times y \times x}, \text{Pooling}, \text{Strides}, \text{Padding} ...\\
+\text{SumPool2d} &: \mathbb{R}^{c \times y \times x}, \text{Pooling}, \text{Strides}, \text{Padding} ...\\
 \text{Threshold} &:  \begin{cases} 1 & v > v_{threshold} \\ 0 & else \end{cases}
 \end{align}
 $$
