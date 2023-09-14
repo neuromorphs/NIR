@@ -175,8 +175,8 @@ class SumPool2d(NIRNode):
     padding: np.ndarray  # (Height, width)
 
     def __post_init__(self):
-        self.input_type = {"input": ...}
-        self.output_type = {"output": ...}
+        self.input_type = {"input": ()}
+        self.output_type = {"output": ()}
 
 
 @dataclass
