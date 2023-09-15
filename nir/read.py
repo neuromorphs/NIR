@@ -28,6 +28,12 @@ def read_node(node: typing.Any) -> nir.NIRNode:
             groups=node["groups"][()],
             bias=node["bias"][()],
         )
+    elif node["type"][()] == b"SumPool2d":
+        return nir.SumPool2d(
+            kernel_size=node["kernel_size"][()],
+            stride=node["stride"][()],
+            padding=node["padding"][()],
+        )
     elif node["type"][()] == b"Delay":
         return nir.Delay(delay=node["delay"][()])
     elif node["type"][()] == b"Flatten":

@@ -173,3 +173,16 @@ def test_flatten():
         nir.Output(output_type=np.array([6])),
     )
     factory_test_graph(ir)
+
+
+def test_sum_pool_2d():
+    ir = nir.NIRGraph.from_list(
+        [
+            nir.SumPool2d(
+                kernel_size=np.array([2, 2]),
+                stride=np.array([1, 1]),
+                padding=np.ndarray([0, 0]),
+            )
+        ]
+    )
+    factory_test_graph(ir)

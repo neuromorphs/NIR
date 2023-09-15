@@ -34,6 +34,13 @@ def _convert_node(node: nir.NIRNode) -> dict:
             "groups": node.groups,
             "bias": node.bias,
         }
+    elif isinstance(node, nir.SumPool2d):
+        return {
+            "type": "SumPool2d",
+            "kernel_size": node.kernel_size,
+            "stride": node.stride,
+            "padding": node.padding,
+        }
     elif isinstance(node, nir.Delay):
         return {"type": "Delay", "delay": node.delay}
     elif isinstance(node, nir.Flatten):
