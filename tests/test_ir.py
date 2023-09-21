@@ -1,13 +1,7 @@
 import numpy as np
 
 import nir
-from tests import (
-    mock_delay,
-    mock_affine,
-    mock_integrator,
-    mock_linear,
-    mock_output,
-)
+from tests import mock_affine, mock_delay, mock_integrator, mock_linear, mock_output
 
 
 def test_has_version():
@@ -16,46 +10,11 @@ def test_has_version():
 
 
 def test_eq():
-    a = nir.Input(
-        shape=np.array(
-            [
-                2,
-                3,
-            ]
-        ),
-    )
-    a2 = nir.Input(
-        shape=np.array(
-            [
-                2,
-                3,
-            ]
-        ),
-    )
-    b = nir.Input(
-        shape=np.array(
-            [
-                2,
-                3,
-            ]
-        ),
-    )
-    b2 = nir.Input(
-        shape=np.array(
-            [
-                2,
-                2,
-            ]
-        ),
-    )
-    o = nir.Output(
-        shape=np.array(
-            [
-                2,
-                3,
-            ]
-        ),
-    )
+    a = nir.Input(np.array([2, 3]))
+    a2 = nir.Input(np.array([2, 3]))
+    b = nir.Input(np.array([2, 3]))
+    b2 = nir.Input(np.array([2, 2]))
+    o = nir.Output(np.array([2, 3]))
 
     assert a == a
     assert a2 == a2
@@ -297,7 +256,9 @@ def test_inputs_outputs_properties():
         nodes={
             "in1": nir.Input(np.array([4, 5, 2])),
             "in2": nir.Input(np.array([4, 5, 2])),
-            "flat": nir.Flatten(0),
+            "flat": nir.Flatten(
+                start_dim=0, end_dim=0, input_type={"input": np.array([4, 5, 2])}
+            ),
             "out1": nir.Output(np.array([20, 2])),
             "out2": nir.Output(np.array([20, 2])),
         },
