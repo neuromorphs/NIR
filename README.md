@@ -80,7 +80,7 @@ If you use NIR in your work, please cite the [following Zenodo reference](https:
   month        = jul,
   year         = 2023,
   publisher    = {Zenodo},
-  version      = {0.0.1},
+  version      = {0.2},
   doi          = {10.5281/zenodo.8105042},
   url          = {https://doi.org/10.5281/zenodo.8105042}
 }
