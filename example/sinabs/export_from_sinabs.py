@@ -3,7 +3,6 @@ import torch
 import torch.nn as nn
 from sinabs import from_nir, to_nir
 
-
 batch_size = 4
 
 # Create Sinabs model

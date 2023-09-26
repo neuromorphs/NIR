@@ -28,19 +28,26 @@ def read_node(node: typing.Any) -> nir.NIRNode:
             groups=node["groups"][()],
             bias=node["bias"][()],
         )
+    elif node["type"][()] == b"SumPool2d":
+        return nir.SumPool2d(
+            kernel_size=node["kernel_size"][()],
+            stride=node["stride"][()],
+            padding=node["padding"][()],
+        )
     elif node["type"][()] == b"Delay":
         return nir.Delay(delay=node["delay"][()])
     elif node["type"][()] == b"Flatten":
         return nir.Flatten(
             start_dim=node["start_dim"][()],
             end_dim=node["end_dim"][()],
+            input_type={"input": node["input_type"][()]},
         )
     elif node["type"][()] == b"I":
         return nir.I(r=node["r"][()])
     elif node["type"][()] == b"IF":
         return nir.IF(r=node["r"][()], v_threshold=node["v_threshold"][()])
     elif node["type"][()] == b"Input":
-        return nir.Input(shape=node["shape"][()])
+        return nir.Input(input_type={"input": node["shape"][()]})
     elif node["type"][()] == b"LI":
         return nir.LI(
             tau=node["tau"][()],
@@ -67,10 +74,10 @@ def read_node(node: typing.Any) -> nir.NIRNode:
     elif node["type"][()] == b"NIRGraph":
         return nir.NIRGraph(
             nodes={k: read_node(n) for k, n in node["nodes"].items()},
-            edges=node["edges"].asstr()[()],
+            edges=[(a.decode("utf8"), b.decode("utf8")) for a, b in node["edges"][()]],
         )
     elif node["type"][()] == b"Output":
-        return nir.Output(shape=node["shape"][()])
+        return nir.Output(output_type={"output": node["shape"][()]})
     elif node["type"][()] == b"Scale":
         return nir.Scale(scale=node["scale"][()])
     elif node["type"][()] == b"Threshold":

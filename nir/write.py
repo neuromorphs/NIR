@@ -34,6 +34,13 @@ def _convert_node(node: nir.NIRNode) -> dict:
             "groups": node.groups,
             "bias": node.bias,
         }
+    elif isinstance(node, nir.SumPool2d):
+        return {
+            "type": "SumPool2d",
+            "kernel_size": node.kernel_size,
+            "stride": node.stride,
+            "padding": node.padding,
+        }
     elif isinstance(node, nir.Delay):
         return {"type": "Delay", "delay": node.delay}
     elif isinstance(node, nir.Flatten):
@@ -41,6 +48,7 @@ def _convert_node(node: nir.NIRNode) -> dict:
             "type": "Flatten",
             "start_dim": node.start_dim,
             "end_dim": node.end_dim,
+            "input_type": node.input_type["input"],
         }
     elif isinstance(node, nir.I):
         return {"type": "I", "r": node.r}
@@ -51,7 +59,7 @@ def _convert_node(node: nir.NIRNode) -> dict:
             "v_threshold": node.v_threshold,
         }
     elif isinstance(node, nir.Input):
-        return {"type": "Input", "shape": node.shape}
+        return {"type": "Input", "shape": node.input_type["input"]}
     elif isinstance(node, nir.LI):
         return {
             "type": "LI",
@@ -85,7 +93,7 @@ def _convert_node(node: nir.NIRNode) -> dict:
             "edges": node.edges,
         }
     elif isinstance(node, nir.Output):
-        return {"type": "Output", "shape": node.shape}
+        return {"type": "Output", "shape": node.output_type["output"]}
     elif isinstance(node, nir.Scale):
         return {"type": "Scale", "scale": node.scale}
     elif isinstance(node, nir.Threshold):
