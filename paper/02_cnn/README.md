@@ -36,3 +36,6 @@ nn.Sequential(
   nn.ReLU(),
 )
 ```
+
+**Model extraction**
+Execute the `mnist_sinabs_to_nir.py` which defines an ANN, loads pretrained weights, converts it to SNN and then generates the corresponding `NIRGraph`.
