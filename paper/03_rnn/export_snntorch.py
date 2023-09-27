@@ -13,7 +13,7 @@ from snntorch import surrogate
 
 export_datetime = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
 
-model_name = "Braille_th1_bs5"
+model_name = "th1_bs5"
 
 export_path = "./Braille_snntorch_{}_{}".format(model_name,export_datetime)
 
@@ -97,16 +97,16 @@ print("######################")
 print("NIR graph exported!")
 print("######################")
 
+"""
 torch.save(nir_graph, export_path)
 
 print("####################")
 print("NIR graph saved!")
 print("####################")
-
 """
+
 nir.write(export_path+".nir", nir_graph)
 
 print("####################")
 print("NIR graph written!")
 print("####################")
-"""
