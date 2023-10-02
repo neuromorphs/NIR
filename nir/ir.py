@@ -24,7 +24,7 @@ def _parse_shape_argument(x: Types, key: str):
         raise ValueError("Unknown shape argument", x)
 
 
-@dataclass
+@dataclass(eq=False)
 class NIRNode:
     """Base superclass of Neural Intermediate Representation Unit (NIR).
 
@@ -36,8 +36,11 @@ class NIRNode:
     # input_type: Types = field(init=False, kw_only=True)
     # output_type: Types = field(init=False, kw_only=True)
 
+    def __eq__(self, other):
+        return self is other
 
-@dataclass
+
+@dataclass(eq=False)
 class NIRGraph(NIRNode):
     """Neural Intermediate Representation (NIR) Graph containing a number of nodes and
     edges.
@@ -47,6 +50,18 @@ class NIRGraph(NIRNode):
 
     nodes: Nodes  # List of computational nodes
     edges: Edges  # List of edges between nodes
+
+    @property
+    def inputs(self):
+        return {
+            name: node for name, node in self.nodes.items() if isinstance(node, Input)
+        }
+
+    @property
+    def outputs(self):
+        return {
+            name: node for name, node in self.nodes.items() if isinstance(node, Output)
+        }
 
     @staticmethod
     def from_list(*nodes: NIRNode) -> "NIRGraph":
@@ -101,7 +116,7 @@ class NIRGraph(NIRNode):
         }
 
 
-@dataclass
+@dataclass(eq=False)
 class Affine(NIRNode):
     r"""Affine transform that linearly maps and translates the input signal.
 
@@ -128,7 +143,7 @@ class Affine(NIRNode):
         }
 
 
-@dataclass
+@dataclass(eq=False)
 class Conv1d(NIRNode):
     """Convolutional layer in 1d."""
 
@@ -144,7 +159,7 @@ class Conv1d(NIRNode):
         self.output_type = {"output": np.array(self.weight.shape)[[0, 2]]}
 
 
-@dataclass
+@dataclass(eq=False)
 class Conv2d(NIRNode):
     """Convolutional layer in 2d."""
 
@@ -166,7 +181,7 @@ class Conv2d(NIRNode):
         self.output_type = {"output": np.array(self.weight.shape)[[0, 2, 3]]}
 
 
-@dataclass
+@dataclass(eq=False)
 class SumPool2d(NIRNode):
     """Sum pooling layer in 2d."""
 
@@ -179,7 +194,7 @@ class SumPool2d(NIRNode):
         self.output_type = {"output": ()}
 
 
-@dataclass
+@dataclass(eq=False)
 class CubaLIF(NIRNode):
     r"""Current based leaky integrate and-fire-neuron model.
 
@@ -235,7 +250,7 @@ class CubaLIF(NIRNode):
         self.output_type = {"output": np.array(self.v_threshold.shape)}
 
 
-@dataclass
+@dataclass(eq=False)
 class Delay(NIRNode):
     """Simple delay node.
 
@@ -253,7 +268,7 @@ class Delay(NIRNode):
         self.output_type = {"output": np.array(self.delay.shape)}
 
 
-@dataclass
+@dataclass(eq=False)
 class Flatten(NIRNode):
     """Flatten node.
 
@@ -284,7 +299,7 @@ class Flatten(NIRNode):
             raise ValueError("input and output shape must have same number of elements")
 
 
-@dataclass
+@dataclass(eq=False)
 class I(NIRNode):  # noqa: E742
     r"""Integrator.
 
@@ -301,7 +316,7 @@ class I(NIRNode):  # noqa: E742
         self.output_type = {"output": np.array(self.r.shape)}
 
 
-@dataclass
+@dataclass(eq=False)
 class IF(NIRNode):
     r"""Integrate-and-fire neuron model.
 
@@ -334,7 +349,7 @@ class IF(NIRNode):
         self.output_type = {"output": np.array(self.r.shape)}
 
 
-@dataclass
+@dataclass(eq=False)
 class Input(NIRNode):
     """Input Node.
 
@@ -350,7 +365,7 @@ class Input(NIRNode):
         self.output_type = {"output": self.input_type["input"]}
 
 
-@dataclass
+@dataclass(eq=False)
 class LI(NIRNode):
     r"""Leaky integrator neuron model.
 
@@ -376,7 +391,7 @@ class LI(NIRNode):
         self.output_type = {"output": np.array(self.r.shape)}
 
 
-@dataclass
+@dataclass(eq=False)
 class Linear(NIRNode):
     r"""Linear transform without bias:
 
@@ -395,7 +410,7 @@ class Linear(NIRNode):
         self.output_type = {"output": self.weight.shape[:-2] + (self.weight.shape[-2],)}
 
 
-@dataclass
+@dataclass(eq=False)
 class LIF(NIRNode):
     r"""Leaky integrate and-fire-neuron model.
 
@@ -437,7 +452,7 @@ class LIF(NIRNode):
         self.output_type = {"output": np.array(self.r.shape)}
 
 
-@dataclass
+@dataclass(eq=False)
 class Output(NIRNode):
     """Output Node.
 
@@ -453,7 +468,7 @@ class Output(NIRNode):
         self.input_type = {"input": self.output_type["output"]}
 
 
-@dataclass
+@dataclass(eq=False)
 class Scale(NIRNode):
     r"""Scales a signal by some values.
 
@@ -471,7 +486,7 @@ class Scale(NIRNode):
         self.output_type = {"output": np.array(self.scale.shape)}
 
 
-@dataclass
+@dataclass(eq=False)
 class Threshold(NIRNode):
     r"""Threshold node.
 
