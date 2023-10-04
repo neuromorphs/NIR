@@ -1,0 +1,10 @@
+{
+    "nb_input_copies": 1, 
+    "nb_hidden": 350, 
+    "beta_r": 0.85, 
+    "beta_out": 0.95, 
+    "lr": 0.005, 
+    "reg_l1": 4e-04, 
+    "reg_l2": 7e-06, 
+    "slope": 10
+}
