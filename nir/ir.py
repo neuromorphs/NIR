@@ -206,11 +206,10 @@ class CubaLIF(NIRNode):
 
     Where :math:`\tau_{syn}` is the synaptic time constant,
     :math:`\tau_{mem}` is the membrane time constant,
-    :math:`w_{in}` is the input current weight (elementwise),
-    :math:`v` is the membrane potential,
-    :math:`v_{leak}` is the leak voltage,
     :math:`R` is the resistance,
+    :math:`v_{leak}` is the leak voltage,
     :math:`v_{threshold}` is the firing threshold,
+    :math:`w_{in}` is the input current weight (elementwise),
     and :math:`S` is the input spike.
     """
 
