@@ -82,7 +82,7 @@ parameters = {
 
 device = "cpu"
 
-dummy_input = torch.rand(256, 1, 24)
+dummy_input = torch.rand(256, 1, 12)
 
 saved_state_dict_path = "./model_ref_20230827_182756.pt"
 
