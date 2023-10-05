@@ -13,9 +13,9 @@ from snntorch import surrogate
 
 export_datetime = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
 
-model_name = "th1_bs5_collapsed"
+export_path = "./Braille_snntorch_{}".format(export_datetime)
 
-export_path = "./Braille_snntorch_{}_{}".format(model_name,export_datetime)
+saved_state_dict_path = "./model_ref_20231005_101700.pt"
 
 
 def model_build(settings, input_size, num_steps, device):
@@ -78,22 +78,20 @@ def model_build(settings, input_size, num_steps, device):
 
 
 parameters = {
-    "nb_hidden": 50,
-    "alpha_r": 0.5, # just tentative
-    "alpha_out": 0.2, # just tentative
-    "beta_r": 0.85,
-    "beta_out": 0.95,
+    "nb_hidden": 55,
+    "alpha_r": 0.55,
+    "alpha_out": 0.2,
+    "beta_r": 0.8,
+    "beta_out": 0.2,
     "lr": 0.005,
-    "reg_l1": 0.0004,
-    "reg_l2": 0.000007,
+    "reg_l1": 0.0006,
+    "reg_l2": 0.000002,
     "slope": 10
 }
 
 device = "cpu"
 
-dummy_input = torch.rand(256, 1, 12)
-
-saved_state_dict_path = "./model_ref_20230827_182756.pt"
+dummy_input = torch.rand(256, 1, 12) # to work with the "collapsed" version from the original Braille dataset
 
 model = model_build(settings=parameters, input_size=dummy_input.shape[-1], num_steps=dummy_input.shape[0], device=device)
 
@@ -107,7 +105,7 @@ print("NIR graph exported!")
 print("######################")
 
 """
-torch.save(nir_graph, export_path)
+torch.save(nir_graph, export_path+".pt")
 
 print("####################")
 print("NIR graph saved!")

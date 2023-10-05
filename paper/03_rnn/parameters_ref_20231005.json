@@ -1,0 +1,11 @@
+{
+    "nb_hidden": 55,
+    "alpha_r": 0.55,
+    "alpha_out": 0.2,
+    "beta_r": 0.8,
+    "beta_out": 0.2,
+    "lr": 0.005,
+    "reg_l1": 0.0006,
+    "reg_l2": 0.000002,
+    "slope": 10
+}
