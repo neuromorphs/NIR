@@ -14,14 +14,58 @@ Types = typing.Dict[str, np.ndarray]
 
 
 def _parse_shape_argument(x: Types, key: str):
+    """Parse the shape argument of a NIR node."""
     if isinstance(x, np.ndarray):
         return {key: x}
     elif isinstance(x, Sequence):
         return {key: np.array(x)}
     elif isinstance(x, dict):
         return x
+
+
+def _calculate_conv_output(
+    x_in: typing.Union[int, np.ndarray],
+    padding: typing.Union[int, np.ndarray],
+    dilation: typing.Union[int, np.ndarray],
+    kernel_size: typing.Union[int, np.ndarray],
+    stride: typing.Union[int, np.ndarray],
+) -> int:
+    """Calculates the output for a single dimension of a convolutional layer.
+    https://pytorch.org/docs/stable/generated/torch.nn.Conv1d.html#torch.nn.Conv1d
+
+    Return:
+        np.ndarray: Output shape
+    """
+    if isinstance(x_in, int):
+        dimensions = 1
     else:
-        raise ValueError("Unknown shape argument", x)
+        dimensions = len(x_in)
+    shapes = []
+    for i in range(dimensions):
+        shape = np.floor(
+            (
+                _index_tuple(x_in, i)
+                + 2 * _index_tuple(padding, i)
+                - _index_tuple(dilation, i) * (_index_tuple(kernel_size, i) - 1)
+                - 1
+            )
+            / _index_tuple(stride, i)
+            + 1
+        )
+        shapes.append(int(shape))
+    return np.array(shapes)
+
+
+def _index_tuple(
+    tuple: typing.Union[int, np.ndarray], index: int
+) -> typing.Union[int, np.ndarray]:
+    """If the input is a tuple/array, index it. Otherwise, return it as-is."""
+    if isinstance(tuple, np.ndarray) or isinstance(tuple, Sequence):
+        return tuple[index]
+    elif isinstance(tuple, int):
+        return np.array([tuple])
+    else:
+        raise TypeError(f"tuple must be int or np.ndarray, not {type(tuple)}")
 
 
 @dataclass(eq=False)
@@ -145,9 +189,23 @@ class Affine(NIRNode):
 
 @dataclass(eq=False)
 class Conv1d(NIRNode):
-    """Convolutional layer in 1d."""
+    """Convolutional layer in 1d.
 
-    weight: np.ndarray  # Weight C_out * C_in * X
+    Note that the input_shape argument is required to disambiguate the shape, and is used
+    to infer the exact output shape along with the other parameters.
+
+    Arguments:
+        input_shape (Union[int, np.ndarray]): Shape of spatial input (X)
+        weight (np.ndarray): Weight C_out * C_in * W_x
+        stride (Union[int, np.ndarray]): Stride
+        padding (Union[int, np.ndarray]): Padding
+        dilation (Union[int, np.ndarray]): Dilation
+        groups (Union[int, np.ndarray]): Groups
+        bias (np.ndarray): Bias shaped as C_out
+    """
+
+    input_shape: int  # X
+    weight: np.ndarray  # Weight C_out * C_in * W_x
     stride: int  # Stride
     padding: int  # Padding
     dilation: int  # Dilation
@@ -155,15 +213,37 @@ class Conv1d(NIRNode):
     bias: np.ndarray  # Bias C_out
 
     def __post_init__(self):
-        self.input_type = {"input": np.array(self.weight.shape)[1:]}
-        self.output_type = {"output": np.array(self.weight.shape)[[0, 2]]}
+        self.input_type = {"input": np.array([self.weight.shape[1], self.input_shape])}
+        output_shape = _calculate_conv_output(
+            self.input_shape,
+            self.padding,
+            self.dilation,
+            self.weight.shape[2],
+            self.stride,
+        )
+        self.output_type = {"output": np.array([self.weight.shape[0], *output_shape])}
 
 
 @dataclass(eq=False)
 class Conv2d(NIRNode):
-    """Convolutional layer in 2d."""
+    """Convolutional layer in 2d.
 
-    weight: np.ndarray  # Weight C_out * C_in * X * Y
+    Note that the input_shape argument is required to disambiguate the shape, and is used
+    to infer the exact output shape along with the other parameters.
+
+    Arguments:
+        input_shape (np.ndarray): Shape of spatial input (W_x, W_y)
+        weight (np.ndarray): Weight C_out * C_in * W_x * W_y
+        stride (Union[int, np.ndarray]): Stride
+        padding (Union[int, np.ndarray]): Padding
+        dilation (Union[int, np.ndarray]): Dilation
+        groups (Union[int, np.ndarray]): Groups
+        bias (np.ndarray): Bias shaped as C_out
+    """
+
+    # Shape of input tensor (overrrides input_type from
+    input_shape: np.ndarray
+    weight: np.ndarray  # Weight C_out * C_in * W_x * W_y
     stride: int  # Stride
     padding: int  # Padding
     dilation: int  # Dilation
@@ -177,21 +257,15 @@ class Conv2d(NIRNode):
             self.padding = (self.padding, self.padding)
         if isinstance(self.dilation, int):
             self.dilation = (self.dilation, self.dilation)
-        self.input_type = {"input": np.array(self.weight.shape)[1:]}
-        self.output_type = {"output": np.array(self.weight.shape)[[0, 2, 3]]}
-
-
-@dataclass(eq=False)
-class SumPool2d(NIRNode):
-    """Sum pooling layer in 2d."""
-
-    kernel_size: np.ndarray  # (Height, Width)
-    stride: np.ndarray  # (Height, width)
-    padding: np.ndarray  # (Height, width)
-
-    def __post_init__(self):
-        self.input_type = {"input": ()}
-        self.output_type = {"output": ()}
+        self.input_type = {"input": np.array([self.weight.shape[1], *self.input_shape])}
+        output_shape = _calculate_conv_output(
+            self.input_shape,
+            self.padding,
+            self.dilation,
+            self.weight.shape[2],
+            self.stride,
+        )
+        self.output_type = {"output": np.array([self.weight.shape[0], *output_shape])}
 
 
 @dataclass(eq=False)
@@ -484,6 +558,19 @@ class Scale(NIRNode):
     def __post_init__(self):
         self.input_type = {"input": np.array(self.scale.shape)}
         self.output_type = {"output": np.array(self.scale.shape)}
+
+
+@dataclass(eq=False)
+class SumPool2d(NIRNode):
+    """Sum pooling layer in 2d."""
+
+    kernel_size: np.ndarray  # (Height, Width)
+    stride: np.ndarray  # (Height, width)
+    padding: np.ndarray  # (Height, width)
+
+    def __post_init__(self):
+        self.input_type = {"input": ()}
+        self.output_type = {"output": ()}
 
 
 @dataclass(eq=False)

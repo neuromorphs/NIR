@@ -98,6 +98,38 @@ def test_delay():
     assert ir.edges == [("in", "d"), ("d", "out")]
 
 
+def test_conv1d():
+    w = np.random.randn(2, 1, 3)
+    a = nir.Conv1d(
+        input_shape=100,
+        weight=w,
+        stride=2,
+        dilation=1,
+        groups=1,
+        padding=1,
+        bias=np.ndarray([1]),
+    )
+    assert np.allclose(a.weight, w)
+    assert np.allclose(a.input_shape, 100)
+    assert np.allclose(a.output_type["output"], np.array([2, 50]))
+
+
+def test_conv2d():
+    w = np.random.randn(3, 1, 3, 3)
+    a = nir.Conv2d(
+        input_shape=(100, 100),
+        weight=w,
+        padding=(1, 1),
+        stride=(1, 2),
+        dilation=(1, 1),
+        groups=(1, 1),
+        bias=np.ndarray([1]),
+    )
+    assert np.allclose(a.weight, w)
+    assert np.allclose(a.input_shape, np.array([100, 100]))
+    assert np.allclose(a.output_type["output"], np.array([3, 100, 50]))
+
+
 def test_cuba_lif():
     a = np.random.randn(10, 10)
     lif = nir.CubaLIF(tau_mem=a, tau_syn=a, r=a, v_leak=a, v_threshold=a)
