@@ -15,7 +15,7 @@ export_datetime = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
 
 export_path = "./Braille_snntorch_{}".format(export_datetime)
 
-saved_state_dict_path = "./model_ref_20231005_101700.pt"
+saved_state_dict_path = "./model_ref_20231006_124842.pt"
 
 
 def model_build(settings, input_size, num_steps, device):
@@ -78,15 +78,15 @@ def model_build(settings, input_size, num_steps, device):
 
 
 parameters = {
-    "nb_hidden": 55,
-    "alpha_r": 0.55,
-    "alpha_out": 0.2,
-    "beta_r": 0.8,
-    "beta_out": 0.2,
-    "lr": 0.005,
-    "reg_l1": 0.0006,
-    "reg_l2": 0.000002,
-    "slope": 10
+    "nb_hidden": 43,
+    "alpha_r": 0.4,
+    "alpha_out": 0.35,
+    "beta_r": 0.95,
+    "beta_out": 0.9,
+    "lr": 0.001,
+    "reg_l1": 0.0008,
+    "reg_l2": 0.000006,
+    "slope": 20
 }
 
 device = "cpu"
