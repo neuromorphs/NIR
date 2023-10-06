@@ -30,18 +30,20 @@ ann = nn.Sequential(
 
 ann.load_state_dict(torch.load("rate_based_gregor.pth"))
 
+# Convert ann to snn
 snn = from_model(ann, input_shape=(2, 34, 34), batch_size=1).spiking_model
 
-print(snn)
-
-
+# Convert SNN to NIR graph
 nir_graph = to_nir(snn, sample_data=torch.rand((1, 2, 34, 34)))
 # Save the graph
 nir.write("scnn_mnist.nir", nir_graph)
 
-print(nir_graph)
-
 # Load sinabs model from nir graph
+extracted_sinabs_model = from_nir(nir_graph, batch_size=1)
+# print(extracted_sinabs_model)
 
-sinabs_model = from_nir(nir_graph, batch_size=1)
-print(sinabs_model)
+
+# Try a forward call on the generated model
+sample_data = torch.rand((100, 2, 34, 34))
+out = extracted_sinabs_model(sample_data)
+print(out.shape)
