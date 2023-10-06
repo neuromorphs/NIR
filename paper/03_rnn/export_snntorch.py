@@ -23,7 +23,7 @@ def model_build(settings, input_size, num_steps, device):
     ### Network structure (input data --> encoding -> hidden -> output)
     input_channels = int(input_size)
     num_hidden = int(settings["nb_hidden"])
-    num_outputs = 27
+    num_outputs = 7
 
     ### Surrogate gradient setting
     spike_grad = surrogate.fast_sigmoid(slope=int(settings["slope"]))
