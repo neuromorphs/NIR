@@ -17,6 +17,7 @@ def _convert_node(node: nir.NIRNode) -> dict:
     elif isinstance(node, nir.Conv1d):
         return {
             "type": "Conv1d",
+            "input_shape": node.input_shape,
             "weight": node.weight,
             "stride": node.stride,
             "padding": node.padding,
@@ -27,6 +28,7 @@ def _convert_node(node: nir.NIRNode) -> dict:
     elif isinstance(node, nir.Conv2d):
         return {
             "type": "Conv2d",
+            "input_shape": node.input_shape,
             "weight": node.weight,
             "stride": node.stride,
             "padding": node.padding,
