@@ -12,6 +12,7 @@ def read_node(node: typing.Any) -> nir.NIRNode:
         return nir.Affine(weight=node["weight"][()], bias=node["bias"][()])
     elif node["type"][()] == b"Conv1d":
         return nir.Conv1d(
+            input_shape=node["input_shape"][()],
             weight=node["weight"][()],
             stride=node["stride"][()],
             padding=node["padding"][()],
@@ -21,6 +22,7 @@ def read_node(node: typing.Any) -> nir.NIRNode:
         )
     elif node["type"][()] == b"Conv2d":
         return nir.Conv2d(
+            input_shape=node["input_shape"][()],
             weight=node["weight"][()],
             stride=node["stride"][()],
             padding=node["padding"][()],
