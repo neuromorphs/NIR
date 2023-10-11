@@ -72,7 +72,7 @@ def test_conv1d():
     factory_test_graph(ir)
 
 
-def test_conv1d():
+def test_conv1d_2():
     ir = nir.NIRGraph.from_list(
         mock_conv((100, 100), (1, 2, 3, 3)),
     )

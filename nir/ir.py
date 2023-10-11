@@ -219,7 +219,8 @@ class NIRGraph(NIRNode):
         of nodes in the graph as needed. Assumes that the input_type of the graph is set. Moves
         from the input nodes to the output nodes. Raises ValueError if types are inconsistent.
 
-        Assumes that all input types are of form: {'input': ...} and all output types are of form: {'output': ...}.
+        Assumes that all input types are of form: {'input': ...} and all output types are of form:
+        {'output': ...}.
 
         Currently only supports the inference of output types for Conv1d and Conv2d nodes.
         Does not support nested NIR graphs.
@@ -247,7 +248,7 @@ class NIRGraph(NIRNode):
             ])
             if undef_post_input_type:
                 # define post input_type to be the same as pre output_type
-                print(f'[warning] {post_key}.input_type undefined -> set to {pre_key}.output_type')
+                print(f'[warning] {post_key}.input_type undefined, set to {pre_key}.output_type')
                 post_node.input_type = {
                     k.replace('output', 'input'): v for k, v in pre_node.output_type.items()
                 }
@@ -371,7 +372,7 @@ class Conv1d(NIRNode):
 
     def __post_init__(self):
         if isinstance(self.padding, str) and self.padding not in ["same", "valid"]:
-            raise ValueError(f"padding must be 'same', 'valid', or an integer, not {self.padding}")
+            raise ValueError(f"padding must be 'same', 'valid', or int, not {self.padding}")
         if self.input_shape is None:
             # leave input and output types undefined
             self.input_type = {"input": None}
@@ -427,7 +428,7 @@ class Conv2d(NIRNode):
 
     def __post_init__(self):
         if isinstance(self.padding, str) and self.padding not in ["same", "valid"]:
-            raise ValueError(f"padding must be 'same', 'valid', or an integer, not {self.padding}")
+            raise ValueError(f"padding must be 'same', 'valid', or int, not {self.padding}")
         if isinstance(self.padding, int):
             self.padding = (self.padding, self.padding)
         if isinstance(self.stride, int):
