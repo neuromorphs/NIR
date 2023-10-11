@@ -145,7 +145,21 @@ class Affine(NIRNode):
 
 @dataclass(eq=False)
 class Conv1d(NIRNode):
-    """Convolutional layer in 1d."""
+    """Convolutional layer in 1d.
+    
+    :param weight: Weight, shape (C_out, C_in, X)
+    :type weight: np.ndarray
+    :param stride: Stride
+    :type stride: int
+    :param padding: Padding
+    :type padding: int
+    :param dilation: Dilation
+    :type dilation: int
+    :param groups: Groups
+    :type groups: int
+    :param bias: Bias array of shape (C_out,)
+    :type bias: int
+    """
 
     weight: np.ndarray  # Weight C_out * C_in * X
     stride: int  # Stride
@@ -161,12 +175,26 @@ class Conv1d(NIRNode):
 
 @dataclass(eq=False)
 class Conv2d(NIRNode):
-    """Convolutional layer in 2d."""
+    """Convolutional layer in 2d.
+    
+    :param weight: Weight, shape (C_out, C_in, X, Y)
+    :type weight: np.ndarray
+    :param stride: Stride
+    :type stride: int or (int, int)
+    :param padding: Padding
+    :type padding: int or (int, int)
+    :param dilation: Dilation
+    :type dilation: int or (int, int)
+    :param groups: Groups
+    :type groups: int
+    :param bias: Bias, shape (C_out,)
+    :type bias: np.ndarray
+    """
 
     weight: np.ndarray  # Weight C_out * C_in * X * Y
-    stride: int  # Stride
-    padding: int  # Padding
-    dilation: int  # Dilation
+    stride: typing.Union[int, typing.Tuple[int, int]]  # Stride
+    padding: typing.Union[int, typing.Tuple[int, int]]  # Padding
+    dilation: typing.Union[int, typing.Tuple[int, int]]  # Dilation
     groups: int  # Groups
     bias: np.ndarray  # Bias C_out
 
