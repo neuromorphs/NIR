@@ -24,40 +24,56 @@ def _parse_shape_argument(x: Types, key: str):
 
 
 def _calculate_conv_output(
-    x_in: typing.Union[int, np.ndarray],
-    padding: typing.Union[int, np.ndarray],
-    dilation: typing.Union[int, np.ndarray],
-    kernel_size: typing.Union[int, np.ndarray],
-    stride: typing.Union[int, np.ndarray],
-) -> int:
+    input_shape: typing.Union[int, typing.Sequence[int]],
+    padding: typing.Union[int, str, typing.Sequence[int]],
+    dilation: typing.Union[int, typing.Sequence[int]],
+    kernel_size: typing.Union[int, typing.Sequence[int]],
+    stride: typing.Union[int, typing.Sequence[int]],
+) -> typing.Sequence[int]:
     """Calculates the output for a single dimension of a convolutional layer.
     https://pytorch.org/docs/stable/generated/torch.nn.Conv1d.html#torch.nn.Conv1d
 
-    Return:
-        np.ndarray: Output shape
+    :param input_shape: input shape, either int or (int, int)
+    :type input_shape: int | typing.Sequence[int]
+    :param padding: padding
+    :type padding: int | typing.Sequence[int]
+    :param dilation: dilation
+    :type dilation: int | typing.Sequence[int]
+    :param kernel_size: kernel size
+    :type kernel_size: int | typing.Sequence[int]
+    :param stride: stride
+    :type stride: int | typing.Sequence[int]
+
+    :return: output shape
+    :rtype: typing.Sequence[int]
     """
-    if isinstance(x_in, int):
-        dimensions = 1
+    if isinstance(input_shape, int):
+        ndim = 1
     else:
-        dimensions = len(x_in)
+        ndim = len(input_shape)
+    if padding == 'valid':
+        padding = [0] * ndim
     shapes = []
-    for i in range(dimensions):
-        shape = np.floor(
-            (
-                _index_tuple(x_in, i)
-                + 2 * _index_tuple(padding, i)
-                - _index_tuple(dilation, i) * (_index_tuple(kernel_size, i) - 1)
-                - 1
+    for i in range(ndim):
+        if padding == 'same':
+            shape = input_shape[i]
+        else:
+            shape = np.floor(
+                (
+                    _index_tuple(input_shape, i)
+                    + 2 * _index_tuple(padding, i)
+                    - _index_tuple(dilation, i) * (_index_tuple(kernel_size, i) - 1)
+                    - 1
+                )
+                / _index_tuple(stride, i)
+                + 1
             )
-            / _index_tuple(stride, i)
-            + 1
-        )
         shapes.append(int(shape))
     return np.array(shapes)
 
 
 def _index_tuple(
-    tuple: typing.Union[int, np.ndarray], index: int
+    tuple: typing.Union[int, typing.Sequence[int]], index: int
 ) -> typing.Union[int, np.ndarray]:
     """If the input is a tuple/array, index it. Otherwise, return it as-is."""
     if isinstance(tuple, np.ndarray) or isinstance(tuple, Sequence):
@@ -192,36 +208,54 @@ class Conv1d(NIRNode):
     """Convolutional layer in 1d.
 
     Note that the input_shape argument is required to disambiguate the shape, and is used
-    to infer the exact output shape along with the other parameters.
+    to infer the exact output shape along with the other parameters. If the input_shape
+    is None, the output shape will also be None.
 
-    Arguments:
-        input_shape (Union[int, np.ndarray]): Shape of spatial input (X)
-        weight (np.ndarray): Weight C_out * C_in * W_x
-        stride (Union[int, np.ndarray]): Stride
-        padding (Union[int, np.ndarray]): Padding
-        dilation (Union[int, np.ndarray]): Dilation
-        groups (Union[int, np.ndarray]): Groups
-        bias (np.ndarray): Bias shaped as C_out
+    The NIRGraph.infer_all_shapes function may be used to automatically infer the input and
+    output types on the graph level.
+
+    :param input_shape: Shape of spatial input (N,)
+    :type input_shape: Optional[int]
+    :param weight: Weight, shape (C_out, C_in, N)
+    :type weight: np.ndarray
+    :param stride: Stride
+    :type stride: int
+    :param padding: Padding, if string must be 'same' or 'valid'
+    :type padding: int | str
+    :param dilation: Dilation
+    :type dilation: int
+    :param groups: Groups
+    :type groups: int
+    :param bias: Bias array of shape (C_out,)
+    :type bias: np.ndarray
     """
 
-    input_shape: int  # X
-    weight: np.ndarray  # Weight C_out * C_in * W_x
+    input_shape: typing.Optional[int]  # N
+    weight: np.ndarray  # Weight C_out * C_in * N
     stride: int  # Stride
-    padding: int  # Padding
+    padding: typing.Union[int, str]  # Padding
     dilation: int  # Dilation
     groups: int  # Groups
     bias: np.ndarray  # Bias C_out
 
     def __post_init__(self):
-        self.input_type = {"input": np.array([self.weight.shape[1], self.input_shape])}
-        output_shape = _calculate_conv_output(
-            self.input_shape,
-            self.padding,
-            self.dilation,
-            self.weight.shape[2],
-            self.stride,
-        )
-        self.output_type = {"output": np.array([self.weight.shape[0], *output_shape])}
+        if isinstance(self.padding, str) and self.padding not in ["same", "valid"]:
+            raise ValueError(f"padding must be 'same', 'valid', or an integer, not {self.padding}")
+        if self.input_shape is None:
+            # leave input and output types undefined
+            self.input_type = {"input": None}
+            self.output_type = {"output": None}
+        else:
+            # infer input and output types from input_shape
+            self.input_type = {"input": np.array([self.weight.shape[1], self.input_shape])}
+            output_shape = _calculate_conv_output(
+                self.input_shape,
+                self.padding,
+                self.dilation,
+                self.weight.shape[2],
+                self.stride,
+            )
+            self.output_type = {"output": np.array([self.weight.shape[0], *output_shape])}
 
 
 @dataclass(eq=False)
@@ -229,43 +263,61 @@ class Conv2d(NIRNode):
     """Convolutional layer in 2d.
 
     Note that the input_shape argument is required to disambiguate the shape, and is used
-    to infer the exact output shape along with the other parameters.
+    to infer the exact output shape along with the other parameters. If the input_shape
+    is None, the output shape will also be None.
 
-    Arguments:
-        input_shape (np.ndarray): Shape of spatial input (W_x, W_y)
-        weight (np.ndarray): Weight C_out * C_in * W_x * W_y
-        stride (Union[int, np.ndarray]): Stride
-        padding (Union[int, np.ndarray]): Padding
-        dilation (Union[int, np.ndarray]): Dilation
-        groups (Union[int, np.ndarray]): Groups
-        bias (np.ndarray): Bias shaped as C_out
+    The NIRGraph.infer_all_shapes function may be used to automatically infer the input and
+    output types on the graph level.
+
+    :param input_shape: Shape of spatial input (N_x, N_y)
+    :type input_shape: Optional[tuple[int, int]]
+    :param weight: Weight, shape (C_out, C_in, N_x, N_y)
+    :type weight: np.ndarray
+    :param stride: Stride
+    :type stride: int | int, int
+    :param padding: Padding, if string must be 'same' or 'valid'
+    :type padding: int | int, int | str
+    :param dilation: Dilation
+    :type dilation: int | int, int
+    :param groups: Groups
+    :type groups: int
+    :param bias: Bias array of shape (C_out,)
+    :type bias: np.ndarray
     """
 
     # Shape of input tensor (overrrides input_type from
-    input_shape: np.ndarray
+    input_shape: typing.Optional[typing.Tuple[int, int]]  # N_x, N_y
     weight: np.ndarray  # Weight C_out * C_in * W_x * W_y
-    stride: int  # Stride
-    padding: int  # Padding
-    dilation: int  # Dilation
+    stride: typing.Union[int, typing.Tuple[int, int]]  # Stride
+    padding: typing.Union[int, typing.Tuple[int, int], str]  # Padding
+    dilation: typing.Union[int, typing.Tuple[int, int]]  # Dilation
     groups: int  # Groups
     bias: np.ndarray  # Bias C_out
 
     def __post_init__(self):
-        if isinstance(self.stride, int):
-            self.stride = (self.stride, self.stride)
+        if isinstance(self.padding, str) and self.padding not in ["same", "valid"]:
+            raise ValueError(f"padding must be 'same', 'valid', or an integer, not {self.padding}")
         if isinstance(self.padding, int):
             self.padding = (self.padding, self.padding)
+        if isinstance(self.stride, int):
+            self.stride = (self.stride, self.stride)
         if isinstance(self.dilation, int):
             self.dilation = (self.dilation, self.dilation)
-        self.input_type = {"input": np.array([self.weight.shape[1], *self.input_shape])}
-        output_shape = _calculate_conv_output(
-            self.input_shape,
-            self.padding,
-            self.dilation,
-            self.weight.shape[2],
-            self.stride,
-        )
-        self.output_type = {"output": np.array([self.weight.shape[0], *output_shape])}
+        if self.input_shape is None:
+            # leave input and output types undefined
+            self.input_type = {"input": None}
+            self.output_type = {"output": None}
+        else:
+            # infer input and output types from input_shape
+            self.input_type = {"input": np.array([self.weight.shape[1], *self.input_shape])}
+            output_shape = _calculate_conv_output(
+                self.input_shape,
+                self.padding,
+                self.dilation,
+                self.weight.shape[2],
+                self.stride,
+            )
+            self.output_type = {"output": np.array([self.weight.shape[0], *output_shape])}
 
 
 @dataclass(eq=False)
