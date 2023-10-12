@@ -27,7 +27,7 @@ def _parse_shape_argument(x: Types, key: str):
 
 def _calculate_conv_output(
     input_shape: typing.Union[int, typing.Sequence[int]],
-    padding: typing.Union[int, str, typing.Sequence[int]],
+    padding: typing.Union[int, typing.Sequence[int]],
     dilation: typing.Union[int, typing.Sequence[int]],
     kernel_size: typing.Union[int, typing.Sequence[int]],
     stride: typing.Union[int, typing.Sequence[int]],
@@ -53,23 +53,18 @@ def _calculate_conv_output(
         ndim = 1
     else:
         ndim = len(input_shape)
-    if isinstance(padding, str) and padding == 'valid':
-        padding = [0] * ndim
     shapes = []
     for i in range(ndim):
-        if isinstance(padding, str) and padding == 'same':
-            shape = input_shape[i]
-        else:
-            shape = np.floor(
-                (
-                    _index_tuple(input_shape, i)
-                    + 2 * _index_tuple(padding, i)
-                    - _index_tuple(dilation, i) * (_index_tuple(kernel_size, i) - 1)
-                    - 1
-                )
-                / _index_tuple(stride, i)
-                + 1
+        shape = np.floor(
+            (
+                _index_tuple(input_shape, i)
+                + 2 * _index_tuple(padding, i)
+                - _index_tuple(dilation, i) * (_index_tuple(kernel_size, i) - 1)
+                - 1
             )
+            / _index_tuple(stride, i)
+            + 1
+        )
         shapes.append(int(shape))
     return np.array(shapes)
 
@@ -352,8 +347,8 @@ class Conv1d(NIRNode):
     :type weight: np.ndarray
     :param stride: Stride
     :type stride: int
-    :param padding: Padding, if string must be 'same' or 'valid'
-    :type padding: int | str
+    :param padding: Padding
+    :type padding: int
     :param dilation: Dilation
     :type dilation: int
     :param groups: Groups
@@ -365,14 +360,12 @@ class Conv1d(NIRNode):
     input_shape: typing.Optional[int]  # N
     weight: np.ndarray  # Weight C_out * C_in * N
     stride: int  # Stride
-    padding: typing.Union[int, str]  # Padding
+    padding: int  # Padding
     dilation: int  # Dilation
     groups: int  # Groups
     bias: np.ndarray  # Bias C_out
 
     def __post_init__(self):
-        if isinstance(self.padding, str) and self.padding not in ["same", "valid"]:
-            raise ValueError(f"padding must be 'same', 'valid', or int, not {self.padding}")
         if self.input_shape is None:
             # leave input and output types undefined
             self.input_type = {"input": None}
@@ -407,8 +400,8 @@ class Conv2d(NIRNode):
     :type weight: np.ndarray
     :param stride: Stride
     :type stride: int | int, int
-    :param padding: Padding, if string must be 'same' or 'valid'
-    :type padding: int | int, int | str
+    :param padding: Padding
+    :type padding: int | int, int
     :param dilation: Dilation
     :type dilation: int | int, int
     :param groups: Groups
@@ -421,14 +414,12 @@ class Conv2d(NIRNode):
     input_shape: typing.Optional[typing.Tuple[int, int]]  # N_x, N_y
     weight: np.ndarray  # Weight C_out * C_in * W_x * W_y
     stride: typing.Union[int, typing.Tuple[int, int]]  # Stride
-    padding: typing.Union[int, typing.Tuple[int, int], str]  # Padding
+    padding: typing.Union[int, typing.Tuple[int, int]]  # Padding
     dilation: typing.Union[int, typing.Tuple[int, int]]  # Dilation
     groups: int  # Groups
     bias: np.ndarray  # Bias C_out
 
     def __post_init__(self):
-        if isinstance(self.padding, str) and self.padding not in ["same", "valid"]:
-            raise ValueError(f"padding must be 'same', 'valid', or int, not {self.padding}")
         if isinstance(self.padding, int):
             self.padding = (self.padding, self.padding)
         if isinstance(self.stride, int):
