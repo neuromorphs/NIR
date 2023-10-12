@@ -476,6 +476,14 @@ class CubaLIF(NIRNode):
             v-v_{threshold} & z=1 \\
             v & else
         \end{cases}
+    
+    or, if the reset voltage is not None:
+
+    .. math::
+        v = \begin{cases}
+            v_{reset} & z=1 \\
+            v & else
+        \end{cases}
 
     Where :math:`\tau_{syn}` is the synaptic time constant,
     :math:`\tau_{mem}` is the membrane time constant,
@@ -484,6 +492,7 @@ class CubaLIF(NIRNode):
     :math:`v_{leak}` is the leak voltage,
     :math:`R` is the resistance,
     :math:`v_{threshold}` is the firing threshold,
+    :math:`v_{reset}` is the reset voltage,
     and :math:`S` is the input spike.
     """
 
@@ -493,6 +502,7 @@ class CubaLIF(NIRNode):
     v_leak: np.ndarray  # Leak voltage
     v_threshold: np.ndarray  # Firing threshold
     w_in: np.ndarray = 1.0  # Input current weight
+    v_reset: typing.Optional[np.ndarray] = None  # Reset voltage
 
     def __post_init__(self):
         assert (
@@ -502,6 +512,8 @@ class CubaLIF(NIRNode):
             == self.v_leak.shape
             == self.v_threshold.shape
         ), "All parameters must have the same shape"
+        if self.v_reset is not None:
+            assert self.r.shape == self.v_reset.shape, "All parameters must have the same shape"
         # If w_in is a scalar, make it an array of same shape as v_threshold
         self.w_in = np.ones_like(self.v_threshold) * self.w_in
         self.input_type = {"input": np.array(self.v_threshold.shape)}
@@ -594,15 +606,26 @@ class IF(NIRNode):
             v-v_{thr} & z=1 \\
             v & else
         \end{cases}
+    
+    or, if the reset voltage is not None:
+
+    .. math::
+        v = \begin{cases}
+            v_{reset} & z=1 \\
+            v & else
+        \end{cases}
     """
 
     r: np.ndarray  # Resistance
     v_threshold: np.ndarray  # Firing threshold
+    v_reset: typing.Optional[np.ndarray] = None  # Reset voltage
 
     def __post_init__(self):
         assert (
             self.r.shape == self.v_threshold.shape
         ), "All parameters must have the same shape"
+        if self.v_reset is not None:
+            assert self.r.shape == self.v_reset.shape, "All parameters must have the same shape"
         self.input_type = {"input": np.array(self.r.shape)}
         self.output_type = {"output": np.array(self.r.shape)}
 
@@ -688,16 +711,26 @@ class LIF(NIRNode):
             v-v_{thr} & z=1 \\
             v & else
         \end{cases}
+    
+    or, if the reset voltage is not None:
+
+    .. math::
+        v = \begin{cases}
+            v_{reset} & z=1 \\
+            v & else
+        \end{cases}
 
     Where :math:`\tau` is the time constant, :math:`v` is the membrane potential,
     :math:`v_{leak}` is the leak voltage, :math:`R` is the resistance,
     :math:`v_{threshold}` is the firing threshold, and :math:`I` is the input current.
+    :math:`v_{reset}` is the reset voltage.
     """
 
     tau: np.ndarray  # Time constant
     r: np.ndarray  # Resistance
     v_leak: np.ndarray  # Leak voltage
     v_threshold: np.ndarray  # Firing threshold
+    v_reset: typing.Optional[np.ndarray] = None  # Reset voltage
 
     def __post_init__(self):
         assert (
@@ -706,6 +739,8 @@ class LIF(NIRNode):
             == self.v_leak.shape
             == self.v_threshold.shape
         ), "All parameters must have the same shape"
+        if self.v_reset is not None:
+            assert self.r.shape == self.v_reset.shape, "All parameters must have the same shape"
         self.input_type = {"input": np.array(self.r.shape)}
         self.output_type = {"output": np.array(self.r.shape)}
 
