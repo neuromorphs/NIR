@@ -27,7 +27,7 @@ def _parse_shape_argument(x: Types, key: str):
 
 def _calculate_conv_output(
     input_shape: typing.Union[int, typing.Sequence[int]],
-    padding: typing.Union[int, typing.Sequence[int]],
+    padding: np.ndarray,
     dilation: typing.Union[int, typing.Sequence[int]],
     kernel_size: typing.Union[int, typing.Sequence[int]],
     stride: typing.Union[int, typing.Sequence[int]],
@@ -37,8 +37,8 @@ def _calculate_conv_output(
 
     :param input_shape: input shape, either int or (int, int)
     :type input_shape: int | typing.Sequence[int]
-    :param padding: padding
-    :type padding: int | typing.Sequence[int]
+    :param padding: padding, each dimension has two values
+    :type padding: integer array, of shape (2,) or (2, 2), etc.
     :param dilation: dilation
     :type dilation: int | typing.Sequence[int]
     :param kernel_size: kernel size
@@ -58,7 +58,7 @@ def _calculate_conv_output(
         shape = np.floor(
             (
                 _index_tuple(input_shape, i)
-                + 2 * _index_tuple(padding, i)
+                + sum(padding if isinstance(padding[0], (int, np.integer)) else padding[i])
                 - _index_tuple(dilation, i) * (_index_tuple(kernel_size, i) - 1)
                 - 1
             )
@@ -360,12 +360,17 @@ class Conv1d(NIRNode):
     input_shape: typing.Optional[int]  # N
     weight: np.ndarray  # Weight C_out * C_in * N
     stride: int  # Stride
-    padding: int  # Padding
+    padding: typing.Union[int, typing.Tuple[int, int]]  # Padding
     dilation: int  # Dilation
     groups: int  # Groups
     bias: np.ndarray  # Bias C_out
 
     def __post_init__(self):
+        if isinstance(self.padding, int):
+            self.padding = (self.padding, self.padding)
+        elif isinstance(self.padding[0], (int, np.integer)):
+            assert len(self.padding) == 2, "Conv1D Padding must be of length 2"
+            self.padding = tuple([int(p) for p in self.padding])
         if self.input_shape is None:
             # leave input and output types undefined
             self.input_type = {"input": None}
@@ -401,7 +406,7 @@ class Conv2d(NIRNode):
     :param stride: Stride
     :type stride: int | int, int
     :param padding: Padding
-    :type padding: int | int, int
+    :type padding: int | int, int | ((int, int), (int, int))
     :param dilation: Dilation
     :type dilation: int | int, int
     :param groups: Groups
@@ -414,14 +419,20 @@ class Conv2d(NIRNode):
     input_shape: typing.Optional[typing.Tuple[int, int]]  # N_x, N_y
     weight: np.ndarray  # Weight C_out * C_in * W_x * W_y
     stride: typing.Union[int, typing.Tuple[int, int]]  # Stride
-    padding: typing.Union[int, typing.Tuple[int, int]]  # Padding
+    padding: typing.Union[int, typing.Tuple[int, int], typing.Sequence[typing.Tuple[int, int]]]
     dilation: typing.Union[int, typing.Tuple[int, int]]  # Dilation
     groups: int  # Groups
     bias: np.ndarray  # Bias C_out
 
     def __post_init__(self):
         if isinstance(self.padding, int):
-            self.padding = (self.padding, self.padding)
+            self.padding = ((self.padding, self.padding), (self.padding, self.padding))
+        elif isinstance(self.padding[0], (int, np.integer)):
+            assert len(self.padding) == 2, "Conv2D Padding must be of length 2"
+            self.padding = (self.padding[0], self.padding[0]), (self.padding[1], self.padding[1])
+        elif isinstance(self.padding[0][0], (int, np.integer)):
+            assert all(len(p) == 2 for p in self.padding), "Padding must be a tuple of length 2"
+            self.padding = tuple([tuple([int(e) for e in p]) for p in self.padding])
         if isinstance(self.stride, int):
             self.stride = (self.stride, self.stride)
         if isinstance(self.dilation, int):
