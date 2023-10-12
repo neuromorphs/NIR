@@ -107,8 +107,11 @@ def _convert_node(node: nir.NIRNode) -> dict:
         raise ValueError(f"Unknown node type: {node}")
 
 
-def write(filename: typing.Union[str, pathlib.Path], graph: nir.NIRNode) -> None:
-    """Write a NIR to a HDF5 file."""
+def write(filename: typing.Union[str, pathlib.Path], graph: nir.NIRNode, strict=True) -> None:
+    """Write a NIR to a HDF5 file. If strict, only allow valid graphs to be written."""
+
+    if not graph.is_valid() and strict:
+        raise ValueError("Cannot write an invalid graph. See NIRGraph.is_valid().")
 
     def write_recursive(group: h5py.Group, node: dict) -> None:
         for k, v in node.items():

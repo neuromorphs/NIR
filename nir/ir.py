@@ -112,6 +112,7 @@ class NIRGraph(NIRNode):
 
     nodes: Nodes  # List of computational nodes
     edges: Edges  # List of edges between nodes
+    ensure_validity: bool = True  # Whether to check that the graph is valid
 
     @property
     def inputs(self):
@@ -177,14 +178,14 @@ class NIRGraph(NIRNode):
             node_key: self.nodes[node_key].output_type for node_key in output_node_keys
         }
         # check that all nodes have consistent and defined input and output types
-        try:
-            self._check_types()
-        except ValueError as e:
-            print(f'[warning] {e}')
-            self.infer_types()
-            self._check_types()
-    
-    def _check_types(self):
+        if self.ensure_validity:
+            if not self.is_valid():
+                print('invalid graph, attempting to infer types')
+                self.infer_types()
+                if not self.is_valid():
+                    raise ValueError('invalid graph, could not infer types')
+
+    def is_valid(self):
         """Check that all nodes in the graph have input and output types. Will raise ValueError
         if any node has no input or output type, or if the types are inconsistent."""
         for edge in self.edges:
@@ -196,18 +197,21 @@ class NIRGraph(NIRNode):
                 v is None for v in pre_node.output_type.values()
             )
             if undef_out_type:
-                raise ValueError(f'pre node {edge[0]} has no output type')
+                print(f'pre node {edge[0]} has no output type')
+                return False
             undef_in_type = post_node.input_type is None or any(
                 v is None for v in post_node.input_type.values()
             )
             if undef_in_type:
-                raise ValueError(f'post node {edge[1]} has no input type')
+                print(f'post node {edge[1]} has no input type')
+                return False
 
             # make sure the length of types is equal
             if len(pre_node.output_type) != len(post_node.input_type):
                 pre_repr = f'len({edge[0]}.output)={len(pre_node.output_type)}'
                 post_repr = f'len({edge[1]}.input)={len(post_node.input_type)}'
-                raise ValueError(f'type length mismatch: {pre_repr} -> {post_repr}')
+                print(f'type length mismatch: {pre_repr} -> {post_repr}')
+                return False
 
             # make sure the type values match up
             if len(pre_node.output_type.keys()) == 1:
@@ -216,9 +220,11 @@ class NIRGraph(NIRNode):
                 if not np.array_equal(post_input_type, pre_output_type):
                     pre_repr = f'{edge[0]}.output: {pre_output_type}'
                     post_repr = f'{edge[1]}.input: {post_input_type}'
-                    raise ValueError(f'type mismatch: {pre_repr} -> {post_repr}')
+                    print(f'type mismatch: {pre_repr} -> {post_repr}')
+                    return False
             else:
-                raise NotImplementedError('multiple input/output types not supported yet')
+                print('multiple input/output types not supported yet')
+                return False
         return True
     
     def _forward_type_inference(self, debug=True):

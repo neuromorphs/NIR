@@ -88,10 +88,16 @@ def read_node(node: typing.Any) -> nir.NIRNode:
         raise ValueError(f"Unknown unit type: {node['type'][()]}")
 
 
-def read(filename: typing.Union[str, pathlib.Path]) -> nir.NIRGraph:
-    """Load a NIR from a HDF/conn5 file."""
+def read(filename: typing.Union[str, pathlib.Path], strict=True) -> nir.NIRGraph:
+    """Load a NIR from a HDF/conn5 file. If strict, only load valid graphs."""
     with h5py.File(filename, "r") as f:
-        return read_node(f["node"])
+        graph: nir.NIRGraph = read_node(f["node"])
+        if not graph.is_valid():
+            print('[WARNING] graph is invalid, attempting nir.NIRGraph.infer_types()')
+            graph = graph.infer_types()
+            if not graph.is_valid() and strict:
+                raise ValueError("Invalid graph, could not read.")
+        return graph
 
 
 def read_version(filename: typing.Union[str, pathlib.Path]) -> str:
