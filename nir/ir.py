@@ -176,6 +176,13 @@ class NIRGraph(NIRNode):
         self.output_type = {
             node_key: self.nodes[node_key].output_type for node_key in output_node_keys
         }
+        # check that all nodes have consistent and defined input and output types
+        try:
+            self._check_types()
+        except ValueError as e:
+            print(f'[warning] {e}')
+            self.infer_types()
+            self._check_types()
     
     def _check_types(self):
         """Check that all nodes in the graph have input and output types. Will raise ValueError
