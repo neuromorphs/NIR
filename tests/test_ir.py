@@ -329,6 +329,82 @@ def test_inputs_outputs_properties():
     assert ir.nodes["out2"] in ir2.nodes["inner"].outputs.values()
 
 
+def test_sumpool_type_inference():
+    graphs = {
+        'undef graph output': nir.NIRGraph(nodes={
+            'input': nir.Input(input_type=np.array([1, 64, 64])),
+            'sumpool': nir.SumPool2d(
+                kernel_size=np.array([2, 2]),
+                stride=np.array([2, 2]),
+                padding=np.array([0, 0])
+            ),
+            'output': nir.Output(output_type=None)
+        }, edges=[('input', 'sumpool'), ('sumpool', 'output')]),
+    }
+    for name, graph in graphs.items():
+        try:
+            graph._check_types()
+        except Exception:
+            pass
+        else:
+            raise AssertionError(f'type check failed for: {name}')
+        graph.infer_types()
+        assert graph._check_types(), f'type inference failed for: {name}'
+
+
+def test_flatten_type_inference():
+    graphs = {
+        'undef graph output': nir.NIRGraph(nodes={
+            'input': nir.Input(input_type=np.array([1, 64, 64])),
+            'flatten': nir.Flatten(
+                start_dim=0,
+                end_dim=0,
+                input_type=np.array([1, 64, 64])
+            ),
+            'output': nir.Output(output_type=None)
+        }, edges=[('input', 'flatten'), ('flatten', 'output')]),
+
+        'incorrect graph output': nir.NIRGraph(nodes={
+            'input': nir.Input(input_type=np.array([1, 64, 64])),
+            'flatten': nir.Flatten(
+                start_dim=0,
+                end_dim=0,
+                input_type=np.array([1, 64, 64])
+            ),
+            'output': nir.Output(output_type=np.array([1, 61, 1]))
+        }, edges=[('input', 'flatten'), ('flatten', 'output')]),
+
+        'undef flatten.input': nir.NIRGraph(nodes={
+            'input': nir.Input(input_type=np.array([1, 64, 64])),
+            'flatten': nir.Flatten(
+                start_dim=0,
+                end_dim=0,
+                input_type=None
+            ),
+            'output': nir.Output(output_type=np.array([1, 61, 61]))
+        }, edges=[('input', 'flatten'), ('flatten', 'output')]),
+
+        'undef flatten.input and graph output': nir.NIRGraph(nodes={
+            'input': nir.Input(input_type=np.array([1, 64, 64])),
+            'flatten': nir.Flatten(
+                start_dim=0,
+                end_dim=0,
+                input_type=None
+            ),
+            'output': nir.Output(output_type=None)
+        }, edges=[('input', 'flatten'), ('flatten', 'output')])
+    }
+    for name, graph in graphs.items():
+        try:
+            graph._check_types()
+        except Exception:
+            pass
+        else:
+            raise AssertionError(f'type check failed for: {name}')
+        graph.infer_types()
+        assert graph._check_types(), f'type inference failed for: {name}'
+
+
 def test_conv_type_inference():
     graphs = {
         'undef graph output': nir.NIRGraph(nodes={
@@ -430,5 +506,12 @@ def test_conv_type_inference():
         }, edges=[('input', 'conv'), ('conv', 'output')]),
     }
     for name, graph in graphs.items():
+        try:
+            # this should raise an exception
+            graph._check_types()
+        except Exception:
+            pass
+        else:
+            raise AssertionError(f'type check failed for: {name}')
         graph.infer_types()
         assert graph._check_types(), f'type inference failed for: {name}'
