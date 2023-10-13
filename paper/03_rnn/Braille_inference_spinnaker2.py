@@ -102,6 +102,7 @@ for i in range(n_samples):
     hw = brian2_sim.Brian2Backend()
 
     timesteps = sample.shape[1]
+    net.reset()  # clear previous spikes and voltages
     hw.run(net, timesteps, quantize_weights=False)
 
     spike_times = outp[0].get_spikes()
