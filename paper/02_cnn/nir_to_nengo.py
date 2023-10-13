@@ -2,11 +2,13 @@ import nengo
 import numpy as np
 import nir
 
+
 class IF(nengo.SpikingRectifiedLinear):
     def step(self, dt, J, output, voltage):
         voltage += J * dt
-        output[:] = (self.amplitude / dt) * np.where(voltage>1,1,0)
-        voltage[output>0] = 0
+        output[:] = (self.amplitude / dt) * np.where(voltage > 1, 1, 0)
+        voltage[output > 0] = 0
+
 
 def nir_to_nengo(n, dt=0.001):
     nengo_map = {}
@@ -18,7 +20,8 @@ def nir_to_nengo(n, dt=0.001):
         filters = {}
         for name, obj in n.nodes.items():
             if isinstance(obj, nir.Input):
-                node = nengo.Node(None, size_in=np.product(obj.input_type['input']), label=f"Input {name} {obj.input_type['input']}")
+                node = nengo.Node(None, size_in=np.product(obj.input_type['input']),
+                                  label=f"Input {name} {obj.input_type['input']}")
                 nengo_map[name] = node
                 pre_map[name] = node
             elif isinstance(obj, nir.LIF):
@@ -29,7 +32,8 @@ def nir_to_nengo(n, dt=0.001):
                     n_neurons=N,
                     dimensions=1,
                     label=f"LIF {name}",
-                    neuron_type = nengo.LIF(tau_rc=obj.tau[0], tau_ref=0, initial_state={"voltage": nengo.dists.Choice([0])}),
+                    neuron_type=nengo.LIF(tau_rc=obj.tau[0], tau_ref=0,
+                                          initial_state={"voltage": nengo.dists.Choice([0])}),
                     gain=np.ones(N)/obj.v_threshold,
                     bias=np.zeros(N),
                 )
@@ -43,7 +47,8 @@ def nir_to_nengo(n, dt=0.001):
                     n_neurons=N,
                     dimensions=1,
                     label=f"IF {name}",
-                    neuron_type = IF(initial_state={"voltage": nengo.dists.Choice([0])}, amplitude=dt),
+                    neuron_type=IF(initial_state={"voltage": nengo.dists.Choice([0])},
+                                   amplitude=dt),
                     gain=np.ones(N)/obj.v_threshold.flatten()/dt,
                     bias=np.zeros(N),
                 )
@@ -71,7 +76,8 @@ def nir_to_nengo(n, dt=0.001):
                 pre_map[name] = w
                 post_map[name] = w
             elif isinstance(obj, nir.Output):
-                nengo_map[name] = nengo.Node(None, size_in=np.product(obj.output_type['output']), label=f"Output {name} {obj.input_type['input']}")
+                nengo_map[name] = nengo.Node(None, size_in=np.product(obj.output_type['output']),
+                                             label=f"Output {name} {obj.input_type['input']}")
                 post_map[name] = nengo_map[name]
             elif isinstance(obj, nir.Flatten):
                 if name == '5':
@@ -86,57 +92,65 @@ def nir_to_nengo(n, dt=0.001):
                 post_map[name] = node
             elif isinstance(obj, nir.Conv2d):
                 conv = nengo.Network(label=f'Conv2d {name}')
-                
+
                 if name == '0':
-                    input_shape = (2,34,34)
+                    input_shape = (2, 34, 34)
                 elif name == '2':
-                    input_shape = (16,16,16)
+                    input_shape = (16, 16, 16)
                 else:
-                    input_shape = (16,8,8)
-                    
+                    input_shape = (16, 8, 8)
+
                 pad = np.ones(input_shape)
-                pad = np.pad(pad, [(0,0),(obj.padding[0],obj.padding[0]),(obj.padding[1],obj.padding[1])], 'constant', constant_values=0)
-                
+                pad = np.pad(
+                    pad,
+                    [
+                        (0, 0),
+                        (obj.padding[0], obj.padding[0]),
+                        (obj.padding[1], obj.padding[1])
+                    ],
+                    'constant',
+                    constant_values=0)
+
                 with conv:
-                    ww = np.transpose(obj.weight,(2,3,1,0))
+                    ww = np.transpose(obj.weight, (2, 3, 1, 0))
                     c = nengo.Convolution(n_filters=obj.weight.shape[0],
                                           input_shape=pad.shape,
                                           channels_last=False,
                                           init=ww,
                                           strides=obj.stride,
                                           padding='valid',
-                                          kernel_size=(obj.weight.shape[2],obj.weight.shape[3]),
-                                        )
-                    conv.input = nengo.Node(None, size_in=np.product(input_shape), label=f'{name}.in')
+                                          kernel_size=(obj.weight.shape[2], obj.weight.shape[3])
+                                          )
+                    conv.input = nengo.Node(None, size_in=np.product(input_shape),
+                                            label=f'{name}.in')
                     conv.pad = nengo.Node(None, size_in=np.product(pad.shape))
-                    nengo.Connection(conv.input, conv.pad[np.where(pad.flatten()>0)[0]], synapse=None)
+                    nengo.Connection(conv.input, conv.pad[np.where(pad.flatten() > 0)[0]],
+                                     synapse=None)
                     conv.output = nengo.Node(None, size_in=c.size_out, label=f'{name}.out')
-                
+
                     nengo.Connection(conv.pad, conv.output, synapse=None,
                                      transform=c)
-                
-                
-                
+
                 nengo_map[name] = conv
                 pre_map[name] = conv.output
                 post_map[name] = conv.input
             elif isinstance(obj, nir.SumPool2d):
                 pool = nengo.Network(label=f'SumPool2d {name}')
                 with pool:
-                    if name=='4':
-                        input_shape = (16,16,16)
-                    elif name=='7':
-                        input_shape = (8,8,8)
+                    if name == '4':
+                        input_shape = (16, 16, 16)
+                    elif name == '7':
+                        input_shape = (8, 8, 8)
                     else:
                         1/0
-                        
+
                     n_filters = input_shape[0]
                     pool_size = tuple(obj.kernel_size)
                     n_pool = np.product(pool_size)
                     kernel = np.reshape(
                                 [np.eye(n_filters)] * n_pool, pool_size + (n_filters, n_filters)
-                    )                        
-                        
+                    )
+
                     c = nengo.Convolution(n_filters=input_shape[0],
                                           input_shape=input_shape,
                                           channels_last=False,
@@ -144,9 +158,11 @@ def nir_to_nengo(n, dt=0.001):
                                           strides=obj.stride,
                                           padding='valid',
                                           kernel_size=pool_size,
-                                         )    
-                    pool.input = nengo.Node(None, size_in=np.product(input_shape), label=f'SumPool2d {name}.in')
-                    pool.output = nengo.Node(None, size_in=c.size_out, label=f'SumPool2d {name}.out')
+                                          )
+                    pool.input = nengo.Node(None, size_in=np.product(input_shape),
+                                            label=f'SumPool2d {name}.in')
+                    pool.output = nengo.Node(None, size_in=c.size_out,
+                                             label=f'SumPool2d {name}.out')
                     nengo.Connection(pool.input, pool.output, synapse=None, transform=c)
                 nengo_map[name] = pool
                 pre_map[name] = pool.output

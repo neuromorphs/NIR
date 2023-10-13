@@ -53,11 +53,11 @@ def _calculate_conv_output(
         ndim = 1
     else:
         ndim = len(input_shape)
-    if isinstance(padding, str) and padding == 'valid':
+    if isinstance(padding, str) and padding == "valid":
         padding = [0] * ndim
     shapes = []
     for i in range(ndim):
-        if isinstance(padding, str) and padding == 'same':
+        if isinstance(padding, str) and padding == "same":
             shape = input_shape[i]
         else:
             shape = np.floor(
@@ -74,10 +74,36 @@ def _calculate_conv_output(
     return np.array(shapes)
 
 
+def _calc_flatten_output(
+    input_shape: typing.Sequence[int], start_dim: int, end_dim: int
+):
+    start_shape = np.array(input_shape[:start_dim]) if start_dim != 0 else []
+    middle_shape = (
+        np.prod(input_shape[start_dim : end_dim + 1])
+        if end_dim != -1
+        else np.prod(input_shape[start_dim:])
+    )
+    end_shape = (
+        np.array(input_shape[end_dim + 1 :])
+        if end_dim != -1 and end_dim != len(input_shape) - 1
+        else []
+    )
+    return np.array(
+        [
+            *start_shape,
+            middle_shape,
+            *end_shape,
+        ]
+    )
+
+
 def _index_tuple(
     tuple: typing.Union[int, typing.Sequence[int]], index: int
 ) -> typing.Union[int, np.ndarray]:
-    """If the input is a tuple/array, index it. Otherwise, return it as-is."""
+    """If the input is a tuple/array, index it.
+
+    Otherwise, return it as-is.
+    """
     if isinstance(tuple, np.ndarray) or isinstance(tuple, Sequence):
         return tuple[index]
     elif isinstance(tuple, (int, np.integer)):
@@ -143,14 +169,18 @@ class NIRGraph(NIRNode):
             return name
 
         counts = Counter()
-        node_dict = {"input": Input(input_type=nodes[0].input_type)}
+        if not isinstance(nodes[0], Input):
+            node_dict = {"input": Input(input_type=nodes[0].input_type)}
+        else:
+            node_dict = {}
         edges = []
 
         for node in nodes:
             name = unique_node_name(node, counts)
             node_dict[name] = node
 
-        node_dict["output"] = Output(output_type=nodes[-1].output_type)
+        if not isinstance(nodes[-1], Output):
+            node_dict["output"] = Output(output_type=nodes[-1].output_type)
 
         names = list(node_dict)
         for i in range(len(names) - 1):
@@ -176,10 +206,13 @@ class NIRGraph(NIRNode):
         self.output_type = {
             node_key: self.nodes[node_key].output_type for node_key in output_node_keys
         }
-    
+
     def _check_types(self):
-        """Check that all nodes in the graph have input and output types. Will raise ValueError
-        if any node has no input or output type, or if the types are inconsistent."""
+        """Check that all nodes in the graph have input and output types.
+
+        Will raise ValueError if any node has no input or output type, or if the types
+        are inconsistent.
+        """
         for edge in self.edges:
             pre_node = self.nodes[edge[0]]
             post_node = self.nodes[edge[1]]
@@ -189,35 +222,38 @@ class NIRGraph(NIRNode):
                 v is None for v in pre_node.output_type.values()
             )
             if undef_out_type:
-                raise ValueError(f'pre node {edge[0]} has no output type')
+                raise ValueError(f"pre node {edge[0]} has no output type")
             undef_in_type = post_node.input_type is None or any(
                 v is None for v in post_node.input_type.values()
             )
             if undef_in_type:
-                raise ValueError(f'post node {edge[1]} has no input type')
+                raise ValueError(f"post node {edge[1]} has no input type")
 
             # make sure the length of types is equal
             if len(pre_node.output_type) != len(post_node.input_type):
-                pre_repr = f'len({edge[0]}.output)={len(pre_node.output_type)}'
-                post_repr = f'len({edge[1]}.input)={len(post_node.input_type)}'
-                raise ValueError(f'type length mismatch: {pre_repr} -> {post_repr}')
+                pre_repr = f"len({edge[0]}.output)={len(pre_node.output_type)}"
+                post_repr = f"len({edge[1]}.input)={len(post_node.input_type)}"
+                raise ValueError(f"type length mismatch: {pre_repr} -> {post_repr}")
 
             # make sure the type values match up
             if len(pre_node.output_type.keys()) == 1:
                 post_input_type = list(post_node.input_type.values())[0]
                 pre_output_type = list(pre_node.output_type.values())[0]
                 if not np.array_equal(post_input_type, pre_output_type):
-                    pre_repr = f'{edge[0]}.output: {pre_output_type}'
-                    post_repr = f'{edge[1]}.input: {post_input_type}'
-                    raise ValueError(f'type mismatch: {pre_repr} -> {post_repr}')
+                    pre_repr = f"{edge[0]}.output: {pre_output_type}"
+                    post_repr = f"{edge[1]}.input: {post_input_type}"
+                    raise ValueError(f"type mismatch: {pre_repr} -> {post_repr}")
             else:
-                raise NotImplementedError('multiple input/output types not supported yet')
+                raise NotImplementedError(
+                    "multiple input/output types not supported yet"
+                )
         return True
-    
+
     def _forward_type_inference(self, debug=True):
-        """Infer the types of all nodes in this graph. Will modify the input_type and output_type
-        of nodes in the graph as needed. Assumes that the input_type of the graph is set. Moves
-        from the input nodes to the output nodes. Raises ValueError if types are inconsistent.
+        """Infer the types of all nodes in this graph. Will modify the input_type and
+        output_type of nodes in the graph as needed. Assumes that the input_type of the
+        graph is set. Moves from the input nodes to the output nodes. Raises ValueError
+        if types are inconsistent.
 
         Assumes that all input types are of form: {'input': ...} and all output types are of form:
         {'output': ...}.
@@ -231,34 +267,46 @@ class NIRGraph(NIRNode):
             pre_key, post_key = ready.pop()
             pre_node = self.nodes[pre_key]
             post_node = self.nodes[post_key]
-            
+
             if isinstance(pre_node, NIRGraph) or isinstance(post_node, NIRGraph):
-                raise NotImplementedError('type inference on nested NIR graphs not supported yet')
-            
+                raise NotImplementedError(
+                    "type inference on nested NIR graphs not supported yet"
+                )
+
             # check if post input_type needs to be defined
             undef_post_input_type = post_node.input_type is None or any(
                 v is None for v in post_node.input_type.values()
             )
-            type_mismatch = any([
-                len(post_node.input_type) != len(pre_node.output_type),
-                not np.array_equal(
-                    np.array(list(pre_node.output_type.values())), 
-                    np.array(list(post_node.input_type.values()))
-                )
-            ])
+            type_mismatch = any(
+                [
+                    len(post_node.input_type) != len(pre_node.output_type),
+                    not np.array_equal(
+                        np.array(list(pre_node.output_type.values())),
+                        np.array(list(post_node.input_type.values())),
+                    ),
+                ]
+            )
             if undef_post_input_type:
                 # define post input_type to be the same as pre output_type
-                print(f'[warning] {post_key}.input_type undefined, set to {pre_key}.output_type')
+                print(
+                    f"[warning] {post_key}.input_type undefined, set to {pre_key}.output_type"
+                )
                 post_node.input_type = {
-                    k.replace('output', 'input'): v for k, v in pre_node.output_type.items()
+                    k.replace("output", "input"): v
+                    for k, v in pre_node.output_type.items()
                 }
             elif type_mismatch:
                 # set post input_type to be the same as pre output_type
-                pre_repr = f'{pre_key}.output: {np.array(list(pre_node.output_type.values()))}'
-                post_repr = f'{post_key}.input: {np.array(list(post_node.input_type.values()))}'
-                print(f'[warning] overwriting {post_repr} with {pre_repr}')
+                pre_repr = (
+                    f"{pre_key}.output: {np.array(list(pre_node.output_type.values()))}"
+                )
+                post_repr = (
+                    f"{post_key}.input: {np.array(list(post_node.input_type.values()))}"
+                )
+                print(f"[warning] overwriting {post_repr} with {pre_repr}")
                 post_node.input_type = {
-                    k.replace('output', 'input'): v for k, v in pre_node.output_type.items()
+                    k.replace("output", "input"): v
+                    for k, v in pre_node.output_type.items()
                 }
 
             # check if post output_type needs to be defined
@@ -269,9 +317,9 @@ class NIRGraph(NIRNode):
                 # define post output_type
                 if isinstance(post_node, Conv1d) or isinstance(post_node, Conv2d):
                     if isinstance(post_node, Conv1d):
-                        post_node.input_shape = post_node.input_type['input'][1]
+                        post_node.input_shape = post_node.input_type["input"][1]
                     else:
-                        post_node.input_shape = tuple(post_node.input_type['input'][1:])
+                        post_node.input_shape = tuple(post_node.input_type["input"][1:])
                     output_shape = _calculate_conv_output(
                         post_node.input_shape,
                         post_node.padding,
@@ -281,14 +329,42 @@ class NIRGraph(NIRNode):
                     )
                     output_type = np.array([post_node.weight.shape[0], *output_shape])
                     post_node.output_type = {"output": output_type}
-            
+
+                elif isinstance(post_node, SumPool2d):
+                    output_shape = _calculate_conv_output(
+                        pre_node.output_type["output"][1:],
+                        post_node.padding,
+                        1,
+                        post_node.kernel_size,
+                        post_node.stride,
+                    )
+                    output_type = np.array(
+                        [post_node.input_type["input"][0], *output_shape]
+                    )
+                    post_node.output_type = {"output": output_type}
+
+                elif isinstance(post_node, Flatten):
+                    print("updateing flatten output")
+                    post_node.output_type = {
+                        "output": _calc_flatten_output(
+                            post_node.input_type["input"],
+                            post_node.start_dim,
+                            post_node.end_dim,
+                        )
+                    }
+                    n_inputs = np.prod(post_node.input_type["input"])
+                    n_outputs = np.prod(post_node.output_type["output"])
+                    assert (
+                        n_inputs == n_outputs
+                    ), "Flatten must not change the number of elements"
+
             seen.add(post_key)
             ready += [e for e in self.edges if e[0] == post_key and e[1] not in seen]
 
     def infer_types(self):
         """Infer the shapes of all nodes in this graph. Will modify the input_type and
         output_type of all nodes in the graph.
-        
+
         Assumes that either the input type or the output type of the graph is set.
         Assumes that if A->B, then A.output_type.values() = B.input_type.values()
         """
@@ -303,7 +379,9 @@ class NIRGraph(NIRNode):
             self._forward_type_inference()
         elif not undef_output_type:
             # backward-mode type inferring
-            raise NotImplementedError('backward-mode type inference not implemented yet')
+            raise NotImplementedError(
+                "backward-mode type inference not implemented yet"
+            )
         else:
             raise ValueError("Either input_type or output_type must be set")
 
@@ -339,12 +417,12 @@ class Affine(NIRNode):
 class Conv1d(NIRNode):
     """Convolutional layer in 1d.
 
-    Note that the input_shape argument is required to disambiguate the shape, and is used
-    to infer the exact output shape along with the other parameters. If the input_shape
-    is None, the output shape will also be None.
+    Note that the input_shape argument is required to disambiguate the shape, and is
+    used to infer the exact output shape along with the other parameters. If the
+    input_shape is None, the output shape will also be None.
 
-    The NIRGraph.infer_all_shapes function may be used to automatically infer the input and
-    output types on the graph level.
+    The NIRGraph.infer_all_shapes function may be used to automatically infer the input
+    and output types on the graph level.
 
     :param input_shape: Shape of spatial input (N,)
     :type input_shape: Optional[int]
@@ -372,14 +450,18 @@ class Conv1d(NIRNode):
 
     def __post_init__(self):
         if isinstance(self.padding, str) and self.padding not in ["same", "valid"]:
-            raise ValueError(f"padding must be 'same', 'valid', or int, not {self.padding}")
+            raise ValueError(
+                f"padding must be 'same', 'valid', or int, not {self.padding}"
+            )
         if self.input_shape is None:
             # leave input and output types undefined
             self.input_type = {"input": None}
             self.output_type = {"output": None}
         else:
             # infer input and output types from input_shape
-            self.input_type = {"input": np.array([self.weight.shape[1], self.input_shape])}
+            self.input_type = {
+                "input": np.array([self.weight.shape[1], self.input_shape])
+            }
             output_shape = _calculate_conv_output(
                 self.input_shape,
                 self.padding,
@@ -387,19 +469,21 @@ class Conv1d(NIRNode):
                 self.weight.shape[2],
                 self.stride,
             )
-            self.output_type = {"output": np.array([self.weight.shape[0], *output_shape])}
+            self.output_type = {
+                "output": np.array([self.weight.shape[0], *output_shape])
+            }
 
 
 @dataclass(eq=False)
 class Conv2d(NIRNode):
     """Convolutional layer in 2d.
 
-    Note that the input_shape argument is required to disambiguate the shape, and is used
-    to infer the exact output shape along with the other parameters. If the input_shape
-    is None, the output shape will also be None.
+    Note that the input_shape argument is required to disambiguate the shape, and is
+    used to infer the exact output shape along with the other parameters. If the
+    input_shape is None, the output shape will also be None.
 
-    The NIRGraph.infer_all_shapes function may be used to automatically infer the input and
-    output types on the graph level.
+    The NIRGraph.infer_all_shapes function may be used to automatically infer the input
+    and output types on the graph level.
 
     :param input_shape: Shape of spatial input (N_x, N_y)
     :type input_shape: Optional[tuple[int, int]]
@@ -428,7 +512,9 @@ class Conv2d(NIRNode):
 
     def __post_init__(self):
         if isinstance(self.padding, str) and self.padding not in ["same", "valid"]:
-            raise ValueError(f"padding must be 'same', 'valid', or int, not {self.padding}")
+            raise ValueError(
+                f"padding must be 'same', 'valid', or int, not {self.padding}"
+            )
         if isinstance(self.padding, int):
             self.padding = (self.padding, self.padding)
         if isinstance(self.stride, int):
@@ -441,7 +527,9 @@ class Conv2d(NIRNode):
             self.output_type = {"output": None}
         else:
             # infer input and output types from input_shape
-            self.input_type = {"input": np.array([self.weight.shape[1], *self.input_shape])}
+            self.input_type = {
+                "input": np.array([self.weight.shape[1], *self.input_shape])
+            }
             output_shape = _calculate_conv_output(
                 self.input_shape,
                 self.padding,
@@ -449,7 +537,9 @@ class Conv2d(NIRNode):
                 self.weight.shape[2],
                 self.stride,
             )
-            self.output_type = {"output": np.array([self.weight.shape[0], *output_shape])}
+            self.output_type = {
+                "output": np.array([self.weight.shape[0], *output_shape])
+            }
 
 
 @dataclass(eq=False)
@@ -541,19 +631,20 @@ class Flatten(NIRNode):
 
     def __post_init__(self):
         self.input_type = _parse_shape_argument(self.input_type, "input")
-        concat = self.input_type["input"][self.start_dim : self.end_dim].prod()
-        self.output_type = {
-            "output": np.array(
-                [
-                    *self.input_type["input"][: self.start_dim],
-                    concat,
-                    *self.input_type["input"][self.end_dim :],
-                ]
-            )
-        }
-        # make sure input and output shape are valid
-        if np.prod(self.input_type["input"]) != np.prod(self.output_type["output"]):
-            raise ValueError("input and output shape must have same number of elements")
+        if self.input_type["input"] is None:
+            self.input_type = {"input": None}
+            self.output_type = {"output": None}
+        else:
+            self.output_type = {
+                "output": _calc_flatten_output(
+                    self.input_type["input"], self.start_dim, self.end_dim
+                )
+            }
+            # make sure input and output shape are valid
+            if np.prod(self.input_type["input"]) != np.prod(self.output_type["output"]):
+                raise ValueError(
+                    "input and output shape must have same number of elements"
+                )
 
 
 @dataclass(eq=False)
@@ -752,8 +843,8 @@ class SumPool2d(NIRNode):
     padding: np.ndarray  # (Height, width)
 
     def __post_init__(self):
-        self.input_type = {"input": ()}
-        self.output_type = {"output": ()}
+        self.input_type = {"input": None}
+        self.output_type = {"output": None}
 
 
 @dataclass(eq=False)
