@@ -32,12 +32,27 @@ extensions = [
     "sphinx.ext.mathjax",
     "sphinx.ext.autosummary",
     "sphinx_external_toc",
+    "sphinxcontrib.mermaid",
+    "autoapi.extension",
 ]
+
 external_toc_path = "_toc.yml"
 
 myst_enable_extensions = [
     "amsmath",
     "dollarmath",
+]
+
+autodoc_typehints = "both"
+autoapi_type = "python"
+autoapi_dirs = ["../../nir"]
+autoapi_options = [
+    "members",
+    "undoc-members",
+    "show-inheritance",
+    "show-module-summary",
+    "special-members",
+    "imported-members",
 ]
 
 # MyST settings
