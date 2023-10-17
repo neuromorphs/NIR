@@ -5,4 +5,5 @@ numpy
 h5py
 sphinx_external_toc
 sphinxcontrib-mermaid
+astroid~=2.15 # https://github.com/readthedocs/sphinx-autoapi/issues/407
 sphinx-autoapi
