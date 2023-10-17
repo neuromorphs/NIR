@@ -3,7 +3,7 @@
 <img alt="NIR Logo" src="https://github.com/neuromorphs/NIR/raw/main/docs/logo_light.png">
 </picture>
 
-# NIR: Neuromorphic Intermediate Representation
+# NIR - Neuromorphic Intermediate Representation
 
 NIR provides a standard way to describe arbitrary **physical** networks.
 **NIR is currently supported by 6 simulators and 4 hardware platforms**, allowing users to seamlessly move between any of these platforms.
