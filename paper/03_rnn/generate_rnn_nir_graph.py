@@ -254,14 +254,14 @@ def print_nir_graph(nir_graph: nir.NIRGraph):
 nir_graph = export_nirtorch.to_nir(net, ds_test[0][0])
 print('\nRNN graph with NIRTorch\n')
 print_nir_graph(nir_graph)
-nir.write("braille_nirtorch.nir", nir_graph)
+nir.write("braille_v2.nir", nir_graph)
 
 net2 = import_nirtorch.from_nir(nir_graph)
 
 print('\nback to NIR\n')
 nir_graph2 = export_nirtorch.to_nir(net2, ds_test[0][0])
 print_nir_graph(nir_graph2)
-nir.write("braille.nir", nir_graph2)
+nir.write("braille_v2.nir", nir_graph2)  # same, but without recurrent edge
 
 # important: reload original nir_graph bc it was modified
 nir_graph = export_nirtorch.to_nir(net, ds_test[0][0])
