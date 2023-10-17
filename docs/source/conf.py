@@ -67,7 +67,7 @@ templates_path = ["_templates"]
 
 html_theme = "sphinx_book_theme"
 html_title = "NIR documentation"
-html_logo = "../symbol_light.png"
+html_logo = "../logo_light.png"
 html_show_sourcelink = True
 html_sourcelink_suffix = ""
 
