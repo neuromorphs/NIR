@@ -4,14 +4,12 @@ parts:
 - caption: Introduction
   chapters:
   - file: what
-    title: What is NIR?
+    title: What is it?
   - file: about
-    title: About NIR
 - caption: User guide
   chapters:
   - file: usage
   - file: primitives
-    title: NIR primitives
   - file: support
     title: Platform support
 - caption: Examples
@@ -28,7 +26,3 @@ parts:
   - file: api_design
   - file: dev
     title: Contributing
-- caption: API
-  chapters:
-  - file: modindex
-    title: API reference

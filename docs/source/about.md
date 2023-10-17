@@ -1,4 +1,4 @@
-# About NIR
+# About
 
 The Neuromorphic Intermediate Representation (NIR) is a joint effort between researchers and engineers working to spread the usage and accelerate the innnovation of neuromorphic technologies.
 It is a product of many clever actors, thinking deeply about the interplay between computation and physics, and it would be incorrect to claim that NIR is owned by any single actor.
