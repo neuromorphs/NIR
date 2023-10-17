@@ -1,6 +1,6 @@
 sphinx==5.0.2
 sphinx-book-theme
-myst-parser
+myst_nb
 numpy
 h5py
 sphinx_external_toc
