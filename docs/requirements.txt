@@ -5,4 +5,3 @@ numpy
 h5py
 sphinx_external_toc
 sphinxcontrib-mermaid
-jupyter-book
