@@ -1,3 +1,0 @@
-# NIR ⇄ snnTorch
-
-Coming soon...

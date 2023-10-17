@@ -16,13 +16,13 @@ parts:
     title: Platform support
 - caption: Examples
   chapters:
-  - file: examples/lava
-  - file: examples/nengo
-  - file: examples/norse
-  - file: examples/rockpool
-  - file: examples/sinabs
-  - file: examples/snntorch
-  - file: examples/spinnaker
+  - file: examples/lava/nir-conversion
+  - file: examples/nengo/nir-conversion
+  - file: examples/norse/nir-conversion
+  - file: examples/rockpool/nir-conversion
+  - file: examples/sinabs/nir-conversion
+  - file: examples/snntorch/nir-conversion
+  - file: examples/spinnaker2/import
 - caption: Developer guide
   chapters:
   - file: api_design
