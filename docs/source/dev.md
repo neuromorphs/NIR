@@ -1,4 +1,4 @@
-# Contributing to NIR
+# Contributing
 
 ## Developer guide: Getting started
 

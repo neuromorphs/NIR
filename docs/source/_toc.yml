@@ -4,31 +4,25 @@ parts:
 - caption: Introduction
   chapters:
   - file: what
-    title: What is NIR?
+    title: What is it?
   - file: about
-    title: About NIR
 - caption: User guide
   chapters:
   - file: usage
   - file: primitives
-    title: NIR primitives
   - file: support
     title: Platform support
 - caption: Examples
   chapters:
-  - file: examples/lava
-  - file: examples/nengo
-  - file: examples/norse
-  - file: examples/rockpool
-  - file: examples/sinabs
-  - file: examples/snntorch
-  - file: examples/spinnaker
+  - file: examples/lava/nir-conversion
+  - file: examples/nengo/nir-conversion
+  - file: examples/norse/nir-conversion
+  - file: examples/rockpool/nir-conversion
+  - file: examples/sinabs/nir-conversion
+  - file: examples/snntorch/nir-conversion
+  - file: examples/spinnaker2/import
 - caption: Developer guide
   chapters:
   - file: api_design
   - file: dev
     title: Contributing
-- caption: API
-  chapters:
-  - file: modindex
-    title: API reference

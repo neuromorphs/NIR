@@ -1,8 +1,9 @@
 sphinx==5.0.2
 sphinx-book-theme
-myst-parser
+myst_nb
 numpy
 h5py
 sphinx_external_toc
 sphinxcontrib-mermaid
-jupyter-book
+astroid~=2.15 # https://github.com/readthedocs/sphinx-autoapi/issues/407
+sphinx-autoapi

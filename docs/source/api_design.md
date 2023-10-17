@@ -1,4 +1,4 @@
-# NIR API design
+# API design
 
 The reference implementation simply consists of a series of Python classes that *represent* [NIR structures](primitives).
 In other words, they do not implement the functionality of the nodes, but simply represent the necessary parameters required to *eventually* evaluate the node.
