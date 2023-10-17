@@ -183,6 +183,76 @@ def val_test_loop(
             return [np.mean(batch_loss), np.mean(batch_acc)]
 
 
+def val_test_loop_nirtorch(
+    dataset,
+    batch_size,
+    net,
+    loss_fn,
+    device,
+    shuffle=True,
+    label_probabilities=False,
+):
+    with torch.no_grad():
+        net.eval()
+        loader = DataLoader(dataset, batch_size=batch_size, shuffle=shuffle, drop_last=False)
+
+        batch_loss = []
+        batch_acc = []
+
+        for data, labels in loader:
+            data = data.to(device).swapaxes(1, 0)
+            labels = labels.to(device)
+
+            print('data.shape', data.shape)
+            print('labels.shape', labels.shape)
+
+            # TODO: implement the forward pass correctly (iterate over time)
+
+            # TODO: reset the state of the network
+            for node in net.graph.node_list:
+                if isinstance(node.elem, snn.RSynaptic):
+                    node.elem.spk, node.elem.syn, node.elem.mem = node.elem.init_rsynaptic()
+                elif isinstance(node.elem, snn.Synaptic):
+                    node.elem.syn, node.elem.mem = node.elem.init_synaptic()
+                elif isinstance(node.elem, snn.RLeaky):
+                    node.elem.spk, node.elem.mem = node.elem.init_rleaky()
+                elif isinstance(node.elem, snn.Leaky):
+                    node.elem.mem = node.elem.init_leaky()
+
+            # NET WANTS (B, N) (no time!)
+            spk_out_arr, hid_rec_arr = [], []
+            for t in range(data.shape[0]):
+                spk_out, hid_rec = net(data[t, :, :])
+                spk_out_arr.append(spk_out)
+                hid_rec_arr.append(hid_rec)
+
+            spk_out = torch.stack(spk_out_arr, dim=0)
+
+            print('spk_out.shape', spk_out.shape)
+            print()
+
+            # Validation loss
+            loss_val = loss_fn(spk_out, labels)
+            batch_loss.append(loss_val.detach().cpu().item())
+
+            # Accuracy
+            act_total_out = torch.sum(spk_out, 0)  # sum over time
+            _, neuron_max_act_total_out = torch.max(
+                act_total_out, 1
+            )  # argmax over output units to compare to labels
+            batch_acc.extend(
+                (neuron_max_act_total_out == labels).detach().cpu().numpy()
+            )
+            # batch_acc.append(np.mean((neuron_max_act_total_out == labels).detach().cpu().numpy
+
+        if label_probabilities:
+            log_softmax_fn = nn.LogSoftmax(dim=-1)
+            log_p_y = log_softmax_fn(act_total_out)
+            return [np.mean(batch_loss), np.mean(batch_acc)], torch.exp(log_p_y)
+        else:
+            return [np.mean(batch_loss), np.mean(batch_acc)]
+
+
 # INFERENCE ON TEST SET
 
 batch_size = 64
@@ -201,35 +271,35 @@ test_results = val_test_loop(
 )
 print("Test accuracy: {}%".format(np.round(test_results[1] * 100, 2)))
 
-# INFERENCE ON INDIVIDUAL TEST SAMPLES
+# # INFERENCE ON INDIVIDUAL TEST SAMPLES
 
-Ns = 10
+# Ns = 10
 
-for ii in range(Ns):
-    single_sample = next(iter(DataLoader(ds_test, batch_size=1, shuffle=True)))
-    _, lbl_probs = val_test_loop(
-        TensorDataset(single_sample[0], single_sample[1]),
-        1,
-        net,
-        loss_fn,
-        device,
-        shuffle=False,
-        saved_state_dict=best_val_layers,
-        label_probabilities=True,
-        regularization=regularization,
-    )
-    print("Single-sample inference {}/{} from test set:".format(ii + 1, Ns))
-    print(
-        "Sample: {} \tPrediction: {}".format(
-            letter_written[single_sample[1]],
-            letter_written[torch.max(lbl_probs.cpu(), 1)[1]],
-        )
-    )
-    print(
-        "Label probabilities (%): {}\n".format(
-            np.round(np.array(lbl_probs.detach().cpu().numpy()) * 100, 2)
-        )
-    )
+# for ii in range(Ns):
+#     single_sample = next(iter(DataLoader(ds_test, batch_size=1, shuffle=True)))
+#     _, lbl_probs = val_test_loop(
+#         TensorDataset(single_sample[0], single_sample[1]),
+#         1,
+#         net,
+#         loss_fn,
+#         device,
+#         shuffle=False,
+#         saved_state_dict=best_val_layers,
+#         label_probabilities=True,
+#         regularization=regularization,
+#     )
+#     print("Single-sample inference {}/{} from test set:".format(ii + 1, Ns))
+#     print(
+#         "Sample: {} \tPrediction: {}".format(
+#             letter_written[single_sample[1]],
+#             letter_written[torch.max(lbl_probs.cpu(), 1)[1]],
+#         )
+#     )
+#     print(
+#         "Label probabilities (%): {}\n".format(
+#             np.round(np.array(lbl_probs.detach().cpu().numpy()) * 100, 2)
+#         )
+#     )
 
 
 ##########################################################################################
@@ -253,14 +323,31 @@ def print_nir_graph(nir_graph: nir.NIRGraph):
 
 nir_graph = export_nirtorch.to_nir(net, ds_test[0][0])
 print('\nRNN graph with NIRTorch\n')
-print_nir_graph(nir_graph)
+# print_nir_graph(nir_graph)
 nir.write("braille_v2.nir", nir_graph)
 
 net2 = import_nirtorch.from_nir(nir_graph)
 
+print('\n test the re-imported torch network\n')
+batch_size = 64
+input_size = 12
+num_steps = next(iter(ds_test))[0].shape[0]
+# net = model_build(parameters, input_size, num_steps, device)
+test_results = val_test_loop_nirtorch(
+    ds_test,
+    batch_size,
+    net2,
+    loss_fn,
+    device,
+    shuffle=False,
+)
+print("Test accuracy: {}%".format(np.round(test_results[1] * 100, 2)))
+
+net2 = import_nirtorch.from_nir(nir_graph)  # reset the network
+
 print('\nback to NIR\n')
 nir_graph2 = export_nirtorch.to_nir(net2, ds_test[0][0])
-print_nir_graph(nir_graph2)
+# print_nir_graph(nir_graph2)
 nir.write("braille_v2.nir", nir_graph2)  # same, but without recurrent edge
 
 # important: reload original nir_graph bc it was modified
