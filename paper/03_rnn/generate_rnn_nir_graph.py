@@ -362,18 +362,39 @@ beta1 = net._modules['lif2'].beta
 beta2 = net2._modules['lif2'].beta
 print(f'lif2 beta:         {beta1 == beta2}')
 
-loader = DataLoader(ds_test, batch_size=64, shuffle=True, drop_last=False)
+loader = DataLoader(ds_test, batch_size=4, shuffle=True, drop_last=False)
 data, labels = next(iter(loader))
 
 for node in net2.graph.node_list:
+    print(node.elem)
     if isinstance(node.elem, snn.RSynaptic):
         node.elem.spk, node.elem.syn, node.elem.mem = node.elem.init_rsynaptic()
     elif isinstance(node.elem, snn.Synaptic):
         node.elem.syn, node.elem.mem = node.elem.init_synaptic()
-    elif isinstance(node.elem, snn.RLeaky):
-        node.elem.spk, node.elem.mem = node.elem.init_rleaky()
-    elif isinstance(node.elem, snn.Leaky):
-        node.elem.mem = node.elem.init_leaky()
+
+# ALSO RESET THE HIDDEN OF NET1
+spk1, syn1, mem1 = net._modules['lif1'].init_rsynaptic()
+syn2, mem2 = net._modules['lif2'].init_synaptic()
+
+sout1_arr, hrec1_arr = [], []
+sout2_arr, hrec2_arr = [], []
+for tstep in range(data.shape[1]):
+    x = data[:, tstep, :]
+
+    # forward pass through network 1
+    cur1 = net._modules['fc1'](x)
+    spk1, syn1, mem1 = net._modules['lif1'](cur1, spk1, syn1, mem1)
+    # Output layer
+    cur2 = net._modules['fc2'](spk1)
+    spk2, syn2, mem2 = net._modules['lif2'](cur2, syn2, mem2)
+    sout1_arr.append(spk2)
+
+    # forward pass through network 2
+    spk_out, hid_rec = net2(x)
+    sout2_arr.append(spk_out)
+
+    if not torch.equal(spk_out, spk2):
+        print(tstep, spk_out.sum(), spk2.sum())
 
 
 # HACK: remove self-recurrence of lif1
