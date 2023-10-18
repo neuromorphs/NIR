@@ -60,7 +60,7 @@ def convert_node_to_lava_dl_element(node, scale_v_thr=1.0):
             weight_scale=1, weight_norm=False, pre_hook_fx=None
         )
         return slayer.synapse.Pool(**pool_synapse_params)
-    
+
     elif isinstance(node, nir.ir.IF):
         assert len(np.unique(node.v_threshold)) == 1, 'v_threshold must be the same for all neurons'
         assert len(np.unique(node.r)) == 1, 'resistance must be the same for all neurons'
@@ -84,7 +84,7 @@ def convert_node_to_lava_dl_element(node, scale_v_thr=1.0):
         #     threshold_decay=0.0,
         # )
         # return slayer.neuron.alif.Neuron(**alif_neuron_params)
-        
+
     elif isinstance(node, nir.ir.Affine):
         assert np.abs(node.bias).sum() == 0.0, 'bias not supported in lava-dl'
         weight = node.weight
@@ -98,10 +98,10 @@ def convert_node_to_lava_dl_element(node, scale_v_thr=1.0):
         )
         dense.weight.data = torch.from_numpy(weight.reshape(dense.weight.shape))
         return dense
-    
+
     elif isinstance(node, nir.ir.Flatten):
         return Flatten(node.start_dim, node.end_dim)
-    
+
     else:
         print("UNSUPPORTED")
 
@@ -126,7 +126,7 @@ class NIR2LavaDLNetwork(torch.nn.Module):
             self.blocks = torch.nn.ModuleList(new_list)
         else:
             self.blocks = torch.nn.ModuleList(module_list)
-    
+
     def forward(self, spike):
         for block in self.blocks:
             if isinstance(block, torch.nn.Module):
@@ -152,5 +152,5 @@ def nir_to_lava_dl(graph, scale_v_thr=1.0, debug=False):
         module_list.append(convert_node_to_lava_dl_element(node, scale_v_thr=scale_v_thr))
 
     assert len(visited_node_keys) == len(graph.nodes), 'not all nodes visited'
-    
+
     return NIR2LavaDLNetwork(module_list)

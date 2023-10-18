@@ -3,7 +3,7 @@ import tempfile
 import numpy as np
 
 import nir
-from tests import mock_affine
+from tests import mock_affine, mock_conv
 
 
 def assert_equivalence(ir: nir.NIRGraph, ir2: nir.NIRGraph):
@@ -61,6 +61,22 @@ def test_nested():
         edges=[("a", "b"), ("b", "a")],
     )
     factory_test_graph(nested)
+
+
+def test_conv1d():
+    ir = nir.NIRGraph.from_list(
+        mock_affine(2, 100),
+        mock_conv(100, (1, 2, 3)),
+        mock_affine(100, 2),
+    )
+    factory_test_graph(ir)
+
+
+def test_conv1d_2():
+    ir = nir.NIRGraph.from_list(
+        mock_conv((100, 100), (1, 2, 3, 3)),
+    )
+    factory_test_graph(ir)
 
 
 def test_integrator():
@@ -178,11 +194,13 @@ def test_flatten():
 def test_sum_pool_2d():
     ir = nir.NIRGraph.from_list(
         [
+            nir.Input(input_type=np.array([2, 2, 10, 10])),
             nir.SumPool2d(
                 kernel_size=np.array([2, 2]),
                 stride=np.array([1, 1]),
                 padding=np.ndarray([0, 0]),
-            )
+            ),
+            nir.Output(output_type=np.array([2, 2, 5, 5])),
         ]
     )
     factory_test_graph(ir)
