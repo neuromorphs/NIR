@@ -8,3 +8,5 @@ build
 _build
 _archive
 _autosummary
+paper/02_cnn/NMNIST/
+*.log
