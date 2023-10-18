@@ -6,10 +6,11 @@ from snntorch import functional as SF
 from snntorch import surrogate
 import torch
 import torch.nn as nn
-from torch.utils.data import DataLoader, TensorDataset
+from torch.utils.data import DataLoader
 import nir
 # NOTE: this requires snntorch/nir (PR) and nirtorch/master (unreleased)
 from snntorch import import_nirtorch, export_nirtorch
+import nirtorch
 
 
 seed = 42
@@ -37,57 +38,60 @@ SHUFFLE = False
 letter_written = ["Space", "A", "E", "I", "O", "U", "Y"]
 
 
-def print_nir_graph(nir_graph: nir.NIRGraph):
-    print("nodes:")
-    for nodekey, node in nir_graph.nodes.items():
-        print("\t", nodekey, node.__class__.__name__)
-    print("edges:")
-    for edge in nir_graph.edges:
-        print("\t", edge)
-
-
-def check_parameters(net, net2):
+def check_parameters(net, net2) -> bool:
+    ok = True
     w1 = net._modules['fc1']._parameters['weight']
     w2 = net2._modules['fc1']._parameters['weight']
     if not torch.allclose(w1, w2):
         print(f'input weights:     {torch.allclose(w1, w2)}')
+        ok = False
     b1 = net._modules['fc1']._parameters['bias']
     b2 = net2._modules['fc1']._parameters['bias']
     if not torch.allclose(b1, b2):
         print(f'input bias:        {torch.allclose(b1, b2)}')
+        ok = False
     w1 = net._modules['fc2']._parameters['weight']
     w2 = net2._modules['fc2']._parameters['weight']
     if not torch.allclose(w1, w2):
         print(f'output weights:    {torch.allclose(w1, w2)}')
+        ok = False
     b1 = net._modules['fc2']._parameters['bias']
     b2 = net2._modules['fc2']._parameters['bias']
     if not torch.allclose(b1, b2):
         print(f'output bias:       {torch.allclose(b1, b2)}')
+        ok = False
     w1 = net._modules['lif1'].recurrent._parameters['weight']
     w2 = net2._modules['lif1'].recurrent._parameters['weight']
     if not torch.allclose(w1, w2):
         print(f'recurrent weights: {torch.allclose(w1, w2)}')
+        ok = False
     b1 = net._modules['lif1'].recurrent._parameters['bias']
     b2 = net2._modules['lif1'].recurrent._parameters['bias']
     if not torch.allclose(b1, b2):
         print(f'recurrent bias:    {torch.allclose(b1, b2)}')
+        ok = False
 
     alpha1 = net._modules['lif1'].alpha
     alpha2 = net2._modules['lif1'].alpha
     if not torch.allclose(alpha1, alpha2):
         print(f'lif1 alpha:        {torch.allclose(alpha1, alpha2)}')
+        ok = False
     beta1 = net._modules['lif1'].beta
     beta2 = net2._modules['lif1'].beta
     if not torch.allclose(beta1, beta2):
         print(f'lif1 beta:         {torch.allclose(beta1, beta2)}')
+        ok = False
     alpha1 = net._modules['lif2'].alpha
     alpha2 = net2._modules['lif2'].alpha
     if not torch.allclose(alpha1, alpha2):
         print(f'lif2 alpha:        {torch.allclose(alpha1, alpha2)}')
+        ok = False
     beta1 = net._modules['lif2'].beta
     beta2 = net2._modules['lif2'].beta
     if not torch.allclose(beta1, beta2):
         print(f'lif2 beta:         {torch.allclose(beta1, beta2)}')
+        ok = False
+    return ok
 
 
 def model_build(settings, input_size, num_steps, device):
@@ -162,7 +166,7 @@ def val_test_loop(
             data = data.to(device).swapaxes(1, 0)
             labels = labels.to(device)
 
-            spk_out, hid_rec = net(data)
+            spk_out, _ = net(data)
 
             loss_val = loss_fn(spk_out, labels)
             batch_loss.append(loss_val.detach().cpu().item())
@@ -174,14 +178,7 @@ def val_test_loop(
         return [np.mean(batch_loss), np.mean(batch_acc)]
 
 
-def val_test_loop_nirtorch(
-    dataset,
-    batch_size,
-    net,
-    loss_fn,
-    device,
-    shuffle=True,
-):
+def val_test_loop_nirtorch(dataset, batch_size, net, loss_fn, device, shuffle=True):
     with torch.no_grad():
         net.eval()
         loader = DataLoader(dataset, batch_size=batch_size, shuffle=shuffle, drop_last=False)
@@ -193,13 +190,6 @@ def val_test_loop_nirtorch(
             data = data.to(device).swapaxes(1, 0)
             labels = labels.to(device)
 
-            # # reset network states
-            # for node in net.graph.node_list:
-            #     if isinstance(node.elem, snn.RSynaptic):
-            #         node.elem.spk, node.elem.syn, node.elem.mem = node.elem.init_rsynaptic()
-            #     elif isinstance(node.elem, snn.Synaptic):
-            #         node.elem.syn, node.elem.mem = node.elem.init_synaptic()
-
             h_state = nirtorch.from_nir.GraphExecutorState(
                 state={
                     'lif1': net._modules['lif1'].init_rsynaptic(),  # 3-tuple: spk, syn, mem
@@ -207,10 +197,9 @@ def val_test_loop_nirtorch(
                 }
             )
 
-            # NET WANTS (B, N) (no time!)
             spk_out_arr = []
             for t in range(data.shape[0]):
-                spk_out, h_state = net(data[t, :, :], h_state)
+                spk_out, h_state = net(data[t], h_state)
                 spk_out_arr.append(spk_out)
             spk_out = torch.stack(spk_out_arr, dim=0)
 
@@ -224,100 +213,6 @@ def val_test_loop_nirtorch(
         return [np.mean(batch_loss), np.mean(batch_acc)]
 
 
-# build initial network
-###########################
-
-print('\nload snnTorch module from checkpoint\n')
-
-batch_size = 4
-input_size = 12
-
-num_steps = next(iter(ds_test))[0].shape[0]
-net = model_build(parameters, input_size, num_steps, device)
-
-test_results = val_test_loop(
-    ds_test,
-    batch_size,
-    net,
-    loss_fn,
-    device,
-    shuffle=SHUFFLE,
-    saved_state_dict=best_val_layers,
-)
-print("test accuracy: {}%".format(np.round(test_results[1] * 100, 2)))
-
-# export to NIR
-###########################
-
-print('\nexport to NIR graph\n')
-nir_graph = export_nirtorch.to_nir(net, ds_test[0][0])
-# print_nir_graph(nir_graph)
-nir.write("braille_v2.nir", nir_graph)
-
-
-# import from NIR - custom network
-###########################
-
-
-# this one does not work!!!
-class ImportedNetworkBefore(nn.Module):
-    def __init__(self, nir_graph: nir.NIRGraph):
-        super().__init__()
-        self.graph = nir_graph
-
-        node = nir_graph.nodes['fc1']
-        self.fc1 = torch.nn.Linear(node.weight.shape[1], node.weight.shape[0])
-        self.fc1.weight.data = torch.Tensor(node.weight)
-        self.fc1.bias.data = torch.Tensor(node.bias)
-
-        node = nir_graph.nodes['lif1']
-        nodelif = node.nodes['lif1.lif']
-        nodewrec = node.nodes['lif1.w_rec']
-        self.lif1 = snn.RSynaptic(
-            alpha=float(np.unique(1 - (1e-4 / nodelif.tau_syn))[0]),
-            beta=float(np.unique(1 - (1e-4 / nodelif.tau_mem))[0]),
-            threshold=float(np.unique(nodelif.v_threshold)[0]),
-            reset_mechanism='zero',
-            all_to_all=True,
-            linear_features=nodewrec.weight.shape[0],
-            init_hidden=True,
-        )
-        self.lif1.recurrent.weight.data = torch.Tensor(nodewrec.weight)
-        self.lif1.recurrent.bias.data = torch.Tensor(nodewrec.bias)
-
-        node = nir_graph.nodes['fc2']
-        self.fc2 = torch.nn.Linear(node.weight.shape[1], node.weight.shape[0])
-        self.fc2.weight.data = torch.Tensor(node.weight)
-        self.fc2.bias.data = torch.Tensor(node.bias)
-
-        node = nir_graph.nodes['lif2']
-        self.lif2 = snn.Synaptic(
-            alpha=float(np.unique(1 - (1e-4 / node.tau_syn))[0]),
-            beta=float(np.unique(1 - (1e-4 / node.tau_mem))[0]),
-            threshold=float(np.unique(node.v_threshold)[0]),
-            reset_mechanism='zero',
-            init_hidden=True,
-        )
-
-    def forward(self, x):
-        self.lif1.spk1, self.lif1.syn1, self.lif1.mem1 = self.lif1.init_rsynaptic()
-        self.lif1.syn2, self.lif1.mem2 = self.lif2.init_synaptic()
-
-        spk1_rec = []  # not necessarily needed for inference
-        spk2_rec = []
-
-        for step in range(x.shape[0]):
-            cur1 = self.fc1(x[step])
-            spk1 = self.lif1(cur1)
-            cur2 = self.fc2(spk1)
-            spk2 = self.lif2(cur2)
-            spk1_rec.append(spk1)
-            spk2_rec.append(spk2)
-
-        return torch.stack(spk2_rec, dim=0), torch.stack(spk1_rec, dim=0)
-
-
-# this one works!!!
 class ImportedNetwork(nn.Module):
     def __init__(self, nir_graph: nir.NIRGraph):
         super().__init__()
@@ -328,9 +223,6 @@ class ImportedNetwork(nn.Module):
         self.fc1.weight.data = torch.Tensor(node.weight)
         self.fc1.bias.data = torch.Tensor(node.bias)
 
-        # node = nir_graph.nodes['lif1']
-        # nodelif = node.nodes['lif1.lif']
-        # nodewrec = node.nodes['lif1.w_rec']
         nodelif = nir_graph.nodes['lif1.lif']
         nodewrec = nir_graph.nodes['lif1.w_rec']
         self.lif1 = snn.RSynaptic(
@@ -377,7 +269,32 @@ class ImportedNetwork(nn.Module):
         return torch.stack(spk2_rec, dim=0), torch.stack(spk1_rec, dim=0)
 
 
-net0 = ImportedNetwork(nir_graph)  # custom network (should work)
+# build initial network
+###########################
+
+print('\nload snnTorch module from checkpoint\n')
+
+batch_size = 4
+input_size = 12
+
+num_steps = next(iter(ds_test))[0].shape[0]
+net = model_build(parameters, input_size, num_steps, device)
+
+test_results = val_test_loop(ds_test, batch_size, net, loss_fn, device,
+                             shuffle=SHUFFLE, saved_state_dict=best_val_layers)
+print("test accuracy: {}%".format(np.round(test_results[1] * 100, 2)))
+
+# export to NIR
+###########################
+
+print('\nexport to NIR graph\n')
+nir_graph = export_nirtorch.to_nir(net, ds_test[0][0])
+nir.write("braille_v2.nir", nir_graph)
+
+# import from NIR - custom network
+###########################
+
+net0 = ImportedNetwork(nir_graph)
 
 # import from NIR - using nirtorch
 ###########################
@@ -385,42 +302,28 @@ net0 = ImportedNetwork(nir_graph)  # custom network (should work)
 print('\nimport NIR graph (using nirtorch)\n')
 
 net2 = import_nirtorch.from_nir(nir_graph)
-check_parameters(net, net2)
+if check_parameters(net, net2):
+    print('parameters match!')
+else:
+    print('parameters do not match!')
 
 # HACK: remove self-recurrence of lif1  # DOES NOT FIX IT!  # YES IT DOES! YEEHAW
-# print(net2.graph.debug_str())
 lif1_node = {el.name: el for el in [e for e in net2.graph.node_list][-1].outgoing_nodes}['lif1']
 [e for e in net2.graph.node_list][-1].outgoing_nodes.pop(lif1_node)
-# print()
-# print(net2.graph.debug_str())
-# print()
 
-# forward pass through both networks
+# forward pass through all networks in parallel
 ###########################
 
 loader = DataLoader(ds_test, batch_size=4, shuffle=SHUFFLE, drop_last=False)
 data, labels = next(iter(loader))
 
-# out = net3(data.swapaxes(1, 0))  # custom network..
-
 # reset network 0 states
 spk1_0, syn1_0, mem1_0 = net0.lif1.init_rsynaptic()
 syn2_0, mem2_0 = net0.lif2.init_synaptic()
-
 # reset network 1 states
 spk1, syn1, mem1 = net._modules['lif1'].init_rsynaptic()
 syn2, mem2 = net._modules['lif2'].init_synaptic()
-
-# # reset network 2 states -- init_hidden=True
-# for node in net2.graph.node_list:
-#     if isinstance(node.elem, snn.RSynaptic):
-#         node.elem.spk, node.elem.syn, node.elem.mem = node.elem.init_rsynaptic()
-#     elif isinstance(node.elem, snn.Synaptic):
-#         node.elem.syn, node.elem.mem = node.elem.init_synaptic()
-# h2_state = None
-
 # reset network 2 states -- init_hidden=False
-import nirtorch
 h2_state = nirtorch.from_nir.GraphExecutorState(
     state={
         'lif1': net2._modules['lif1'].init_rsynaptic(),  # 3-tuple: spk, syn, mem
@@ -428,8 +331,8 @@ h2_state = nirtorch.from_nir.GraphExecutorState(
     }
 )
 
-sout1_arr, hrec1_arr = [], []
-sout2_arr, hrec2_arr = [], []
+sout1_arr = []
+sout2_arr = []
 sout0_arr = []
 for tstep in range(data.shape[1]):
     x = data[:, tstep, :]
@@ -439,105 +342,57 @@ for tstep in range(data.shape[1]):
     spk1_0, syn1_0, mem1_0 = net0.lif1(cur1_0, spk1_0, syn1_0, mem1_0)
     cur2_0 = net0.fc2(spk1_0)
     spk2_0, syn2_0, mem2_0 = net0.lif2(cur2_0, syn2_0, mem2_0)
-    # spk1_rec.append(spk1)
     sout0_arr.append(spk2_0)
-
     # forward pass through network 1
     cur1 = net._modules['fc1'](x)
     spk1, syn1, mem1 = net._modules['lif1'](cur1, spk1, syn1, mem1)
-    # Output layer
     cur2 = net._modules['fc2'](spk1)
     spk2, syn2, mem2 = net._modules['lif2'](cur2, syn2, mem2)
     sout1_arr.append(spk2)
-
     # forward pass through network 2
-    spk_out, h2_state = net2(x, h2_state)  # init_hidden=False
-    # spk_out, h2_state = net2(x)  # init_hidden=True
+    spk_out, h2_state = net2(x, h2_state)
     sout2_arr.append(spk_out)
 
     comparison = np.array([
         [
-            cur1.sum().item(),
-            syn1.sum().item(),
-            mem1.sum().item(),
-            spk1.sum().item(),
-            cur2.sum().item(),
-            syn2.sum().item(),
-            mem2.sum().item(),
-            spk2.sum().item(),
+            cur1.sum().item(), syn1.sum().item(), mem1.sum().item(), spk1.sum().item(),
+            cur2.sum().item(), syn2.sum().item(), mem2.sum().item(), spk2.sum().item(),
         ],
         [
-            cur1_0.sum().item(),
-            syn1_0.sum().item(),
-            mem1_0.sum().item(),
-            spk1_0.sum().item(),
-            cur2_0.sum().item(),
-            syn2_0.sum().item(),
-            mem2_0.sum().item(),
-            spk2_0.sum().item(),
+            cur1_0.sum().item(), syn1_0.sum().item(), mem1_0.sum().item(), spk1_0.sum().item(),
+            cur2_0.sum().item(), syn2_0.sum().item(), mem2_0.sum().item(), spk2_0.sum().item(),
         ],
         [
-            h2_state.cache['fc1'].sum().item(),
-            h2_state.state['lif1'][1].sum().item(),
-            h2_state.state['lif1'][2].sum().item(),
-            h2_state.cache['lif1'].sum().item(),
-            h2_state.cache['fc2'].sum().item(),
-            h2_state.state['lif2'][0].sum().item(),
-            h2_state.state['lif2'][1].sum().item(),
-            h2_state.cache['lif2'].sum().item(),
+            h2_state.cache['fc1'].sum().item(), h2_state.state['lif1'][1].sum().item(),
+            h2_state.state['lif1'][2].sum().item(), h2_state.cache['lif1'].sum().item(),
+            h2_state.cache['fc2'].sum().item(), h2_state.state['lif2'][0].sum().item(),
+            h2_state.state['lif2'][1].sum().item(), h2_state.cache['lif2'].sum().item(),
         ]
     ])
-# print(f'\t{tstep}')
-# print(f"cur1: {cur1.sum().item():7.2f} {h2_state.cache['fc1'].sum().item():7.2f}", end=' ')
-# print(f"syn1: {syn1.sum().item():7.2f} {net2._modules['lif1'].syn.sum().item():7.2f}", end=' ')
-# print(f"mem1: {mem1.sum().item():7.2f} {net2._modules['lif1'].mem.sum().item():7.2f}", end=' ')
-# print(f"spk1: {spk1.sum().item():7.2f} {h2_state.cache['lif1'].sum().item():7.2f}")
-# print(f"cur2: {cur2.sum().item():7.2f} {h2_state.cache['fc2'].sum().item():7.2f}", end=' ')
-# print(f"syn2: {syn2.sum().item():7.2f} {net2._modules['lif2'].syn.sum().item():7.2f}", end=' ')
-# print(f"mem2: {mem2.sum().item():7.2f} {net2._modules['lif2'].mem.sum().item():7.2f}", end=' ')
-# print(f"spk2: {spk2.sum().item():7.2f} {h2_state.cache['lif2'].sum().item():7.2f}")
-# print()
 
     if not torch.equal(h2_state.cache['fc1'], cur1):
         print(tstep, 'fc1', h2_state.cache['fc1'].sum().item(), cur1.sum().item())
-
     if not torch.equal(h2_state.cache['lif1'], spk1):
         print(tstep, 'lif1', h2_state.cache['lif1'].sum().item(), spk1.sum().item())
-
     if not torch.equal(h2_state.cache['fc2'], cur2):
         print(tstep, 'fc2', h2_state.cache['fc2'].sum().item(), cur2.sum().item())
-
     if not torch.equal(spk_out, spk2):
         print(tstep, 'lif2', spk_out.sum().item(), spk2.sum().item())
 
     # print(tstep)
     # print(comparison)
 
-    assert True, 'stop'
-
-
-# new_out = out[0]  # custom network..
-# org_out = torch.stack(sout1_arr, dim=0)
-
 print('\ntest the re-imported snnTorch network (using nirtorch)\n')
-test_results = val_test_loop_nirtorch(
-    ds_test,
-    batch_size,
-    net2,
-    loss_fn,
-    device,
-    shuffle=SHUFFLE,
-)
+test_results = val_test_loop_nirtorch(ds_test, batch_size, net2, loss_fn, device, shuffle=SHUFFLE)
 print("test accuracy: {}%".format(np.round(test_results[1] * 100, 2)))
 
 # back to NIR and test
 ###########################
 
 net2 = import_nirtorch.from_nir(nir_graph)  # reset the network
-
 print('\nexporting back to NIR\n')
+# HACK: initialize hidden state and pass it to the graph executor
 model_fwd_args = [
-    # HACK: initialize hidden state and pass it to the graph executor
     nirtorch.from_nir.GraphExecutorState(
         state={
             'lif1': net2._modules['lif1'].init_rsynaptic(),  # 3-tuple: spk, syn, mem
@@ -546,8 +401,7 @@ model_fwd_args = [
     )
 ]
 nir_graph2 = export_nirtorch.to_nir(net2, ds_test[0][0], model_fwd_args=model_fwd_args)
-# print_nir_graph(nir_graph2)
-nir.write("braille_v2a.nir", nir_graph2)  # same, but without recurrent edge
+nir.write("braille_v2a.nir", nir_graph2)
 nir_graph = export_nirtorch.to_nir(net, ds_test[0][0])  # must reload, bc graph was modified
 
 assert nir_graph.nodes.keys() == nir_graph2.nodes.keys(), 'node keys mismatch'
@@ -555,11 +409,9 @@ for nodekey in nir_graph.nodes:
     a = nir_graph.nodes[nodekey].__class__.__name__ if nodekey in nir_graph.nodes else None
     b = nir_graph2.nodes[nodekey].__class__.__name__ if nodekey in nir_graph2.nodes else None
     assert a == b, f'node type mismatch: {a} vs {b}'
-    # print(f'{nodekey}: {a}')
     for attr in nir_graph.nodes[nodekey].__dict__:
         close = None
         if isinstance(nir_graph.nodes[nodekey].__dict__[attr], np.ndarray):
             close = np.allclose(nir_graph.nodes[nodekey].__dict__[attr],
                                 nir_graph2.nodes[nodekey].__dict__[attr])
-        # print(f'\t{attr:12}: {close} {"!!!" if close is False else ""}')
         assert close is not False, f'node attribute mismatch: {nodekey}.{attr}'
