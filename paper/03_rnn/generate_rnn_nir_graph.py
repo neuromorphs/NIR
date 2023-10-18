@@ -328,6 +328,57 @@ nir.write("braille_v2.nir", nir_graph)
 
 net2 = import_nirtorch.from_nir(nir_graph)
 
+# check that parameters are the same in both networks
+print('\ncheck parameter match\n')
+w1 = net._modules['fc1']._parameters['weight']
+w2 = net2._modules['fc1']._parameters['weight']
+print(f'input weights:     {torch.allclose(w1, w2)}')
+b1 = net._modules['fc1']._parameters['bias']
+b2 = net2._modules['fc1']._parameters['bias']
+print(f'input bias:        {torch.allclose(b1, b2)}')
+w1 = net._modules['fc2']._parameters['weight']
+w2 = net2._modules['fc2']._parameters['weight']
+print(f'output weights:    {torch.allclose(w1, w2)}')
+b1 = net._modules['fc2']._parameters['bias']
+b2 = net2._modules['fc2']._parameters['bias']
+print(f'output bias:       {torch.allclose(b1, b2)}')
+w1 = net._modules['lif1'].recurrent._parameters['weight']
+w2 = net2._modules['lif1'].recurrent._parameters['weight']
+print(f'recurrent weights: {torch.allclose(w1, w2)}')
+b1 = net._modules['lif1'].recurrent._parameters['bias']
+b2 = net2._modules['lif1'].recurrent._parameters['bias']
+print(f'recurrent bias:    {torch.allclose(b1, b2)}')
+
+alpha1 = net._modules['lif1'].alpha
+alpha2 = net2._modules['lif1'].alpha
+print(f'lif1 alpha:        {alpha1 == alpha2}')
+beta1 = net._modules['lif1'].beta
+beta2 = net2._modules['lif1'].beta
+print(f'lif1 beta:         {beta1 == beta2}')
+alpha1 = net._modules['lif2'].alpha
+alpha2 = net2._modules['lif2'].alpha
+print(f'lif2 alpha:        {alpha1 == alpha2}')
+beta1 = net._modules['lif2'].beta
+beta2 = net2._modules['lif2'].beta
+print(f'lif2 beta:         {beta1 == beta2}')
+
+loader = DataLoader(ds_test, batch_size=64, shuffle=True, drop_last=False)
+data, labels = next(iter(loader))
+
+for node in net2.graph.node_list:
+    if isinstance(node.elem, snn.RSynaptic):
+        node.elem.spk, node.elem.syn, node.elem.mem = node.elem.init_rsynaptic()
+    elif isinstance(node.elem, snn.Synaptic):
+        node.elem.syn, node.elem.mem = node.elem.init_synaptic()
+    elif isinstance(node.elem, snn.RLeaky):
+        node.elem.spk, node.elem.mem = node.elem.init_rleaky()
+    elif isinstance(node.elem, snn.Leaky):
+        node.elem.mem = node.elem.init_leaky()
+
+
+# HACK: remove self-recurrence of lif1
+# [e for e in net2.graph.node_list][-1].outgoing_nodes.pop({el.name: el for el in [e for e in net2.graph.node_list][-1].outgoing_nodes}['lif1'])
+
 print('\n test the re-imported torch network\n')
 batch_size = 64
 input_size = 12
