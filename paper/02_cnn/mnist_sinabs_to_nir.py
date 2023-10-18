@@ -38,6 +38,7 @@ snn = from_model(
 
 # Convert SNN to NIR graph
 nir_graph = to_nir(snn, sample_data=torch.rand((1, 2, 34, 34)))
+nir_graph.infer_types()
 # Save the graph
 nir.write("scnn_mnist.nir", nir_graph)
 
