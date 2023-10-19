@@ -301,7 +301,27 @@ net0 = ImportedNetwork(nir_graph)
 
 print('\nimport NIR graph (using nirtorch)\n')
 
+nir_graph2 = nir.read('braille_v2.nir')
+
+assert sorted(nir_graph2.nodes.keys()) == sorted(nir_graph.nodes.keys())
+assert sorted(nir_graph2.edges) == sorted(nir_graph.edges)
+for k in nir_graph.nodes:
+    assert nir_graph2.nodes[k].__class__.__name__ == nir_graph.nodes[k].__class__.__name__
+    for k2 in nir_graph.nodes[k].__dict__.keys():
+        a = nir_graph.nodes[k].__dict__[k2]
+        b = nir_graph2.nodes[k].__dict__[k2]
+        if isinstance(a, np.ndarray):
+            if not np.allclose(a, b):
+                print('not close:', k, k2)
+        elif isinstance(a, dict):
+            for k3 in a:
+                if not np.allclose(a[k3], b[k3]):
+                    print('not close:', k, k2, k3)
+        else:
+            print('unknown type:', type(a), k, k2)
+
 net2 = import_nirtorch.from_nir(nir_graph)
+
 if check_parameters(net, net2):
     print('parameters match!')
 else:
