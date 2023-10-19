@@ -285,6 +285,9 @@ class NIRGraph(NIRNode):
             seen.add(post_key)
             ready += [e for e in self.edges if e[0] == post_key and e[1] not in seen]
 
+            self.nodes[pre_key] = pre_node
+            self.nodes[post_key] = post_node
+
     def infer_types(self):
         """Infer the shapes of all nodes in this graph. Will modify the input_type and
         output_type of all nodes in the graph.
