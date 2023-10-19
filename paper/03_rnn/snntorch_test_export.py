@@ -127,4 +127,4 @@ print("test accuracy: {}%".format(np.round(test_results[1] * 100, 2)))
 
 print('\nexport to NIR graph\n')
 nir_graph = export_nirtorch.to_nir(net, ds_test[0][0], ignore_dims=[0])
-nir.write("braille_v2.nir", nir_graph)
+nir.write("braille.nir", nir_graph)
