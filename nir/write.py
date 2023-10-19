@@ -87,6 +87,7 @@ def _convert_node(node: nir.NIRNode) -> dict:
             "r": node.r,
             "v_leak": node.v_leak,
             "v_threshold": node.v_threshold,
+            "w_in": node.w_in,
         }
     elif isinstance(node, nir.NIRGraph):
         return {

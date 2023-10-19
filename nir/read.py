@@ -78,6 +78,7 @@ def read_node(node: typing.Any) -> nir.NIRNode:
             r=node["r"][()],
             v_leak=node["v_leak"][()],
             v_threshold=node["v_threshold"][()],
+            w_in=node["w_in"][()],
         )
     elif node["type"][()] == b"NIRGraph":
         return nir.NIRGraph(
