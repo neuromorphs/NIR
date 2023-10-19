@@ -1,24 +1,24 @@
-# NIR primitives
+# Primitives
 
-NIR defines a set of primitives that establishes 
+NIR defines 16 fundamental primitives listed in the table below, which backends are free to implement as they want, leading to varying outputs across platforms. While discrepancies could be minimized by constraining implementations or making backends aware of each other's discretization choices, NIR does not do this since it is declarative, specifying only the necessary inputs and outputs. Constraining implementations would cause hardware incompatibilities and making backends aware of each other could create large O(N^2) overhead for N backends. The primitives are already computationally expressive and able to solve complex PDEs. 
 
-On top of popular primitives such as convolutional or fully connected/linear computations, we define additional compuational primitives that are specific to neuromorphic computing and hardware implementations thereof. Computational units that are not specifically neuromorphic take inspiration from the Pytorch ecosystem in terms of naming and parameters (such as Conv2d that uses groups/strides). Example definitons of computational units:
-
-$$
-\begin{align}
-\text{Affine} &: \mathbb{R}^{m \times n},  \mathbb{R}^n \\
-\text{CubaLIF} &:  [ \tau, R, v_{leak}, v_{threshold} ] & \text{Conductance-based LIF}\\
-\text{I} &:  [R] \\
-\text{LI} &:  [\tau, R, v_{leak}] \\
-\text{LI} &:  [\tau, R, v_{leak}] \\
-\text{LIF} &:  [ \tau, R, v_{leak}, v_{threshold} ] \\
-\text{Linear} &:  \mathbb{R}^{m \times n} \\
-\text{Conv1d} &:  \mathbb{R}^{c_{out} \times c_{in} \times x},  \text{Strides}, \text{Groups}, ... \\
-\text{Conv2d} &:  \mathbb{R}^{c_{out} \times c_{in} \times y \times x},  \text{Strides}, \text{Groups}, ... \\
-\text{SumPool2d} &: \mathbb{R}^{c \times y \times x}, \text{Pooling}, \text{Strides}, \text{Padding} ...\\
-\text{Threshold} &:  \begin{cases} 1 & v > v_{threshold} \\ 0 & else \end{cases}
-\end{align}
-$$
+| Primitive | Parameters | Computation | Reset |
+|-|-|-|-|  
+| **Input** | Input shape | - | - |
+| **Output** | Output shape | - | - |
+| **Affine** | $W, b$ | $ W*I + b$ | - |
+| **Convolution** | $W$, Stride, Padding, Dilation, Groups, Bias | $f \star g$ | - |
+| **Current-based leaky integrate-and-fire** | $\tau_\text{syn}$, $\tau_\text{mem}$, R, $v_\text{leak}$, $v_\text{thr}$, $w_\text{in}$ | **LI**_1_; **Linear**; **LIF**_2_ | $\begin{cases} v_\text{LI\_2}-v_\text{thr} & \text{Spike} \\ v & \text{else} \end{cases}$ |
+| **Delay** | $\tau$ | $I(t - \tau)$ | - |  
+| **Flatten** | Input shape, Start dim., End dim. | - | - |
+| **Integrator** | $\text{R}$ | $\dot{v} = R I$ | - |
+| **Integrate-and-fire** | $\text{R}, v_\text{thr}$ | **Integrator**; **Threshold** | $\begin{cases} v-v_\text{thr} & \text{Spike} \\ v & \text{else} \end{cases}$ |
+| **Leaky integrator (LI)** | $\tau, \text{R}, v_\text{leak}$ | $\tau \dot{v} = (v_\text{leak} - v) + R I$ | - |
+| **Linear** | $W$ | $W I$ | - |
+| **Leaky integrate-fire (LIF)** | $\tau, \text{R}, v_\text{leak}, v_\text{thr}$ | **LI**; **Threshold** | $\begin{cases} v-v_\text{thr} & \text{Spike} \\ v & \text{else} \end{cases}$ |
+| **Scale** | $s$ | $s I$ | - |
+| **SumPooling** | $p$ | $\sum_{j} x_j$ |  |
+| **Threshold** | $\theta_\text{thr}$ | $H(I - \theta_\text{thr})$ | - |
 
 Each primitive is defined by their own dynamical equation, specified in the [API docs](https://nnir.readthedocs.io/en/latest/modindex.html).
 

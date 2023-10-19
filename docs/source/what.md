@@ -4,6 +4,8 @@ NIR is two things: a specification and a community.
 The specification defines a common format for physical neural networks, including neuromorphic, [spiking neural networks](https://en.wikipedia.org/wiki/Spiking_neural_network).
 The community develops and integrates the NIR specifiation into different frameworks and platforms.
 
+![NIR principle](nir-schema.png)
+
 ## The NIR specification
 NIR is a declarative specification that describes how computational nodes are connected. 
 This permits NIR to describe *arbitrary* networks of *any kind*.
