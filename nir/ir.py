@@ -261,6 +261,12 @@ class NIRGraph(NIRNode):
                     k.replace('output', 'input'): v for k, v in pre_node.output_type.items()
                 }
 
+            # make sure that output nodes have output_type = input_type
+            if isinstance(post_node, Output):
+                post_node.output_type = {
+                    k.replace('input', 'output'): v for k, v in post_node.input_type.items()
+                }
+
             # check if post output_type needs to be defined
             undef_post_output_type = post_node.output_type is None or any(
                 v is None for v in post_node.output_type.values()
