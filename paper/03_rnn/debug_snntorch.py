@@ -288,7 +288,7 @@ print("test accuracy: {}%".format(np.round(test_results[1] * 100, 2)))
 ###########################
 
 print('\nexport to NIR graph\n')
-nir_graph = export_nirtorch.to_nir(net, ds_test[0][0])
+nir_graph = export_nirtorch.to_nir(net, ds_test[0][0], ignore_dims=[0])
 nir.write("braille_v2.nir", nir_graph)
 
 # import from NIR - custom network
@@ -306,10 +306,6 @@ if check_parameters(net, net2):
     print('parameters match!')
 else:
     print('parameters do not match!')
-
-# HACK: remove self-recurrence of lif1  # DOES NOT FIX IT!  # YES IT DOES! YEEHAW
-lif1_node = {el.name: el for el in [e for e in net2.graph.node_list][-1].outgoing_nodes}['lif1']
-[e for e in net2.graph.node_list][-1].outgoing_nodes.pop(lif1_node)
 
 # forward pass through all networks in parallel
 ###########################
@@ -400,9 +396,11 @@ model_fwd_args = [
         }
     )
 ]
-nir_graph2 = export_nirtorch.to_nir(net2, ds_test[0][0], model_fwd_args=model_fwd_args)
+nir_graph2 = export_nirtorch.to_nir(net2, ds_test[0][0], model_fwd_args=model_fwd_args,
+                                    ignore_dims=[0])
+nir_graph2.infer_types()
 nir.write("braille_v2a.nir", nir_graph2)
-nir_graph = export_nirtorch.to_nir(net, ds_test[0][0])  # must reload, bc graph was modified
+nir_graph = export_nirtorch.to_nir(net, ds_test[0][0], ignore_dims=[0])  # must reload (modified)
 
 assert nir_graph.nodes.keys() == nir_graph2.nodes.keys(), 'node keys mismatch'
 for nodekey in nir_graph.nodes:
