@@ -5,25 +5,69 @@ import numpy as np
 import lava.lib.dl.slayer as slayer
 
 
+SCALE = 1 << 10
+
+
+def _create_rnn_subgraph(graph: nir.NIRGraph, lif_nk: str, w_nk: str) -> nir.NIRGraph:
+    """Take a NIRGraph plus the node keys for a LIF and a W_rec, and return a new NIRGraph
+    which has the RNN subgraph replaced with a subgraph (i.e., a single NIRGraph node).
+    """
+    # NOTE: assuming that the LIF and W_rec have keys of form xyz.abc
+    sg_key = lif_nk.split('.')[0]  # TODO: make this more general?
+
+    # create subgraph for RNN
+    sg_edges = [
+        (lif_nk, w_nk), (w_nk, lif_nk), (lif_nk, f'{sg_key}.output'), (f'{sg_key}.input', w_nk)
+    ]
+    sg_nodes = {
+        lif_nk: graph.nodes[lif_nk],
+        w_nk: graph.nodes[w_nk],
+        f'{sg_key}.input': nir.Input(graph.nodes[lif_nk].input_type),
+        f'{sg_key}.output': nir.Output(graph.nodes[lif_nk].output_type),
+    }
+    sg = nir.NIRGraph(nodes=sg_nodes, edges=sg_edges)
+
+    # remove subgraph edges from graph
+    graph.edges = [e for e in graph.edges if e not in [(lif_nk, w_nk), (w_nk, lif_nk)]]
+    # remove subgraph nodes from graph
+    graph.nodes = {k: v for k, v in graph.nodes.items() if k not in [lif_nk, w_nk]}
+
+    # change edges of type (x, lif_nk) to (x, sg_key)
+    graph.edges = [(e[0], sg_key) if e[1] == lif_nk else e for e in graph.edges]
+    # change edges of type (lif_nk, x) to (sg_key, x)
+    graph.edges = [(sg_key, e[1]) if e[0] == lif_nk else e for e in graph.edges]
+
+    # insert subgraph into graph and return
+    graph.nodes[sg_key] = sg
+    return graph
+
+
 def _replace_rnn_subgraph_with_nirgraph(graph: nir.NIRGraph) -> nir.NIRGraph:
     """Take a NIRGraph and replace any RNN subgraphs with a single NIRGraph node."""
-    if len([e for e in graph.nodes.values() if isinstance(e, nir.Input)]) > 1:
-        print('found RNN subgraph, trying to parse')
-        cand_sg_nk = list(set([e[1] for e in graph.edges if e[1] not in graph.nodes]))
-        print('detected subgraph! candidates:', cand_sg_nk)
-        assert len(cand_sg_nk) == 1, 'only one subgraph allowed'
-        nk = cand_sg_nk[0]
-        nodes = {k: v for k, v in graph.nodes.items() if k.startswith(f'{nk}.')}
-        edges = [e for e in graph.edges if e[0].startswith(f'{nk}.') or e[1].startswith(f'{nk}.')]
-        valid_edges = all([e[0].startswith(f'{nk}.') for e in edges])
-        valid_edges = valid_edges and all([e[1].startswith(f'{nk}.') for e in edges])
-        assert valid_edges, 'subgraph edges must start with subgraph key'
-        sg_graph = nir.NIRGraph(nodes=nodes, edges=edges)
-        for k in nodes.keys():
-            graph.nodes.pop(k)
-        for e in edges:
-            graph.edges.remove(e)
-        graph.nodes[nk] = sg_graph
+    print('replace rnn subgraph with nirgraph')
+
+    if len(set(graph.edges)) != len(graph.edges):
+        print('[WARNING] duplicate edges found, removing')
+        graph.edges = list(set(graph.edges))
+
+    # find cycle of LIF <> Dense nodes
+    for edge1 in graph.edges:
+        for edge2 in graph.edges:
+            if not edge1 == edge2:
+                if edge1[0] == edge2[1] and edge1[1] == edge2[0]:
+                    lif_nk = edge1[0]
+                    lif_n = graph.nodes[lif_nk]
+                    w_nk = edge1[1]
+                    w_n = graph.nodes[w_nk]
+                    is_lif = isinstance(lif_n, (nir.LIF, nir.CubaLIF))
+                    is_dense = isinstance(w_n, (nir.Affine, nir.Linear))
+                    # check if the dense only connects to the LIF
+                    w_out_nk = [e[1] for e in graph.edges if e[0] == w_nk]
+                    w_in_nk = [e[0] for e in graph.edges if e[1] == w_nk]
+                    is_rnn = len(w_out_nk) == 1 and len(w_in_nk) == 1
+                    # check if we found an RNN - if so, then parse it
+                    if is_rnn and is_lif and is_dense:
+                        graph = _create_rnn_subgraph(graph, edge1[0], edge1[1])
     return graph
 
 
@@ -48,7 +92,7 @@ def _parse_rnn_subgraph(graph: nir.NIRGraph) -> (nir.NIRNode, nir.NIRNode, int):
         wrec_node = [n for n in sub_nodes if isinstance(n, (nir.Affine, nir.Linear))][0]
     except IndexError:
         raise ValueError('invalid RNN subgraph - could not find all required nodes')
-    lif_size = int(list(input_node.input_type.values())[0][0])
+    lif_size = int(list(input_node.input_type.values())[0][0])  # NOTE: needed for lava-dl
     assert lif_size == list(output_node.output_type.values())[0][0], 'output size mismatch'
     assert lif_size == lif_node.v_threshold.size, 'lif size mismatch (v_threshold)'
     assert lif_size == wrec_node.weight.shape[0], 'w_rec shape mismatch'
@@ -81,34 +125,6 @@ def _nir_to_lavadl_module(node: nir.NIRNode, hack_w_scale=True) -> torch.nn.Modu
         )
         mod.weight.data = torch.from_numpy(node.weight.reshape(mod.weight.shape))
         return mod
-
-    elif isinstance(node, nir.LIF):
-        raise NotImplementedError('not implemented for lava-dl yet')
-        dt = 1e-4
-
-        assert np.allclose(node.v_leak, 0.), 'v_leak not supported'
-        assert np.unique(node.v_threshold).size == 1, 'v_threshold must be same for all neurons'
-
-        beta = 1 - (dt / node.tau)
-        vthr = node.v_threshold
-        w_scale = node.r * dt / node.tau
-
-        if not np.allclose(w_scale, 1.):
-            if hack_w_scale:
-                vthr = vthr / np.unique(w_scale)[0]
-                print('[warning] scaling weights to avoid scaling inputs')
-                print(f'w_scale: {w_scale}, r: {node.r}, dt: {dt}, tau: {node.tau}')
-            else:
-                raise NotImplementedError('w_scale must be 1, or the same for all neurons')
-
-        assert np.unique(vthr).size == 1, 'LIF v_thr must be same for all neurons'
-
-        return snn.Leaky(
-            beta=beta,
-            threshold=np.unique(vthr)[0],
-            reset_mechanism='zero',
-            init_hidden=True,
-        )
 
     elif isinstance(node, nir.CubaLIF):
         dt = 1e-4
@@ -145,50 +161,18 @@ def _nir_to_lavadl_module(node: nir.NIRNode, hack_w_scale=True) -> torch.nn.Modu
                 current_decay=np.unique(cur_decay)[0],
                 voltage_decay=np.unique(vol_decay)[0],
                 shared_param=False,
-                scale=4096,
+                scale=SCALE,
+                # scale=4096,
             )
         )
         block.synapse.weight.data = torch.eye(7).reshape(block.synapse.weight.shape)
         return block
-
-        return slayer.neuron.cuba.Neuron(
-            threshold=np.unique(vthr)[0],
-            current_decay=np.unique(cur_decay)[0],
-            voltage_decay=np.unique(vol_decay)[0],
-            # bias=bias,
-            shared_param=False,
-            scale=4096,
-        )
-        # alpha = 1 - (dt / node.tau_syn)
-        # beta = 1 - (dt / node.tau_mem)
-        # vthr = node.v_threshold
-        # w_scale = node.w_in * (dt / node.tau_syn)
-        # return snn.Synaptic(
-        #     alpha=alpha,
-        #     beta=beta,
-        #     threshold=np.unique(vthr)[0],
-        #     reset_mechanism='zero',
-        #     init_hidden=True,
-        # )
 
     elif isinstance(node, nir.NIRGraph):
         lif_node, wrec_node, lif_size = _parse_rnn_subgraph(node)
 
         if isinstance(lif_node, nir.LIF):
             raise NotImplementedError('LIF in subgraph not supported')
-            # TODO: fix neuron parameters
-            rleaky = snn.RLeaky(
-                beta=1 - (1 / lif_node.tau),
-                threshold=lif_node.v_threshold,
-                reset_mechanism='zero',
-                init_hidden=True,
-                all_to_all=True,
-                linear_features=lif_size,
-            )
-            rleaky.recurrent.weight.data = torch.Tensor(wrec_node.weight)
-            if isinstance(wrec_node, nir.Affine):
-                rleaky.recurrent.bias.data = torch.Tensor(wrec_node.bias)
-            return rleaky
 
         elif isinstance(lif_node, nir.CubaLIF):
             dt = 1e-4
@@ -225,7 +209,8 @@ def _nir_to_lavadl_module(node: nir.NIRNode, hack_w_scale=True) -> torch.nn.Modu
                     current_decay=np.unique(cur_decay)[0],
                     voltage_decay=np.unique(vol_decay)[0],
                     shared_param=False,
-                    scale=4096,
+                    scale=SCALE,
+                    # scale=4096,
                 )
             )
 
@@ -241,23 +226,8 @@ def _nir_to_lavadl_module(node: nir.NIRNode, hack_w_scale=True) -> torch.nn.Modu
 
             return rnn_block
 
-            # breakpoint()
-
-            # rsynaptic = snn.RSynaptic(
-            #     alpha=alpha,
-            #     beta=beta,
-            #     threshold=np.unique(vthr)[0],
-            #     reset_mechanism='zero',
-            #     init_hidden=True,
-            #     all_to_all=not diagonal,
-            #     linear_features=lif_size,
-            #     V=np.diag(wrec_node.weight) if diagonal else None,
-            # )
-
-            # rsynaptic.recurrent.weight.data = torch.Tensor(wrec_node.weight)
-            # if isinstance(wrec_node, nir.Affine):
-            #     rsynaptic.recurrent.bias.data = torch.Tensor(wrec_node.bias)
-            # return rsynaptic
+    elif isinstance(node, nir.LIF):
+        raise NotImplementedError('not implemented for lava-dl yet')
 
     else:
         print('[WARNING] could not parse node of type:', node.__class__.__name__)
@@ -275,3 +245,6 @@ def from_nir(graph: nir.NIRGraph) -> torch.nn.Module:
 if __name__ == '__main__':
     nirgraph = nir.read('braille_v2.nir')
     net = from_nir(nirgraph)
+
+    test_data_path = "data/ds_test.pt"
+    ds_test = torch.load(test_data_path)
