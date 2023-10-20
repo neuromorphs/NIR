@@ -104,6 +104,7 @@ def evaluate(hw, net, inp, outp, x, y):
     inp[0].params = input_spikes
 
     timesteps = x.shape[0] + 1
+    net.reset()
     hw.run(net, timesteps, sys_tick_in_s=2.5e-3, debug=False)
     # spike_times = outp[0].get_spikes()
     # print([(i,o.name) for i,o in enumerate(outp)])
