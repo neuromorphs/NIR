@@ -431,4 +431,4 @@ def test_conv_type_inference():
     }
     for name, graph in graphs.items():
         graph.infer_types()
-        assert graph._check_types(), f'type inference failed for: {name}'
+        assert graph.is_valid(), f'type inference failed for: {name}'
