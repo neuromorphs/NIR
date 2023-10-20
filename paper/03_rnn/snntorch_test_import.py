@@ -53,7 +53,7 @@ def val_test_loop_nirtorch(dataset, batch_size, net, loss_fn, device, shuffle=Tr
 # import from NIR - using nirtorch
 ###########################
 
-nir_graph = nir.read('braille.nir')
+nir_graph = nir.read('braille_subtract.nir')
 net2 = import_nirtorch.from_nir(nir_graph)
 test_results = val_test_loop_nirtorch(ds_test, 64, net2, loss_fn, device, shuffle=SHUFFLE)
 print("test accuracy: {}%".format(np.round(test_results[1] * 100, 2)))
