@@ -10,7 +10,7 @@ simulators to run on: Sinabs (+ others?)
 
 1. Load the graph from `scnn_mnist.nir`
 2. Use the [NMNIST test dataset from Tonic](https://tonic.readthedocs.io/en/latest/generated/tonic.datasets.NMNIST.html#tonic.datasets.NMNIST) (emphasis on **test**) to provide an accuracy. Store that as a single number in `<PLATFORM>_accuracy.npy`.
-3. Pass the data from `val_numbers.npy` through the first two layers in the model, generating output data from the first convolution + neuron layer. That data should have (300, 10, 16, 16, 16) output. Store that in `<PLATFORM>_activities.npy`.
+3. Pass the data from `val_numbers.npy` through the first two layers in the model, generating output data from the first convolution + neuron layer. That data should have (300, 10, 16, 16, 16) output. Store that in `<PLATFORM>_activity.npy`.
 
 ## Things to visualize/compare
 - intermediate layer activations (which layer? perhaps first layer, for better visual features)
