@@ -81,6 +81,7 @@ def compare_synaptic_to_nir(
                 beta=nrn_params["beta"],
                 threshold=nrn_params["threshold"],
                 reset_mechanism=nrn_params["reset_mechanism"],
+                reset_delay=False,  # enforce same reset behavior as in NIR
             )
 
         def forward(self, x):
@@ -214,9 +215,9 @@ def compare_transfer_function(do_plot=False):
 
 
 if __name__ == "__main__":
-    test_convert_synaptic_sub_threshold(do_plot=True)
-    test_convert_synaptic_negative_weight(do_plot=True)
-    test_convert_synaptic_reset_by_subtraction(do_plot=True)
-    test_convert_synaptic_reset_to_zero(do_plot=True)
+    # test_convert_synaptic_sub_threshold(do_plot=True)
+    # test_convert_synaptic_negative_weight(do_plot=True)
+    # test_convert_synaptic_reset_by_subtraction(do_plot=True)
+    # test_convert_synaptic_reset_to_zero(do_plot=True)
     test_convert_synaptic_reset_by_subtraction_const_I(do_plot=True)
     compare_transfer_function(True)
