@@ -24,16 +24,22 @@ for idx, module in enumerate(modules):
         mem_dict[idx] = module.init_leaky()
 # forward pass through time
 out = []
+arr_spk_layer = []
 for t in range(inp_data.shape[0]):
     x = inp_data[t]
+    spklayer = None
     for idx, module in enumerate(modules):
         if isinstance(module, snn.Leaky):
             x, mem_dict[idx] = module(x, mem_dict[idx])
+            if spklayer is None:
+                spklayer = x.detach()
         else:
             x = module(x)
     out.append(x)
-out = torch.stack(out).detach()
-np.save("snnTorch_activity.npy", out.numpy())
+    arr_spk_layer.append(spklayer)
+arr_spk_layer = torch.stack(arr_spk_layer).detach()
+# out = torch.stack(out).detach()
+np.save("snnTorch_activity.npy", arr_spk_layer.numpy())
 
 ############################################################
 # sample_idx = 9020
