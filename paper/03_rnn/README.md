@@ -19,5 +19,5 @@ As in the related paper, the binning procedure resulting in a $\Delta t = 5\text
 
 0. Choose whether to use reset by subtraction or reset to zero for the CuBa-LIF neurons of the model
 1. Load the graph from `braille_subtract.nir` (in the first case) or `braille_zero.nir` (in the second one)
-2. Use the `ds_test.pt` subset (from the `data` folder) to provide test accuracy. Store that as a single number in `<PLATFORM>_accuracy.npy`.
+2. Use the `ds_test.pt` subset (from the `data` folder) to provide test accuracy. Store that as a single number in `<PLATFORM>_accuracy_zero.npy` and `<PLATFORM>_accuracy_subtract.npy` for the two zero/subtract graphs.
 3. Pass the data from the first element in the `ds_test.pt` dataset (`torch.load("data/ds_test.pt")[0][0]`) through the model, and store the output spikes of the first LIF layer (the `"lif1.lif"` node in the graph). That data should have (256, 38) output for the `_zero` graph and (256, 55) for the `_subtract` graph. Store that in `<PLATFORM>_activity_zero.npy` or `<PLATFORM>_activity_subtract.npy`.
