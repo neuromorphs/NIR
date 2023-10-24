@@ -134,7 +134,7 @@ def compare_synaptic_to_nir(
     # Norse #
     #########
 
-    norse_model = norse.torch.from_nir(nir_graph)
+    norse_model = norse.torch.from_nir(nir_graph, dt=1e-4)
 
     def evaluate(x):
         out = []
@@ -145,8 +145,9 @@ def compare_synaptic_to_nir(
             z, state = norse_model(t, state)
             out.append(z)
             cuba_state = state.state["cuba"][0][1]
-            v.append(cuba_state.v)
-            i.append(cuba_state.i)
+            cuba_state = state.state["cuba"][0]
+            v.append(cuba_state[2].v)
+            i.append(cuba_state[1].v)
         return out, v, i
 
     out, v, i = evaluate(torch.Tensor(input_data))
