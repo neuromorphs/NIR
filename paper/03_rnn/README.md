@@ -6,6 +6,7 @@ Hardware to run on: Xylo, Loihi 2, SpiNNaker2
 
 Simulators to run on: snnTorch, Norse, Lava-DL, Nengo (?)
 
+**Note** the graphs use `dt=1e-4`
 
 ## The dataset
 
