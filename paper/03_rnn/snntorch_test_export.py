@@ -11,15 +11,22 @@ import nir
 # NOTE: this requires snntorch/nir (PR) and nirtorch/master (unreleased)
 from snntorch import export_nirtorch
 
-parser = argparse.ArgumentParser()
-parser.add_argument("model", type=str, help="model name")
-args = parser.parse_args()
-
 
 device = torch.device("cpu")
-saved_state_dict_path = f"data/model_ref_{args.model}.pt"
+
+# parser = argparse.ArgumentParser()
+# parser.add_argument("model", type=str, help="model name")
+# args = parser.parse_args()
+# saved_state_dict_path = f"data/model_ref_{args.model}.pt"
+# best_val_layers = torch.load(saved_state_dict_path, map_location=device)
+# parameters_path = f"data/parameters_ref_{args.model}.json"
+# model_name = args.model
+
+model_name = "retrained_zero"
+saved_state_dict_path = "data/retrained_snntorch_20231024_110806.pt"
 best_val_layers = torch.load(saved_state_dict_path, map_location=device)
-parameters_path = f"data/parameters_ref_{args.model}.json"
+parameters_path = "data/parameters_ref_zero.json"
+
 with open(parameters_path) as f:
     parameters = json.load(f)
 regularization = [parameters["reg_l1"], parameters["reg_l2"]]
@@ -48,6 +55,7 @@ def model_build(settings, input_size, num_steps, device):
                 linear_features=num_hidden,
                 spike_grad=spike_grad,
                 reset_mechanism="zero",
+                reset_delay=False,
             )
             self.fc2 = nn.Linear(num_hidden, num_outputs)
             self.lif2 = snn.Synaptic(
@@ -55,6 +63,7 @@ def model_build(settings, input_size, num_steps, device):
                 beta=settings["beta_out"],
                 spike_grad=spike_grad,
                 reset_mechanism="zero",
+                reset_delay=False,
             )
 
         def forward(self, x):
@@ -132,4 +141,4 @@ print("test accuracy: {}%".format(np.round(test_results[1] * 100, 2)))
 
 print('\nexport to NIR graph\n')
 nir_graph = export_nirtorch.to_nir(net, ds_test[0][0], ignore_dims=[0])
-nir.write(f"braille_{args.model}.nir", nir_graph)
+nir.write(f"braille_{model_name}.nir", nir_graph)
