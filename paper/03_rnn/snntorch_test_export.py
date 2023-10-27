@@ -22,10 +22,15 @@ device = torch.device("cpu")
 # parameters_path = f"data/parameters_ref_{args.model}.json"
 # model_name = args.model
 
-model_name = "retrained_zero"
-saved_state_dict_path = "data/retrained_snntorch_20231024_110806.pt"
+# model_name = "retrained_zero"
+model_name = "retrained_nobias_subtract"
+# saved_state_dict_path = "data/retrained_snntorch_20231024_110806.pt"
+saved_state_dict_path = "data/model_noDelay_noBias_ref_subtract.pt"
 best_val_layers = torch.load(saved_state_dict_path, map_location=device)
-parameters_path = "data/parameters_ref_zero.json"
+# parameters_path = "data/parameters_ref_zero.json"
+parameters_path = "data/parameters_noDelay_noBias_ref_subtract.json"
+
+bias = False
 
 with open(parameters_path) as f:
     parameters = json.load(f)
@@ -38,7 +43,7 @@ ds_test = torch.load(test_data_path)
 SHUFFLE = False
 
 
-def model_build(settings, input_size, num_steps, device):
+def model_build(settings, input_size, num_steps, device, bias=True):
     input_channels = int(input_size)
     num_hidden = int(settings["nb_hidden"])
     num_outputs = 7
@@ -48,7 +53,7 @@ def model_build(settings, input_size, num_steps, device):
         def __init__(self):
             super().__init__()
 
-            self.fc1 = nn.Linear(input_channels, num_hidden)
+            self.fc1 = nn.Linear(input_channels, num_hidden, bias=bias)
             self.lif1 = snn.RSynaptic(
                 alpha=settings["alpha_r"],
                 beta=settings["beta_r"],
@@ -57,7 +62,9 @@ def model_build(settings, input_size, num_steps, device):
                 reset_mechanism="zero",
                 reset_delay=False,
             )
-            self.fc2 = nn.Linear(num_hidden, num_outputs)
+            if not bias:
+                self.lif1.recurrent.bias = None
+            self.fc2 = nn.Linear(num_hidden, num_outputs, bias=bias)
             self.lif2 = snn.Synaptic(
                 alpha=settings["alpha_out"],
                 beta=settings["beta_out"],
@@ -131,7 +138,7 @@ print('\nload snnTorch module from checkpoint\n')
 batch_size = 4
 input_size = 12
 num_steps = next(iter(ds_test))[0].shape[0]
-net = model_build(parameters, input_size, num_steps, device)
+net = model_build(parameters, input_size, num_steps, device, bias)
 test_results = val_test_loop(ds_test, batch_size, net, loss_fn, device,
                              shuffle=SHUFFLE, saved_state_dict=best_val_layers)
 print("test accuracy: {}%".format(np.round(test_results[1] * 100, 2)))
