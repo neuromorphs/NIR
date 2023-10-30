@@ -36,8 +36,8 @@ def input_array_to_spike_list(input_array):
 
 # load NIR model
 # model_name = "retrained_zero"
-model_name = "noDelay_bias_zero"
-# model_name = "noDelay_noBias_subtract"
+# model_name = "noDelay_bias_zero"
+model_name = "noDelay_noBias_subtract"
 
 backend = "S2"  # "S2" or "brian2"
 brian2_quantize_weights = True
