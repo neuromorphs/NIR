@@ -59,7 +59,7 @@ legend.scatterpoints: 1
 ### AXES
 axes.grid: False
 axes.labelpad: 4.0
-axes.titlesize: 12
+axes.titlesize: 15
 axes.titleweight: bold
 axes.labelsize: 22
 axes.labelweight: bold
