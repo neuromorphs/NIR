@@ -35,8 +35,12 @@ def input_array_to_spike_list(input_array):
 ### Load NIR Graph
 
 # load NIR model
-model_name = "retrained_zero"
-backend = "S2"  # or "brian2"
+# model_name = "retrained_zero"
+model_name = "noDelay_bias_zero"
+# model_name = "noDelay_noBias_subtract"
+
+backend = "S2"  # "S2" or "brian2"
+brian2_quantize_weights = True
 
 if model_name.endswith("zero"):
     reset_method = s2_nir.ResetMethod.ZERO
@@ -54,10 +58,10 @@ print("edges:")
 for edge in nir_model.edges:
     print("\t", edge)
 
-# s2_nir.add_output_to_node("lif1.lif", nir_model, "ouput_lif1")
+s2_nir.add_output_to_node("lif1.lif", nir_model, "ouput_lif1")
 
 cfg = s2_nir.ConversionConfig(
-    output_record=["v", "spikes"],
+    output_record=["spikes"],
     dt=0.0001,
     conn_delay=0,
     scale_weights=True,
@@ -84,7 +88,7 @@ actual_labels = []
 
 my_loader = DataLoader(ds_test, batch_size=1, shuffle=False)
 
-for single_sample in islice(my_loader, n_samples):
+for iteration, single_sample in enumerate(islice(my_loader, n_samples)):
     sample = single_sample[0].numpy()  # shape: (1, 256, 12)
 
     spike_times = input_array_to_spike_list(sample[0, :, :].T)
@@ -97,18 +101,18 @@ for single_sample in islice(my_loader, n_samples):
 
     if backend == "S2":
         hw = hardware.SpiNNaker2Chip(eth_ip="192.168.1.25")  # use ethernet
-        hw.run(net, timesteps, debug=False)
+        hw.run(net, timesteps, debug=False, sys_tick_in_s=1.0e-3)
     else:
         hw = brian2_sim.Brian2Backend()
-        hw.run(net, timesteps, quantize_weights=False)
+        hw.run(net, timesteps, quantize_weights=brian2_quantize_weights)
 
-    spike_times = outp[0].get_spikes()
-    voltages = outp[0].get_voltages()
-    v_scale = outp[0].nir_v_scale
+    output_pop = next(p for p in outp if p.name == "lif2")
+    hidden_pop = next(p for p in outp if p.name == "lif1.lif")
+    spike_times = output_pop.get_spikes()
 
     n_output_spikes = np.zeros(len(spike_times))
-    for i, s in spike_times.items():
-        n_output_spikes[i] = len(s)
+    for nrn, spikes in spike_times.items():
+        n_output_spikes[nrn] = len(spikes)
 
     print(n_output_spikes)
     predicted_label = int(np.argmax(n_output_spikes))
@@ -118,7 +122,19 @@ for single_sample in islice(my_loader, n_samples):
     predicted_labels.append(predicted_label)
     actual_labels.append(actual_label)
 
+    if iteration == 0:  # save hidden spikes
+        spike_times_lif1 = hidden_pop.get_spikes()
+        activity = np.zeros((timesteps, hidden_pop.size), dtype=int)
+        for nrn, spikes in spike_times_lif1.items():
+            activity[spikes, nrn] = 1
+            np.save(f"s2_activity_{model_name}.npy", activity)
+        if do_plot:
+            plt.imshow(activity.T, interpolation="none", aspect=4)
+            plt.show()
+
     if do_plot:
+        voltages = output_pop.get_voltages()
+        v_scale = output_pop.nir_v_scale
         times = np.arange(timesteps)
         for i, vs in voltages.items():
             plt.plot(times, vs / v_scale, label=str(i))
