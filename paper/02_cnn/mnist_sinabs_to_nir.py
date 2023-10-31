@@ -1,3 +1,4 @@
+import numpy as np
 import tonic
 import torch
 import torch.nn as nn
@@ -41,6 +42,9 @@ nir_graph = to_nir(snn, sample_data=torch.rand((1, 2, 34, 34)))
 nir_graph.infer_types()
 # Save the graph
 nir.write("scnn_mnist.nir", nir_graph)
+
+# Load the graph
+nir_graph = nir.read("scnn_mnist.nir")
 
 # Load sinabs model from nir graph
 extracted_sinabs_model = from_nir(nir_graph, batch_size=1)
@@ -104,15 +108,41 @@ true_pos = []
 device = "mps:0"
 speck_model.to(device)
 
+# Test model accuracy
 for data, label in data_loader:
     data = data.reshape((-1, *input_shape)).to(device)
     label = label.to(device)
     batch_size = len(label)
     set_batch_size(speck_model, batch_size)
+    speck_model.reset_states()
     with torch.no_grad():
         out: torch.Tensor = speck_model(data).reshape((batch_size, -1, 10))
         true_pos.append((out.sum(dim=1).argmax(dim=1)) == label)
         print(f"Current batch accuracy: {true_pos[-1].sum()/len(true_pos[-1])}")
 
 true_pos = torch.cat(true_pos)
-print(f"Final test accuracy {true_pos.sum()/len(true_pos)}")
+accuracy = true_pos.sum() / len(true_pos)
+np.save("sinabs_accuracy.npy", accuracy.item())
+print(f"Final test accuracy {accuracy}")
+
+# Monitor first spiking layer activity for each digit sample
+digit_data = np.swapaxes(np.load("val_numbers.npy"), 0, 1)
+set_batch_size(speck_model, 10)
+
+# Register a forward hook
+activity = []
+
+
+def activity_monitor(mod, _, output):
+    activity.append(output.reshape(-1, 10, 16, 16, 16).cpu().numpy())
+
+
+speck_model.sequence[0].spk_layer.register_forward_hook(activity_monitor)
+
+
+with torch.no_grad():
+    input_data = torch.tensor(digit_data, device=device).float().reshape(-1, 2, 34, 34)
+    out = speck_model(input_data)
+    out = out.reshape(10, -1, 10, 1, 1)
+
+np.save("sinabs_activity.npy", activity[0])
