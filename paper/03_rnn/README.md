@@ -34,3 +34,8 @@ Code examples are available in `Norse inference.ipynb`
    * **Note** the graphs use `dt=1e-4`
 3. Use the `ds_test.pt` subset (from the `data` folder) to provide test accuracy. Store that as a single number in `<PLATFORM>_accuracy_<MODEL>.npy` (e. g. `norse_accuracy_noDelay_bias_zero.nir`)
 4. Pass the data from the first element in the `ds_test.pt` dataset (`torch.load("data/ds_test.pt")[0][0]`) through the models, and store the output spikes of the first LIF layer (the `"lif1.lif"` node in the graph). That data should have (256, 38) output for the `noDelay_bias_zero` graph and (256, 40) for the `noDelay_noBias_subtract` graph. Store that in `<PLATFORM>_activity_<MODEL>.npy`.
+
+
+## Training
+
+To train the Braille reading model, the `Braille_training.ipynb` notebook is available. By setting the `reset_mechanism`, `reset_delay` and `parameters_filename` variables, the different models (and corresponding hyperparameters) can be selected. At the very beginning of the notebook, the `store_weights` can be set as True or False according to what is needed. A cell for GPU usage is also present.
