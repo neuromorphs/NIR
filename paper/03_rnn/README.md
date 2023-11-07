@@ -38,4 +38,4 @@ Code examples are available in `Norse inference.ipynb`
 
 ## Training
 
-To train the Braille reading model, the `Braille_training.ipynb` notebook is available. By setting the `reset_mechanism`, `reset_delay` and `parameters_filename` variables, the different models (and corresponding hyperparameters) can be selected. At the very beginning of the notebook, the `store_weights` can be set as True or False according to what is needed. A cell for GPU usage is also present.
+To train the Braille reading model, the `Braille_training.ipynb` notebook is available. By setting the `reset_mechanism`, `reset_delay` and `parameters_filename` variables, the different models (and corresponding hyperparameters) can be selected. `use_bias` allows instead to specify if bias can be used or not depending on the target platform. At the very beginning of the notebook, the `store_weights` can be set as True or False according to what is needed. A cell for GPU usage is also present.
