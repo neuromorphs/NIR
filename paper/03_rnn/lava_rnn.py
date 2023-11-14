@@ -1,11 +1,12 @@
+"""
+Sharp edges:
+- in lava-dl, the current and voltage state is not automatically reset. must do this manually after every forward pass.
+"""
 import nir
 import nirtorch
 import torch
 import numpy as np
 import lava.lib.dl.slayer as slayer
-
-
-SCALE = 1 << 10
 
 
 def _create_rnn_subgraph(graph: nir.NIRGraph, lif_nk: str, w_nk: str) -> nir.NIRGraph:
@@ -101,7 +102,12 @@ def _parse_rnn_subgraph(graph: nir.NIRGraph) -> (nir.NIRNode, nir.NIRNode, int):
     return lif_node, wrec_node, lif_size
 
 
-def _nir_to_lavadl_module(node: nir.NIRNode, hack_w_scale=True) -> torch.nn.Module:
+def _nir_to_lavadl_module(
+        node: nir.NIRNode,
+        scale: int = 1 << 6,
+        # hack_w_scale=True,
+        dt=1e-4
+) -> torch.nn.Module:
     if isinstance(node, nir.Input) or isinstance(node, nir.Output):
         return None
 
@@ -109,63 +115,72 @@ def _nir_to_lavadl_module(node: nir.NIRNode, hack_w_scale=True) -> torch.nn.Modu
         assert node.bias is not None, 'bias must be specified for Affine layer'
 
         mod = slayer.synapse.Dense(
-            in_neurons=node.weight.shape[1], out_neurons=node.weight.shape[0],
-            weight_scale=1, weight_norm=False, pre_hook_fx=None
+            in_neurons=node.weight.shape[1],
+            out_neurons=node.weight.shape[0],
+            weight_scale=1,
+            weight_norm=False,
+            pre_hook_fx=None,
         )
-        mod.weight.data = torch.from_numpy(node.weight.reshape(mod.weight.shape))
+        weight = torch.from_numpy(node.weight.reshape(mod.weight.shape))
+        mod.weight = torch.nn.Parameter(data=weight, requires_grad=True)
         if not np.allclose(node.bias, 0.):
             bias = torch.from_numpy(node.bias.reshape((node.weight.shape[0])))
             mod.bias = torch.nn.Parameter(data=bias, requires_grad=True)
         return mod
 
     elif isinstance(node, nir.Linear):
+        print('[WARNING] Linear layer not supported, using Dense instead')
         mod = slayer.synapse.Dense(
-            in_neurons=node.weight.shape[1], out_neurons=node.weight.shape[0],
-            weight_scale=1, weight_norm=False, pre_hook_fx=None
+            in_neurons=node.weight.shape[1],
+            out_neurons=node.weight.shape[0],
+            weight_scale=1,
+            weight_norm=False,
+            pre_hook_fx=None
         )
-        mod.weight.data = torch.from_numpy(node.weight.reshape(mod.weight.shape))
+        weight = torch.from_numpy(node.weight.reshape(mod.weight.shape))
+        mod.weight = torch.nn.Parameter(data=weight, requires_grad=True)
         return mod
 
     elif isinstance(node, nir.CubaLIF):
-        dt = 1e-4
-
+        # bias = node.v_leak * dt / node.tau_mem
         assert np.allclose(node.v_leak, 0), 'v_leak not supported'  # not yet in lava-dl?
         assert np.allclose(node.r, node.tau_mem / dt), 'r not supported in CubaLIF'
 
         cur_decay = dt / node.tau_syn
         vol_decay = dt / node.tau_mem
-        # bias = node.v_leak * dt / node.tau_mem
         w_scale = node.w_in * (dt / node.tau_syn)
         vthr = node.v_threshold
-
-        if not np.allclose(w_scale, 1.):
-            if hack_w_scale:
-                vthr = vthr / w_scale
-                print(f'[warning] scaling weights to avoid scaling inputs, w_scale: {w_scale[0]}')
-                print(f'w_in: {node.w_in[0]}, dt: {dt}, tau_syn: {node.tau_syn[0]}')
-            else:
-                raise NotImplementedError('w_scale must be 1, or the same for all neurons')
 
         assert np.unique(cur_decay).size == 1, 'CubaLIF cur_decay must be same for all neurons'
         assert np.unique(vol_decay).size == 1, 'CubaLIF vol_decay must be same for all neurons'
         assert np.unique(vthr).size == 1, 'CubaLIF v_thr must be same for all neurons'
 
+        n_neurons = 7  # HACK: hard-coded
+
         block = slayer.block.cuba.Dense(
-            in_neurons=7,  # HACK: hard-coded
-            out_neurons=7,  # HACK: hard-coded
+            in_neurons=n_neurons,
+            out_neurons=n_neurons,
             weight_scale=1,
             weight_norm=False,
             pre_hook_fx=None,
+            delay_shift=False,
             neuron_params=dict(
                 threshold=np.unique(vthr)[0],
                 current_decay=np.unique(cur_decay)[0],
                 voltage_decay=np.unique(vol_decay)[0],
-                shared_param=False,
-                scale=SCALE,
-                # scale=4096,
+                shared_param=True,
+                scale=scale,
             )
         )
-        block.synapse.weight.data = torch.eye(7).reshape(block.synapse.weight.shape)
+
+        # block.neuron.threshold_eps = 0.0
+
+        weight_pre = torch.eye(n_neurons).reshape(block.synapse.weight.shape)
+        if not np.allclose(w_scale, 1.):
+            # TODO: make sure that dims match up
+            print(f'[warning] scaling weights according to w_in -> w_scale={w_scale[0]}')
+            weight_pre = weight_pre * w_scale
+        block.synapse.weight = torch.nn.Parameter(data=weight_pre, requires_grad=True)
         return block
 
     elif isinstance(node, nir.NIRGraph):
@@ -175,24 +190,14 @@ def _nir_to_lavadl_module(node: nir.NIRNode, hack_w_scale=True) -> torch.nn.Modu
             raise NotImplementedError('LIF in subgraph not supported')
 
         elif isinstance(lif_node, nir.CubaLIF):
-            dt = 1e-4
-
+            # bias = lif_node.v_leak * dt / lif_node.tau_mem
             assert np.allclose(lif_node.v_leak, 0), 'v_leak not supported'  # not yet in lava-dl?
             assert np.allclose(lif_node.r, lif_node.tau_mem / dt), 'r not supported in CubaLIF'
 
             cur_decay = dt / lif_node.tau_syn
             vol_decay = dt / lif_node.tau_mem
-            # bias = lif_node.v_leak * dt / lif_node.tau_mem
             w_scale = lif_node.w_in * (dt / lif_node.tau_syn)
             vthr = lif_node.v_threshold
-
-            if not np.allclose(w_scale, 1.):
-                if hack_w_scale:
-                    vthr = vthr / w_scale
-                    print(f'[warning] scaling weights to avoid scaling inputs, w_scale: {w_scale[0]}')
-                    print(f'w_in: {lif_node.w_in[0]}, dt: {dt}, tau_syn: {lif_node.tau_syn[0]}')
-                else:
-                    raise NotImplementedError('w_scale must be 1, or the same for all neurons')
 
             assert np.unique(cur_decay).size == 1, 'CubaLIF cur_decay must be same for all neurons'
             assert np.unique(vol_decay).size == 1, 'CubaLIF vol_decay must be same for all neurons'
@@ -204,25 +209,32 @@ def _nir_to_lavadl_module(node: nir.NIRNode, hack_w_scale=True) -> torch.nn.Modu
                 weight_scale=1,
                 weight_norm=False,
                 pre_hook_fx=None,
+                delay_shift=False,
                 neuron_params=dict(
                     threshold=np.unique(vthr)[0],
                     current_decay=np.unique(cur_decay)[0],
                     voltage_decay=np.unique(vol_decay)[0],
-                    shared_param=False,
-                    scale=SCALE,
-                    # scale=4096,
+                    shared_param=True,
+                    scale=scale,
                 )
             )
 
-            in_shape = rnn_block.input_synapse.weight.shape
-            rnn_block.input_synapse.weight.data = torch.eye(lif_size).reshape(in_shape)
+            # rnn_block.neuron.threshold_eps = 0.0
+
+            w_pre = torch.eye(lif_size).reshape(rnn_block.input_synapse.weight.shape)
+            if not np.allclose(w_scale, 1.):
+                # TODO: make sure that dims match up
+                print(f'[warning] scaling pre weights for w_in -> w_scale={w_scale[0]}')
+                w_pre = w_pre * w_scale
+            rnn_block.input_synapse.weight = torch.nn.Parameter(data=w_pre, requires_grad=True)
+
             wrec_shape = rnn_block.recurrent_synapse.weight.shape
-            wrec = torch.from_numpy(wrec_node.weight)
-            rnn_block.recurrent_synapse.weight.data = wrec.reshape(wrec_shape)
+            wrec = torch.from_numpy(wrec_node.weight).reshape(wrec_shape)
+            rnn_block.recurrent_synapse.weight = torch.nn.Parameter(data=wrec, requires_grad=True)
 
             if isinstance(wrec_node, nir.Affine) and wrec_node.bias is not None:
-                bias = torch.from_numpy(wrec_node.bias)
-                rnn_block.recurrent_synapse.bias = torch.nn.Parameter(bias.reshape((lif_size)))
+                bias = torch.from_numpy(wrec_node.bias).reshape((lif_size))
+                rnn_block.recurrent_synapse.bias = torch.nn.Parameter(data=bias, requires_grad=True)
 
             return rnn_block
 
@@ -243,7 +255,7 @@ def from_nir(graph: nir.NIRGraph) -> torch.nn.Module:
 
 
 if __name__ == '__main__':
-    nirgraph = nir.read('braille_v2.nir')
+    nirgraph = nir.read('braille_retrained_zero.nir')
     net = from_nir(nirgraph)
 
     test_data_path = "data/ds_test.pt"
