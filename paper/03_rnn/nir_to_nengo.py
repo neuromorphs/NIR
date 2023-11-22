@@ -44,25 +44,32 @@ def nir_to_nengo(n, dt=0.001):
                 assert np.all(obj.r == obj.r[0])
                 R = obj.r[0]
                 assert np.all(obj.v_leak == 0)
-                assert np.all(obj.w_in == 1)
                 assert np.all(obj.v_threshold == obj.v_threshold[0])
                 assert np.all(obj.tau_syn == obj.tau_syn[0])
                 assert np.all(obj.tau_mem == obj.tau_mem[0])
+                
+                tau_mem = obj.tau_mem[0]
+                #tau_mem = -dt/np.log(1-dt/tau_mem)
+                tau_syn = obj.tau_syn[0]
+                tau_syn = -dt/np.log(1-dt/tau_syn)
+                
                 N = obj.tau_mem.flatten().shape[0]
                 ens = nengo.Ensemble(
                     n_neurons=N,
                     dimensions=1,
                     label=f"CubaLIF {name}",
-                    neuron_type=nengo.LIF(tau_rc=obj.tau_mem[0], tau_ref=0,
+                    neuron_type=nengo.LIF(
+                    #neuron_type=nengo.RegularSpiking(nengo.LIFRate(
+                                          tau_ref=0,tau_rc=tau_mem,
                                           amplitude=dt,
                                           initial_state={"voltage": nengo.dists.Choice([0])}),
-                    gain=R*np.ones(N)/obj.v_threshold,
+                    gain=obj.w_in*R*np.ones(N)/obj.v_threshold,
                     bias=np.zeros(N),
                 )
                 nengo_map[name] = ens.neurons
                 pre_map[name] = ens.neurons
                 post_map[name] = ens.neurons
-                filters[ens.neurons] = nengo.synapses.Lowpass(obj.tau_syn[0])                
+                filters[ens.neurons] = nengo.synapses.Lowpass(tau_syn)                
             elif isinstance(obj, nir.IF):
                 assert np.all(obj.r == 1)
                 N = obj.r.flatten().shape[0]
@@ -91,6 +98,16 @@ def nir_to_nengo(n, dt=0.001):
             elif isinstance(obj, nir.Affine):
                 w = nengo.Node(
                     lambda t, x, obj=obj: obj.weight @ x + obj.bias,
+                    size_in=obj.weight.shape[1],
+                    size_out=obj.weight.shape[0],
+                    label=f"Affine {name} ({obj.weight.shape[0]}x{obj.weight.shape[1]})",
+                )
+                nengo_map[name] = w
+                pre_map[name] = w
+                post_map[name] = w
+            elif isinstance(obj, nir.Linear):
+                w = nengo.Node(
+                    lambda t, x, obj=obj: obj.weight @ x,
                     size_in=obj.weight.shape[1],
                     size_out=obj.weight.shape[0],
                     label=f"Affine {name} ({obj.weight.shape[0]}x{obj.weight.shape[1]})",
