@@ -50,7 +50,7 @@ The intermediate represenation can be stored as hdf5 file, which benefits from c
 | [Norse](https://github.com/norse/norse) | ✓ | ✓ | [Norse examples](https://github.com/neuromorphs/nir/tree/main/example/norse/) |
 | [Rockpool](https://rockpool.ai) ([SynSense Xylo chip](https://www.synsense.ai/products/xylo/)) | ✓ | ✓ |
 | [Sinabs](https://sinabs.readthedocs.io) ([SynSense Speck chip](https://www.synsense.ai/products/speck-2/)) | ✓ | ✓ |
-| [snnTorch](https://github.com/jeshraghian/snntorch/) | ✓ | ⬚ |
+| [snnTorch](https://github.com/jeshraghian/snntorch/) | ✓ | ✓ |
 | [SpiNNaker2](https://spinncloud.com/portfolio/spinnaker2/) | ⬚ | ✓ |
 
 
