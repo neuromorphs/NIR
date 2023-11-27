@@ -516,30 +516,6 @@ class NIRGraph(NIRNode):
             seen.add(post_key)
             ready += [e for e in self.edges if e[0] == post_key and e[1] not in seen]
 
-    def infer_types(self):
-        """Infer the shapes of all nodes in this graph. Will modify the input_type and
-        output_type of all nodes in the graph.
-
-        Assumes that either the input type or the output type of the graph is set.
-        Assumes that if A->B, then A.output_type.values() = B.input_type.values()
-        """
-        undef_input_type = self.input_type is None or any(
-            v is None for v in self.input_type.values()
-        )
-        undef_output_type = self.output_type is None or any(
-            v is None for v in self.output_type.values()
-        )
-        if not undef_input_type:
-            # forward-mode type inferring
-            self._forward_type_inference()
-        elif not undef_output_type:
-            # backward-mode type inferring
-            raise NotImplementedError(
-                "backward-mode type inference not implemented yet"
-            )
-        else:
-            raise ValueError("Either input_type or output_type must be set")
-
 
 @dataclass(eq=False)
 class Affine(NIRNode):
