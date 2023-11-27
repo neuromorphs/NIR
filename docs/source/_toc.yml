@@ -21,6 +21,7 @@ parts:
   - file: examples/sinabs/nir-conversion
   - file: examples/snntorch/nir-conversion
   - file: examples/spinnaker2/import
+  - file: examples/spyx/conversion
 - caption: Developer guide
   chapters:
   - file: api_design
