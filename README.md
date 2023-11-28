@@ -43,13 +43,14 @@ Computational units that are not specifically neuromorphic take inspiration from
 
 | **Framework** | **Write to NIR** | **Read from NIR** | **Examples** |
 | --------------- | :--: | :--: | :------: |
-| [Lava-DL](https://github.com/lava-nc/lava-dl) | ✓ | ⬚ |
-| [Nengo](https://nengo.ai) | ✓ | ✓ | [Nengo examples](https://github.com/neuromorphs/nir/tree/main/example/nengo/) |
-| [Norse](https://github.com/norse/norse) | ✓ | ✓ | [Norse examples](https://github.com/neuromorphs/nir/tree/main/example/norse/) |
-| [Rockpool](https://rockpool.ai) ([SynSense Xylo chip](https://www.synsense.ai/products/xylo/)) | ✓ | ✓ |
-| [Sinabs](https://sinabs.readthedocs.io) ([SynSense Speck chip](https://www.synsense.ai/products/speck-2/)) | ✓ | ✓ |
-| [snnTorch](https://github.com/jeshraghian/snntorch/) | ✓ | ✓ |
-| [SpiNNaker2](https://spinncloud.com/portfolio/spinnaker2/) | ⬚ | ✓ |
+| [Lava-DL](https://github.com/lava-nc/lava-dl) | ✓ | ⬚ | [Lava/Loihi examples](https://nnir.readthedocs.io/en/latest/examples/lava/nir-conversion.html) |
+| [Nengo](https://nengo.ai) | ✓ | ✓ | [Nengo examples](https://nnir.readthedocs.io/en/latest/examples/nengo/nir-conversion.html) |
+| [Norse](https://github.com/norse/norse) | ✓ | ✓ | [Norse examples](https://nnir.readthedocs.io/en/latest/examples/norse/nir-conversion.html) |
+| [Rockpool](https://rockpool.ai) ([SynSense Xylo chip](https://www.synsense.ai/products/xylo/)) | ✓ | ✓ | [Rockpool/Xylo examples](https://nnir.readthedocs.io/en/latest/examples/rockpool/nir-conversion.html)
+| [Sinabs](https://sinabs.readthedocs.io) ([SynSense Speck chip](https://www.synsense.ai/products/speck-2/)) | ✓ | ✓ | [Sinabs/Speck examples](https://nnir.readthedocs.io/en/latest/examples/sinabs/nir-conversion.html) |
+| [snnTorch](https://github.com/jeshraghian/snntorch/) | ✓ | ✓ | [snnTorch examples](https://nnir.readthedocs.io/en/latest/examples/snntorch/nir-conversion.html) |
+| [SpiNNaker2](https://spinncloud.com/portfolio/spinnaker2/) | ⬚ | ✓ | [SpiNNaker2 examples](https://nnir.readthedocs.io/en/latest/examples/spinnaker2/import.html) |
+| [Spyx](https://github.com/kmheckel/spyx) | ⬚ | ✓ | [Spyx examples](https://nnir.readthedocs.io/en/latest/examples/spyx/conversion.html)
 
 
 ## Acknowledgements
