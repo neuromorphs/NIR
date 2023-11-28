@@ -5,41 +5,39 @@
 
 # NIR - Neuromorphic Intermediate Representation
 
-NIR provides a standard way to describe arbitrary **physical** networks.
-**NIR is currently supported by 6 simulators and 4 hardware platforms**, allowing users to seamlessly move between any of these platforms.
+NIR is a set of computational primitives, shared across different neuromorphic frameworks and technology stacks.
+**NIR is currently supported by 7 simulators and 4 hardware platforms**, allowing users to seamlessly move between any of these platforms.
+The goal of NIR is to decouple the evolution of neuromorphic hardware and software, ultimately increasing the interoperability between platforms and improving accessibility to neuromorphic technologies.
 
-Neuron models in NIR are defined as dynamical system equations, because time is an essential component of neuromorphic systems.
+## Installation
+NIR is installable via [pip](https://pypi.org/)
+```bash 
+pip install nir
+```
 
-The goal of NIR is to provide a common format that different neuromorphic frameworks (including spiking neural networks) can convert to and from.
+Check your [local framework](https://nnir.readthedocs.io/en/latest/support.html) for NIR support.
 
-## Computational primitives
-> Read more about in our [documentation about NIR primitives](https://nnir.readthedocs.io/en/latest/primitives.html)
+## Usage
+> Read more in our [documentation about NIR usage](https://nnir.readthedocs.io/en/latest/usage.html)
+
+To end-users, NIR is just a declarative format that sits between formats and will hopefully be as invisible as possible.
+However, it is possible to export Python objects or NIR files.
+
+```python
+import nir
+# Write to file
+nir.write("my_graph.nir", nir_graph) 
+
+# Read file
+imported_graph = nir.read("my_graph.nir")
+```
+
+## About NIR
+> Read more in our [documentation about NIR primitives](https://nnir.readthedocs.io/en/latest/primitives.html)
 
 On top of popular primitives such as convolutional or fully connected/linear computations, we define additional compuational primitives that are specific to neuromorphic computing and hardware implementations thereof. 
 Computational units that are not specifically neuromorphic take inspiration from the Pytorch ecosystem in terms of naming and parameters (such as Conv2d that uses groups/strides).
 
-## Connectivity 
-Each computational unit is a node in a static graph.
-Given 3 nodes $A$ which is a LIF node, $B$ which is a Linear node and $C$ which is another LIF node, we can define edges in the graph such as:
-
-```mermaid
-graph LR;
-A --> B;
-B --> C;
-```
-
-Or more complicated graphs, such as
-
-```mermaid
-graph LR;
-A --> A;
-A --> B;
-B --> C;
-A --> C;
-```
-
-## Format
-The intermediate represenation can be stored as hdf5 file, which benefits from compression. 
 
 ## Frameworks that currently support NIR
 
@@ -55,7 +53,7 @@ The intermediate represenation can be stored as hdf5 file, which benefits from c
 
 
 ## Acknowledgements
-Authors (in alphabetical order):
+This work was originally conceived at the [Telluride Neuromorphic Workshop 2023](tellurideneuromorphic.org) by the authors below (in alphabetical order):
 * [Steven Abreu](https://github.com/stevenabreu7)
 * [Felix Bauer](https://github.com/bauerfe)
 * [Jason Eshraghian](https://github.com/jeshraghian)
@@ -65,23 +63,15 @@ Authors (in alphabetical order):
 * [Sadique Sheik](https://github.com/sheiksadique)
 * [Peng Zhou](https://github.com/pengzhouzp)
 
-If you use NIR in your work, please cite the [following Zenodo reference](https://zenodo.org/record/8105042)
+If you use NIR in your work, please cite the [following arXiv preprint](https://arxiv.org/abs/2311.14641)
 
 ```
-@software{nir2023,
-  author       = {Abreu, Steven and
-                  Bauer, Felix and
-                  Eshraghian, Jason and
-                  Jobst, Matthias and
-                  Lenz, Gregor and
-                  Pedersen, Jens Egholm and
-                  Sheik, Sadique},
-  title        = {Neuromorphic Intermediate Representation},
-  month        = jul,
-  year         = 2023,
-  publisher    = {Zenodo},
-  version      = {0.2},
-  doi          = {10.5281/zenodo.8105042},
-  url          = {https://doi.org/10.5281/zenodo.8105042}
+@inproceedings{NIR2023,
+  title={Neuromorphic Intermediate Representation: A Unified Instruction Set for Interoperable Brain-Inspired Computing},
+  author={Jens E. Pedersen and Steven Abreu and Matthias Jobst and Gregor Lenz and Vittorio Fra and Felix C. Bauer and Dylan R. Muir and Peng Zhou and Bernhard Vogginger and Kade Heckel and Gianvito Urgese and Sadasivan Shankar and Terrence C. Stewart and Jason K. Eshraghian and Sadique Sheik},
+  year={2023},
+  doi={https://doi.org/10.48550/arXiv.2311.14641}
+  archivePrefix={arXiv},
+  primaryClass={cs.NE}
 }
 ```

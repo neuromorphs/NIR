@@ -8,3 +8,7 @@ build
 _build
 _archive
 _autosummary
+.ipynb_checkpoints/
+paper/02_cnn/NMNIST/
+lightning_logs/
+*.log

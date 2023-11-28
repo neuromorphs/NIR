@@ -10,6 +10,7 @@ Rather, you would use NIR as a middleman between, say, a neuron simulator and so
 
 Below, we listed a few concrete examples on how to use NIR.
 Please refer to the **Examples** section in the sidebar for code for each supported platform.
+More code examples are available [in the repository for our paper](https://github.com/neuromorphs/NIR/tree/main/paper/).
 
 ## Example: Norse model to Sinabs Speck
 

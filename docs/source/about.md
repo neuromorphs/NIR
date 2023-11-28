@@ -12,6 +12,14 @@ NIR is designed according to two founding principles:
 2. Balance between productivity and correctness
     * We are entering an area of research where scientific giants have made many lasting marks. We are aware that we will not get everything right in the first go, but we are compelled to try. We are equally compelled to keep learning and improving, and the NIR spec will change as we grow.
 
+## Connectivity 
+Each computational unit is a node in a static graph.
+Given 3 nodes $A$ which is a LIF node, $B$ which is a Linear node and $C$ which is another LIF node, we can define edges in the graph such as:
+
+## Format
+The intermediate represenation can be stored as hdf5 file, which benefits from compression. 
+
+
 ## Authors
 Authors (in alphabetical order):
 * [Steven Abreu](https://github.com/stevenabreu7)

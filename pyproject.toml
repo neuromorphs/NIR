@@ -33,6 +33,9 @@ dynamic = ["version"] # Version number read from __init__.py
 [project.urls]
 homepage = "https://github.com/neuromorphs/nir"
 
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
 [tool.setuptools.dynamic]
 version = {attr = "nir.__version__"}
 
@@ -42,3 +45,4 @@ find = {}
 [tool.ruff]
 line-length = 100
 per-file-ignores = {"docs/conf.py" = ["E402"]}
+exclude  = ["paper/"]
