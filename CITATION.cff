@@ -1,0 +1,38 @@
+cff-version: 1.2.0
+title: 'Neuromorphic Intermediate Representation: A Unified Instruction Set for Interoperable Brain-Inspired Computing'
+doi: arXiv:2311.14641
+message: If you use this software in your work, please cite it as follows.
+date-released: 2023-11-23
+authors:
+  - given-names: Jens E.
+    family-names: Pedersen
+  - given-names: Steven
+    family-names: Abreu
+  - given-names: Matthias
+    family-names: Jobst
+  - given-names: Gregor
+    family-names: Lenz
+  - given-names: Vittorio
+    family-names: Fra
+  - given-names: Felix C.
+    family-names: Bauer
+  - given-names: Dylan R.
+    family-names: Muir
+  - given-names: Peng
+    family-names: Zhou
+  - given-names: Bernhard
+    family-names: Vogginger
+  - given-names: Kade
+    family-names: Heckel
+  - given-names: Gianvito
+    family-names: Urgese
+  - given-names: Sadasivan
+    family-names: Shankar
+  - given-names: Terrence C.
+    family-names: Stewart
+  - given-names: Jason K.
+    family-names: Eshraghian
+  - given-names: Sadique
+    family-names: Sheik
+abstract: 'This repository contains the source code of the paper Neuromorphic Intermediate Representation: A Unified Instruction Set for Interoperable Brain-Inspired Computing by Jens E. Pedersen, Steven Abreu, Matthias Jobst, Gregor Lenz, Vittorio Fra, Felix C. Bauer, Dylan R. Muir, Peng Zhou, Bernhard Vogginger, Kade Heckel, Gianvito Urgese, Sadasivan Shankar, Terrence C. Stewart, Jason K. Eshraghian and Sadique Sheik, from Arxiv'
+version: 1.0.0
