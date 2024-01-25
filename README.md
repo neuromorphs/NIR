@@ -50,7 +50,7 @@ Computational units that are not specifically neuromorphic take inspiration from
 | [Sinabs](https://sinabs.readthedocs.io) ([SynSense Speck chip](https://www.synsense.ai/products/speck-2/)) | ✓ | ✓ | [Sinabs/Speck examples](https://nnir.readthedocs.io/en/latest/examples/sinabs/nir-conversion.html) |
 | [snnTorch](https://github.com/jeshraghian/snntorch/) | ✓ | ✓ | [snnTorch examples](https://nnir.readthedocs.io/en/latest/examples/snntorch/nir-conversion.html) |
 | [SpiNNaker2](https://spinncloud.com/portfolio/spinnaker2/) | ⬚ | ✓ | [SpiNNaker2 examples](https://nnir.readthedocs.io/en/latest/examples/spinnaker2/import.html) |
-| [Spyx](https://github.com/kmheckel/spyx) | ⬚ | ✓ | [Spyx examples](https://nnir.readthedocs.io/en/latest/examples/spyx/conversion.html)
+| [Spyx](https://github.com/kmheckel/spyx) | ✓ | ✓ | [Spyx examples](https://nnir.readthedocs.io/en/latest/examples/spyx/conversion.html)
 
 
 ## Acknowledgements

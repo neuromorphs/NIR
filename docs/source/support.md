@@ -1,6 +1,6 @@
 # Supported simulators and hardware
 
-**NIR is currently supported by 6 simulators and 4 hardware platforms**, allowing users to seamlessly move between any of these platforms.
+**NIR is currently supported by 7 simulators and 4 hardware platforms**, allowing users to seamlessly move between any of these platforms.
 The 6 simulators include Lava-DL, Nengo, Norse, Rockpool, Sinabs, and snnTorch.
 The 4 hardware platforms include Intel Loihi (via Lava-DL), Xylo, Speck, and SpiNNaker2.
 
@@ -17,6 +17,7 @@ By "reading" a NIR graph, we mean converting it into a platform-specific represe
 | [Sinabs](https://sinabs.readthedocs.io) ([SynSense Speck chip](https://www.synsense.ai/products/speck-2/)) | ✓ | ✓ |
 | [snnTorch](https://github.com/jeshraghian/snntorch/) | ✓ | ⬚ |
 | [SpiNNaker2](https://spinncloud.com/portfolio/spinnaker2/) | ⬚ | ✓ |
+| [Spyx](https://github.com/kmheckel/spyx) | ✓ | ✓ | [Spyx Examples](https://github.com/neuromorphs/NIR/blob/main/docs/source/examples/spyx/conversion.ipynb)
 
 ## Why are some platforms only reading or writing but not both?
 Some platforms support both reading and writing, but in other cases it does not make sense to both read *and* write NIR graphs.
