@@ -3,16 +3,12 @@
 Documentation: https://nnir.readthedocs.io
 """
 
-from .ir import *
-from .ir import typing
+from . import ir
+from .ir import *  # noqa: F403
+from .ir import typing  # noqa: F401
 from .read import read
 from .write import write
 
-__all__ = ir.__all__ + [
-    "ir",
-    "typing",
-    "read",
-    "write"
-]
+__all__ = ir.__all__ + ["read", "write"]
 
 version = __version__ = "1.0.1"

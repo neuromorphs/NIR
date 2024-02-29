@@ -1,4 +1,4 @@
-from dataclasses import dataclass, asdict
+from dataclasses import asdict, dataclass
 from typing import Any
 
 
@@ -18,9 +18,7 @@ class NIRNode:
         return self is other
 
     def to_dict(self) -> dict[str, Any]:
-        """
-        Serialize into a dictionary
-        """
+        """Serialize into a dictionary."""
         ret = asdict(self)
         # Note: The customization below won't be automatically done recursively for nested NIRNode.
         # Therefore, classes with nested NIRNode e.g. NIRGraph must implement its own to_dict

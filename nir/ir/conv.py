@@ -1,5 +1,9 @@
-from typing import Optional, Union, Tuple
-from .common import *
+from dataclasses import dataclass
+from typing import Optional, Tuple, Union
+
+import numpy as np
+
+from .node import NIRNode
 from .utils import calculate_conv_output
 
 

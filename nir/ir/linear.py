@@ -1,4 +1,8 @@
-from .common import *
+from dataclasses import dataclass
+
+import numpy as np
+
+from .node import NIRNode
 
 
 @dataclass(eq=False)
@@ -13,6 +17,7 @@ class Affine(NIRNode):
     .. math::
         y(t) = W*x(t) + b
     """
+
     weight: np.ndarray  # Weight term
     bias: np.ndarray  # Bias term
 
@@ -35,6 +40,7 @@ class Linear(NIRNode):
     .. math::
         y(t) = W*x(t)
     """
+
     weight: np.ndarray  # Weight term
 
     def __post_init__(self):

@@ -6,6 +6,7 @@ import numpy as np
 
 import nir
 
+
 def write(filename: typing.Union[str, pathlib.Path], graph: nir.typing.NIRNode) -> None:
     """Write a NIR to a HDF5 file."""
 

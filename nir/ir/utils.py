@@ -1,6 +1,8 @@
-from typing import Union, Sequence
-from .typing import Types
+from typing import Sequence, Union
+
 import numpy as np
+
+from .typing import Types
 
 
 def parse_shape_argument(x: Types, key: str):

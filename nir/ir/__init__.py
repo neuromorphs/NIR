@@ -3,7 +3,7 @@ from .delay import Delay
 from .flatten import Flatten
 from .graph import Input, NIRGraph, Output
 from .linear import Affine, Linear, Scale
-from .neuron import CubaLIF, I, IF, LI, LIF
+from .neuron import IF, LI, LIF, CubaLIF, I
 from .pooling import SumPool2d
 from .surrogate_gradient import Threshold
 

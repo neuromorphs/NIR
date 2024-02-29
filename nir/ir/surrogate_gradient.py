@@ -1,4 +1,8 @@
-from .common import *
+from dataclasses import dataclass
+
+import numpy as np
+
+from .node import NIRNode
 
 
 @dataclass(eq=False)

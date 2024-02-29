@@ -1,11 +1,15 @@
+from collections import Counter
+from dataclasses import dataclass
 from typing import Any
-from .typing import Nodes, Edges, Types
-from .common import *
+
+import numpy as np
+
 from .conv import Conv1d, Conv2d
 from .flatten import Flatten
+from .node import NIRNode
 from .pooling import SumPool2d
-from .utils import calculate_conv_output, parse_shape_argument, calc_flatten_output
-from collections import Counter
+from .typing import Edges, Nodes, Types
+from .utils import calc_flatten_output, calculate_conv_output, parse_shape_argument
 
 
 @dataclass(eq=False)
@@ -89,12 +93,15 @@ class NIRGraph(NIRNode):
 
     def to_dict(self) -> dict[str, Any]:
         ret = super().to_dict()
-        ret["nodes"] = { k: n.to_dict() for k, n in self.nodes.items() }
+        ret["nodes"] = {k: n.to_dict() for k, n in self.nodes.items()}
         return ret
 
     def _check_types(self):
-        """Check that all nodes in the graph have input and output types. Will raise ValueError
-        if any node has no input or output type, or if the types are inconsistent."""
+        """Check that all nodes in the graph have input and output types.
+
+        Will raise ValueError if any node has no input or output type, or if the types
+        are inconsistent.
+        """
         for edge in self.edges:
             pre_node = self.nodes[edge[0]]
             post_node = self.nodes[edge[1]]
@@ -132,9 +139,10 @@ class NIRGraph(NIRNode):
         return True
 
     def _forward_type_inference(self, debug=True):
-        """Infer the types of all nodes in this graph. Will modify the input_type and output_type
-        of nodes in the graph as needed. Assumes that the input_type of the graph is set. Moves
-        from the input nodes to the output nodes. Raises ValueError if types are inconsistent.
+        """Infer the types of all nodes in this graph. Will modify the input_type and
+        output_type of nodes in the graph as needed. Assumes that the input_type of the
+        graph is set. Moves from the input nodes to the output nodes. Raises ValueError
+        if types are inconsistent.
 
         Assumes that all input types are of form: {'input': ...} and all output types are of form:
         {'output': ...}.
@@ -420,7 +428,7 @@ class Input(NIRNode):
 
     def to_dict(self) -> dict[str, Any]:
         ret = super().to_dict()
-        del(ret["input_type"])
+        del ret["input_type"]
         ret["shape"] = self.input_type["input"]
         return ret
 
@@ -442,6 +450,6 @@ class Output(NIRNode):
 
     def to_dict(self) -> dict[str, Any]:
         ret = super().to_dict()
-        del(ret["output_type"])
+        del ret["output_type"]
         ret["shape"] = self.output_type["output"]
         return ret

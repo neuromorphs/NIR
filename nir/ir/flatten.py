@@ -1,7 +1,11 @@
+from dataclasses import dataclass
 from typing import Any
-from .common import *
+
+import numpy as np
+
+from .node import NIRNode
 from .typing import Types
-from .utils import parse_shape_argument, calc_flatten_output
+from .utils import calc_flatten_output, parse_shape_argument
 
 
 @dataclass(eq=False)
@@ -37,6 +41,6 @@ class Flatten(NIRNode):
 
     def to_dict(self) -> dict[str, Any]:
         ret = super().to_dict()
-        del(ret["input_type"])
+        del ret["input_type"]
         ret["input_type"] = self.input_type["input"]
         return ret
