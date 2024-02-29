@@ -1,6 +1,9 @@
+from typing import Any
 from .typing import Nodes, Edges, Types
 from .common import *
-from . import Conv1d, Conv2d, Flatten, SumPool2d
+from .conv import Conv1d, Conv2d
+from .flatten import Flatten
+from .pooling import SumPool2d
 from .utils import calculate_conv_output, parse_shape_argument, calc_flatten_output
 from collections import Counter
 
@@ -83,6 +86,11 @@ class NIRGraph(NIRNode):
         self.output_type = {
             node_key: self.nodes[node_key].output_type for node_key in output_node_keys
         }
+
+    def to_dict(self) -> dict[str, Any]:
+        ret = super().to_dict()
+        ret["nodes"] = { k: n.to_dict() for k, n in self.nodes.items() }
+        return ret
 
     def _check_types(self):
         """Check that all nodes in the graph have input and output types. Will raise ValueError
@@ -410,6 +418,12 @@ class Input(NIRNode):
         self.input_type = parse_shape_argument(self.input_type, "input")
         self.output_type = {"output": self.input_type["input"]}
 
+    def to_dict(self) -> dict[str, Any]:
+        ret = super().to_dict()
+        del(ret["input_type"])
+        ret["shape"] = self.input_type["input"]
+        return ret
+
 
 @dataclass(eq=False)
 class Output(NIRNode):
@@ -425,3 +439,9 @@ class Output(NIRNode):
     def __post_init__(self):
         self.output_type = parse_shape_argument(self.output_type, "output")
         self.input_type = {"input": self.output_type["output"]}
+
+    def to_dict(self) -> dict[str, Any]:
+        ret = super().to_dict()
+        del(ret["output_type"])
+        ret["shape"] = self.output_type["output"]
+        return ret

@@ -1,3 +1,4 @@
+from typing import Any
 from .common import *
 from .typing import Types
 from .utils import parse_shape_argument, calc_flatten_output
@@ -33,3 +34,9 @@ class Flatten(NIRNode):
                 raise ValueError(
                     "input and output shape must have same number of elements"
                 )
+
+    def to_dict(self) -> dict[str, Any]:
+        ret = super().to_dict()
+        del(ret["input_type"])
+        ret["input_type"] = self.input_type["input"]
+        return ret

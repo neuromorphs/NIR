@@ -1,5 +1,5 @@
-from dataclasses import dataclass
-import numpy as np
+from dataclasses import dataclass, asdict
+from typing import Any
 
 
 @dataclass(eq=False)
@@ -16,3 +16,14 @@ class NIRNode:
 
     def __eq__(self, other):
         return self is other
+
+    def to_dict(self) -> dict[str, Any]:
+        """
+        Serialize into a dictionary
+        """
+        ret = asdict(self)
+        # Note: The customization below won't be automatically done recursively for nested NIRNode.
+        # Therefore, classes with nested NIRNode e.g. NIRGraph must implement its own to_dict
+        ret["type"] = type(self).__name__
+
+        return ret

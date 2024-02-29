@@ -5,8 +5,7 @@ import h5py
 
 import nir
 
-
-def read_node(node: typing.Any) -> nir.NIRNode:
+def read_node(node: typing.Any) -> nir.typing.NIRNode:
     """Read a graph from a HDF/conn5 file."""
     if node["type"][()] == b"Affine":
         return nir.Affine(weight=node["weight"][()], bias=node["bias"][()])
