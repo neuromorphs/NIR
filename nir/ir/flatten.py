@@ -44,3 +44,10 @@ class Flatten(NIRNode):
         del ret["input_type"]
         ret["input_type"] = self.input_type["input"]
         return ret
+
+    @classmethod
+    def from_dict(cls, node: dict[str, Any]):
+        node["input_type"] = {
+            "input": node["input_type"] if "input_type" in node else None
+        }
+        return super().from_dict(node)

@@ -1,12 +1,12 @@
 import pathlib
-import typing
+from typing import Any, Union
 
 import h5py
 
 import nir
 
 
-def read_node(node: typing.Any) -> nir.typing.NIRNode:
+def read_node(node: Any) -> nir.typing.NIRNode:
     """Read a graph from a HDF/conn5 file."""
     if node["type"][()] == b"Affine":
         return nir.Affine(weight=node["weight"][()], bias=node["bias"][()])
@@ -95,13 +95,35 @@ def read_node(node: typing.Any) -> nir.typing.NIRNode:
         raise ValueError(f"Unknown unit type: {node['type'][()]}")
 
 
-def read(filename: typing.Union[str, pathlib.Path]) -> nir.NIRGraph:
+def try_byte_to_str(a: bytes | dict) -> dict:
+    return a.decode("utf-8") if isinstance(a, bytes) else a
+
+
+def hdf2dict(node: Any) -> dict[str, Any]:
+    ret = {}
+
+    def read_hdf_to_dict(node, data_dict):
+        for key, item in node.items():
+            key = try_byte_to_str(key)
+            if isinstance(item, h5py.Group):
+                data_dict[key] = {}
+                read_hdf_to_dict(item, data_dict[key])
+            elif isinstance(item, h5py.Dataset):
+                item = try_byte_to_str(item[()])
+                data_dict[key] = item
+
+    read_hdf_to_dict(node, ret)
+    return ret
+
+
+def read(filename: Union[str, pathlib.Path]) -> nir.NIRGraph:
     """Load a NIR from a HDF/conn5 file."""
     with h5py.File(filename, "r") as f:
-        return read_node(f["node"])
+        data_dict = hdf2dict(f["node"])
+        return nir.ir.dict2NIRNode(data_dict)
 
 
-def read_version(filename: typing.Union[str, pathlib.Path]) -> str:
+def read_version(filename: Union[str, pathlib.Path]) -> str:
     """Reads the filename of a given NIR file, and raises an exception if the version
     does not exist in the file."""
     with h5py.File(filename, "r") as f:

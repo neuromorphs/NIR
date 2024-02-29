@@ -96,6 +96,15 @@ class NIRGraph(NIRNode):
         ret["nodes"] = {k: n.to_dict() for k, n in self.nodes.items()}
         return ret
 
+    @classmethod
+    def from_dict(cls, node: dict[str, Any]) -> "NIRNode":
+        from . import dict2NIRNode
+
+        node["nodes"] = {k: dict2NIRNode(n) for k, n in node["nodes"].items()}
+        # h5py deserializes this into a numpy array with dtype=object
+        node["edges"] = [(a.decode("utf8"), b.decode("utf8")) for a, b in node["edges"]]
+        return super().from_dict(node)
+
     def _check_types(self):
         """Check that all nodes in the graph have input and output types.
 
@@ -432,6 +441,12 @@ class Input(NIRNode):
         ret["shape"] = self.input_type["input"]
         return ret
 
+    @classmethod
+    def from_dict(cls, node: dict[str, Any]) -> "NIRNode":
+        node["input_type"] = {"input": node["shape"]}
+        del node["shape"]
+        return super().from_dict(node)
+
 
 @dataclass(eq=False)
 class Output(NIRNode):
@@ -453,3 +468,9 @@ class Output(NIRNode):
         del ret["output_type"]
         ret["shape"] = self.output_type["output"]
         return ret
+
+    @classmethod
+    def from_dict(cls, node: dict[str, Any]) -> "NIRNode":
+        node["output_type"] = {"output": node["shape"]}
+        del node["shape"]
+        return super().from_dict(node)

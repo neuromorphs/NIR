@@ -25,3 +25,10 @@ class NIRNode:
         ret["type"] = type(self).__name__
 
         return ret
+
+    @classmethod
+    def from_dict(cls, node: dict[str, Any]) -> "NIRNode":
+        assert node["type"] == cls.__name__
+        del node["type"]
+
+        return cls(**node)
