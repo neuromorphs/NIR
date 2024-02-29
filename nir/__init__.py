@@ -3,8 +3,9 @@
 Documentation: https://nnir.readthedocs.io
 """
 
-from .ir import *  # noqa: F403
-from .read import read  # noqa: F401
-from .write import write  # noqa: F401
+from . import ir
+from ir import *
+from .read import read
+from .write import write
 
 version = __version__ = "1.0.1"
