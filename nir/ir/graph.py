@@ -9,7 +9,12 @@ from .flatten import Flatten
 from .node import NIRNode
 from .pooling import SumPool2d
 from .typing import Edges, Nodes, Types
-from .utils import calc_flatten_output, calculate_conv_output, parse_shape_argument
+from .utils import (
+    calc_flatten_output,
+    calculate_conv_output,
+    parse_shape_argument,
+    try_byte_to_str,
+)
 
 
 @dataclass(eq=False)
@@ -101,8 +106,11 @@ class NIRGraph(NIRNode):
         from . import dict2NIRNode
 
         node["nodes"] = {k: dict2NIRNode(n) for k, n in node["nodes"].items()}
-        # h5py deserializes this into a numpy array with dtype=object
-        node["edges"] = [(a.decode("utf8"), b.decode("utf8")) for a, b in node["edges"]]
+        # h5py deserializes edges into a numpy array of type bytes and dtype=object,
+        # hence using try_byte_to_str here
+        node["edges"] = [
+            (try_byte_to_str(a), try_byte_to_str(b)) for a, b in node["edges"]
+        ]
         return super().from_dict(node)
 
     def _check_types(self):

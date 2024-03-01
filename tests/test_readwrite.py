@@ -32,6 +32,8 @@ def assert_equivalence(ir: nir.NIRGraph, ir2: nir.NIRGraph):
 
 
 def factory_test_graph(ir: nir.NIRGraph):
+    ir2 = nir.NIRGraph.from_dict(ir.to_dict())
+    assert_equivalence(ir, ir2)
     tmp = tempfile.mktemp()
     nir.write(tmp, ir)
     ir2 = nir.read(tmp)

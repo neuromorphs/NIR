@@ -5,6 +5,7 @@ import h5py
 import numpy as np
 
 import nir
+from nir.ir.utils import try_byte_to_str
 
 
 def read_node(node: Any) -> nir.typing.NIRNode:
@@ -94,10 +95,6 @@ def read_node(node: Any) -> nir.typing.NIRNode:
         return nir.Threshold(threshold=node["threshold"][()])
     else:
         raise ValueError(f"Unknown unit type: {node['type'][()]}")
-
-
-def try_byte_to_str(a: bytes | dict) -> dict:
-    return a.decode("utf-8") if isinstance(a, bytes) else a
 
 
 def hdf2dict(node: Any) -> dict[str, Any]:

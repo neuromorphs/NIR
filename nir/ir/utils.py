@@ -100,3 +100,7 @@ def _index_tuple(
         return np.array([tuple])
     else:
         raise TypeError(f"tuple must be int or np.ndarray, not {type(tuple)}")
+
+
+def try_byte_to_str(a: bytes | dict) -> dict:
+    return a.decode("utf-8") if isinstance(a, bytes) else a
