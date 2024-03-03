@@ -41,7 +41,6 @@ class Flatten(NIRNode):
 
     def to_dict(self) -> Dict[str, Any]:
         ret = super().to_dict()
-        del ret["input_type"]
         ret["input_type"] = self.input_type["input"]
         return ret
 

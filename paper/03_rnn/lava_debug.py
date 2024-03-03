@@ -1,6 +1,7 @@
 import nir
 import torch
 import numpy as np
+
 # import os
 # import torch.nn as nn
 from torch.utils.data import DataLoader
@@ -18,10 +19,10 @@ np.random.seed(seed)
 torch.manual_seed(seed)
 torch.use_deterministic_algorithms(True)
 
-nirgraph = nir.read('braille.nir')
+nirgraph = nir.read("braille.nir")
 net = from_nir(nirgraph)
 
-nirgraph = nir.read('braille.nir')
+nirgraph = nir.read("braille.nir")
 net_snn = import_nirtorch.from_nir(nirgraph)
 
 test_data_path = "data/ds_test.pt"
@@ -45,9 +46,12 @@ with torch.no_grad():
         snn_inputs.append(data.swapaxes(1, 0))
         labels = labels
 
-        h_state = GraphExecutorState(state={
-                'lif1': net_snn._modules['lif1'].init_rsynaptic(),  # 3-tuple: spk, syn, mem
-                'lif2': net_snn._modules['lif2'].init_synaptic(),  # 2-tuple: syn, mem
+        h_state = GraphExecutorState(
+            state={
+                "lif1": net_snn._modules[
+                    "lif1"
+                ].init_rsynaptic(),  # 3-tuple: spk, syn, mem
+                "lif2": net_snn._modules["lif2"].init_synaptic(),  # 2-tuple: syn, mem
             }
         )
 
@@ -99,26 +103,28 @@ print("Test accuracy (lava-dl): {}%".format(np.round(test_results[1] * 100, 2)))
 #########################
 
 for i in range(len(snn_inputs)):
-    print(f'input #{i} match: {torch.allclose(snn_inputs[i], ldl_inputs[i])}')
+    print(f"input #{i} match: {torch.allclose(snn_inputs[i], ldl_inputs[i])}")
 
-fc1_snn = torch.stack([h.cache['fc1'] for h in h_states], dim=-1)
-fc1_ldl = hid_rec.cache['fc1']
-print(f'fc1 match (atol=1e-6): {torch.allclose(fc1_snn, fc1_ldl, atol=1e-6)}')
-print(f'fc1 match (atol=1e-8): {torch.allclose(fc1_snn, fc1_ldl, atol=1e-8)}')
+fc1_snn = torch.stack([h.cache["fc1"] for h in h_states], dim=-1)
+fc1_ldl = hid_rec.cache["fc1"]
+print(f"fc1 match (atol=1e-6): {torch.allclose(fc1_snn, fc1_ldl, atol=1e-6)}")
+print(f"fc1 match (atol=1e-8): {torch.allclose(fc1_snn, fc1_ldl, atol=1e-8)}")
 
-lif1_snn = torch.stack([h.cache['lif1'] for h in h_states], dim=-1)
-lif1_ldl = hid_rec.cache['lif1']
+lif1_snn = torch.stack([h.cache["lif1"] for h in h_states], dim=-1)
+lif1_ldl = hid_rec.cache["lif1"]
 
 # lif2_ldl = hid_rec.cache['lif2']
 # net._modules['lif1'].neuron.current_decay
 # net._modules['lif1'].neuron.voltage_decay
 
 # check if lif1 synapse weights are identity matrix
-torch.allclose(net._modules['lif1'].input_synapse.weight.flatten(1).detach(), torch.eye(38))
+torch.allclose(
+    net._modules["lif1"].input_synapse.weight.flatten(1).detach(), torch.eye(38)
+)
 
 # fc2_snn = torch.stack([h.cache['fc2'] for h in h_states], dim=-1)
 # fc2_ldl = hid_rec.cache['fc2']
 # print(f'fc2 match (atol=1e-2): {torch.allclose(fc2_snn, fc2_ldl, atol=1e-2)}')
 # print(f'fc2 match (atol=1e-6): {torch.allclose(fc2_snn, fc2_ldl, atol=1e-6)}')
 # print(f'fc2 match (atol=1e-8): {torch.allclose(fc2_snn, fc2_ldl, atol=1e-8)}')
-print('done')
+print("done")

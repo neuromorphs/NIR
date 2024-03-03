@@ -9,6 +9,7 @@ from snntorch import surrogate
 import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader, TensorDataset
+
 # lava-dl
 import nir
 import nirtorch
@@ -39,7 +40,7 @@ ds_test = torch.load("data/ds_test.pt")
 letter_written = ["Space", "A", "E", "I", "O", "U", "Y"]
 
 # load the lava-dl network
-nir_filename = 'braille_noDelay_bias_zero.nir'
+nir_filename = "braille_noDelay_bias_zero.nir"
 nirgraph = nir.read(nir_filename)
 net = from_nir(nirgraph).to(device)
 
@@ -47,7 +48,9 @@ batch_size = 64
 train_loader = DataLoader(
     ds_train, batch_size=batch_size, shuffle=True, drop_last=False
 )
-error = slayer.loss.SpikeRate(true_rate=0.2, false_rate=0.03, reduction='sum').to(device)
+error = slayer.loss.SpikeRate(true_rate=0.2, false_rate=0.03, reduction="sum").to(
+    device
+)
 optimizer = torch.optim.Adam(net.parameters(), lr=0.0001)
 
 n_epochs = 300
@@ -57,7 +60,7 @@ stats_lss = []
 for epoch in range(n_epochs):
     n_samples = 0
     n_correct = 0
-    sum_loss = 0.
+    sum_loss = 0.0
     for data, labels in train_loader:
         data = data.to(device).swapaxes(1, 2)
         labels = labels.to(device)
@@ -75,16 +78,21 @@ for epoch in range(n_epochs):
         optimizer.step()
         n_samples += data.shape[0]
         sum_loss += loss.detach().cpu().data.item() * spk_rec.shape[0]
-        n_correct += torch.sum(
-            slayer.classifier.Rate.predict(spk_rec) == labels
-        ).detach().cpu().data.item()
-    batch_acc = n_correct/n_samples
-    batch_loss = sum_loss/n_samples
+        n_correct += (
+            torch.sum(slayer.classifier.Rate.predict(spk_rec) == labels)
+            .detach()
+            .cpu()
+            .data.item()
+        )
+    batch_acc = n_correct / n_samples
+    batch_loss = sum_loss / n_samples
     stats_acc.append(batch_acc)
     stats_lss.append(batch_loss)
-    print(f"Epoch [{epoch+1:3}/{n_epochs:3}] loss {batch_loss:.3f} accuracy {batch_acc:.2%}")
+    print(
+        f"Epoch [{epoch+1:3}/{n_epochs:3}] loss {batch_loss:.3f} accuracy {batch_acc:.2%}"
+    )
 
-input('done...')
+input("done...")
 
 loader = DataLoader(ds_test, batch_size=batch_size, shuffle=False)
 
@@ -101,7 +109,9 @@ with torch.no_grad():
         spk_out = spk_out.moveaxis(2, 0)  # TCN
         #####
         act_total_out = torch.sum(spk_out, 0)  # sum over time
-        _, neuron_max_act_total_out = torch.max(act_total_out, 1)  # argmax output > labels
+        _, neuron_max_act_total_out = torch.max(
+            act_total_out, 1
+        )  # argmax output > labels
         pred.extend(neuron_max_act_total_out.detach().cpu().numpy())
         act_out.extend(act_total_out.detach().cpu().numpy())
         batch_acc.extend((neuron_max_act_total_out == labels).detach().cpu().numpy())
@@ -151,9 +161,7 @@ def training_loop(
         _, neuron_max_act_total_out = torch.max(
             act_total_out, 1
         )  # argmax over output units to compare to labels
-        batch_acc.extend(
-            (neuron_max_act_total_out == labels).detach().cpu().numpy()
-        )
+        batch_acc.extend((neuron_max_act_total_out == labels).detach().cpu().numpy())
         # the "old" one with mean per batch:
         # batch_acc.append(np.mean((neuron_max_act_total_out == labels).detach().cpu().numpy()))
 
@@ -279,10 +287,12 @@ for ee in range(num_epochs):
     validation_results.append([val_loss, val_acc])
 
     if (ee == 0) | ((ee + 1) % 10 == 0):
-        print(f"\tepoch {ee + 1}/{num_epochs} done \t --> \ttraining accuracy (loss): "
-              f"{np.round(training_results[-1][1] * 100, 4)}% "
-              f"({training_results[-1][0]}), \tvalidation accuracy (loss): "
-              f"{np.round(validation_results[-1][1] * 100, 4)}% ({validation_results[-1][0]})")
+        print(
+            f"\tepoch {ee + 1}/{num_epochs} done \t --> \ttraining accuracy (loss): "
+            f"{np.round(training_results[-1][1] * 100, 4)}% "
+            f"({training_results[-1][0]}), \tvalidation accuracy (loss): "
+            f"{np.round(validation_results[-1][1] * 100, 4)}% ({validation_results[-1][0]})"
+        )
 
     if val_acc >= np.max(np.array(validation_results)[:, 1]):
         best_val_layers = copy.deepcopy(net.state_dict())

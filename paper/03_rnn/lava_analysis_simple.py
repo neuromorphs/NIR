@@ -1,14 +1,16 @@
-
 import nir
+
 # import nirtorch
 import torch
+
 # import numpy as np
 import lava.lib.dl.slayer as slayer
 import snntorch as snn
 import numpy as np
 import matplotlib.pyplot as plt
-plt.rcParams['figure.figsize'] = [10, 2]
-plt.rcParams['figure.dpi'] = 200
+
+plt.rcParams["figure.figsize"] = [10, 2]
+plt.rcParams["figure.dpi"] = 200
 
 
 dt = 1e-4
@@ -35,7 +37,7 @@ w_in.shape, w_rec.shape
 seq_len = 200
 # ut = np.random.random((lif_size, seq_len))
 # np.save('ut.npy', ut)
-ut = np.load('ut.npy')
+ut = np.load("ut.npy")
 ut = (ut > 0.95).astype(np.float32)
 ut = torch.from_numpy(ut).reshape(1, lif_size, seq_len)
 ut_scale = 0.6
@@ -46,7 +48,7 @@ def snntorch_net():
         alpha=alpha,
         beta=beta,
         threshold=vthr,
-        reset_mechanism='zero',
+        reset_mechanism="zero",
         init_hidden=False,
         all_to_all=True,
         linear_features=lif_size,
@@ -74,7 +76,7 @@ def lava_net():
             voltage_decay=v_decay,
             shared_param=True,
             scale=scale,
-        )
+        ),
     )
     w_in_shape = rnn_lava.input_synapse.weight.data.shape
     rnn_lava.input_synapse.weight.data = w_in.reshape(w_in_shape)
@@ -113,34 +115,36 @@ syn_snntorch = np.stack(syn_snntorch, axis=-1)
 
 # plot
 fig, axs = plt.subplots(5, 1, figsize=(15, 6), dpi=200, sharex=True)
-                        # gridspec_kw={'height_ratios': [1, 2, 2]})
-axs[0].set_title('input spikes')
+# gridspec_kw={'height_ratios': [1, 2, 2]})
+axs[0].set_title("input spikes")
 axs[0].set_xlim(0, seq_len)
 for idx, ut_idx in enumerate(ut[0]):
-    axs[0].eventplot(np.where(ut_idx == 1)[0], lineoffsets=idx, linelengths=0.8, color='red')
+    axs[0].eventplot(
+        np.where(ut_idx == 1)[0], lineoffsets=idx, linelengths=0.8, color="red"
+    )
 
-axs[1].set_title('lava-dl output spikes')
+axs[1].set_title("lava-dl output spikes")
 axs[1].set_xlim(0, seq_len)
 for idx, yt_idx in enumerate(spk_lava[0]):
     axs[1].eventplot(np.where(yt_idx == 1)[0], lineoffsets=idx, linelengths=0.8)
 
-axs[2].set_title('lava-dl membrane')
+axs[2].set_title("lava-dl membrane")
 axs[2].set_xlim(0, seq_len)
 for idx, vt_idx in enumerate(mem_lava[0]):
     axs[2].plot(vt_idx + idx)
-    axs[2].hlines(idx+1, 0, seq_len, color='red', ls='--')
+    axs[2].hlines(idx + 1, 0, seq_len, color="red", ls="--")
 
-axs[3].set_title('snntorch output spikes')
+axs[3].set_title("snntorch output spikes")
 axs[3].set_xlim(0, seq_len)
 for idx, yt_idx in enumerate(out_snntorch[0]):
     axs[3].eventplot(np.where(yt_idx == 1)[0], lineoffsets=idx, linelengths=0.8)
 
-axs[4].set_title('snnTorch membrane')
+axs[4].set_title("snnTorch membrane")
 axs[4].set_xlim(0, seq_len)
 for idx, vt_idx in enumerate(mem_snntorch[0]):
     axs[4].plot(vt_idx + idx)
-    axs[4].hlines(idx+1, 0, seq_len, color='red', ls='--')
+    axs[4].hlines(idx + 1, 0, seq_len, color="red", ls="--")
 
 plt.tight_layout()
-plt.savefig('lava_analysis.png')
+plt.savefig("lava_analysis.png")
 plt.close()

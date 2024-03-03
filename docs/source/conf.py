@@ -56,7 +56,7 @@ autoapi_options = [
 ]
 
 # MyST settings
-nb_execution_mode = "off" # this can be turned to 'auto' once the package is stable
+nb_execution_mode = "off"  # this can be turned to 'auto' once the package is stable
 nb_execution_timeout = 300
 nb_execution_show_tb = True
 

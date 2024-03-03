@@ -456,7 +456,6 @@ class Input(NIRNode):
 
     def to_dict(self) -> Dict[str, Any]:
         ret = super().to_dict()
-        del ret["input_type"]
         ret["shape"] = self.input_type["input"]
         return ret
 
@@ -484,7 +483,6 @@ class Output(NIRNode):
 
     def to_dict(self) -> Dict[str, Any]:
         ret = super().to_dict()
-        del ret["output_type"]
         ret["shape"] = self.output_type["output"]
         return ret
 
