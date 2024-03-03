@@ -1,9 +1,15 @@
 import tempfile
+import inspect, sys
 
 import numpy as np
 
 import nir
 from tests import mock_affine, mock_conv
+
+ALL_NODES = []
+for name, obj in inspect.getmembers(sys.modules["nir.ir"]):
+    if inspect.isclass(obj) and obj.__module__ == "nir.ir":
+        ALL_NODES.append(obj)
 
 
 def assert_equivalence(ir: nir.NIRGraph, ir2: nir.NIRGraph):
@@ -40,9 +46,29 @@ def factory_test_graph(ir: nir.NIRGraph):
     assert_equivalence(ir, ir2)
 
 
+def factory_test_metadata(node):
+    def compare_dicts(d1, d2):
+        for k, v in d1.items():
+            if isinstance(v, np.ndarray):
+                assert np.array_equal(v, d2[k])
+            elif isinstance(v, bytes):
+                assert v.decode("utf8") == d2[k]
+            else:
+                assert v == d2[k]
+
+    metadata = {"some": "metadata", "with": 2, "data": np.array([1, 2, 3])}
+    node.metadata = metadata
+    compare_dicts(node.metadata, metadata)
+    tmp = tempfile.mktemp()
+    nir.write(tmp, node)
+    node2 = nir.read(tmp)
+    compare_dicts(node2.metadata, metadata)
+
+
 def test_simple():
     ir = nir.NIRGraph(nodes={"a": mock_affine(2, 2)}, edges=[("a", "a")])
     factory_test_graph(ir)
+    factory_test_metadata(ir)
 
 
 def test_nested():
@@ -63,6 +89,7 @@ def test_nested():
         edges=[("a", "b"), ("b", "a")],
     )
     factory_test_graph(nested)
+    factory_test_metadata(nested)
 
 
 def test_conv1d():
@@ -72,6 +99,7 @@ def test_conv1d():
         mock_affine(100, 2),
     )
     factory_test_graph(ir)
+    factory_test_metadata(ir)
 
 
 def test_conv1d_2():
@@ -79,6 +107,7 @@ def test_conv1d_2():
         mock_conv((100, 100), (1, 2, 3, 3)),
     )
     factory_test_graph(ir)
+    factory_test_metadata(ir)
 
 
 def test_integrator():
@@ -88,6 +117,7 @@ def test_integrator():
         edges=[("a", "b")],
     )
     factory_test_graph(ir)
+    factory_test_metadata(ir)
 
 
 def test_integrate_and_fire():
@@ -98,6 +128,7 @@ def test_integrate_and_fire():
         edges=[("a", "b")],
     )
     factory_test_graph(ir)
+    factory_test_metadata(ir)
 
 
 def test_leaky_integrator():
@@ -107,6 +138,7 @@ def test_leaky_integrator():
 
     ir = nir.NIRGraph.from_list(mock_affine(2, 2), nir.LI(tau, r, v_leak))
     factory_test_graph(ir)
+    factory_test_metadata(ir)
 
 
 def test_linear():
@@ -115,6 +147,7 @@ def test_linear():
     v_leak = np.array([1, 1, 1])
     ir = nir.NIRGraph.from_list(mock_affine(2, 2), nir.LI(tau, r, v_leak))
     factory_test_graph(ir)
+    factory_test_metadata(ir)
 
 
 def test_leaky_integrator_and_fire():
@@ -127,6 +160,7 @@ def test_leaky_integrator_and_fire():
         nir.LIF(tau, r, v_leak, v_threshold),
     )
     factory_test_graph(ir)
+    factory_test_metadata(ir)
 
 
 def test_current_based_leaky_integrator_and_fire():
@@ -141,6 +175,7 @@ def test_current_based_leaky_integrator_and_fire():
         nir.CubaLIF(tau_mem, tau_syn, r, v_leak, v_threshold, w_in=w_in),
     )
     factory_test_graph(ir)
+    factory_test_metadata(ir)
 
 
 def test_scale():
@@ -150,6 +185,7 @@ def test_scale():
         nir.Output(output_type=np.array([3])),
     )
     factory_test_graph(ir)
+    factory_test_metadata(ir)
 
 
 def test_simple_with_read_write():
@@ -159,6 +195,7 @@ def test_simple_with_read_write():
         nir.Output(output_type=np.array([3])),
     )
     factory_test_graph(ir)
+    factory_test_metadata(ir)
 
 
 def test_delay():
@@ -169,6 +206,7 @@ def test_delay():
         nir.Output(np.array([3])),
     )
     factory_test_graph(ir)
+    factory_test_metadata(ir)
 
 
 def test_threshold():
@@ -179,6 +217,7 @@ def test_threshold():
         nir.Output(np.array([3])),
     )
     factory_test_graph(ir)
+    factory_test_metadata(ir)
 
 
 def test_flatten():
@@ -192,6 +231,7 @@ def test_flatten():
         nir.Output(output_type=np.array([6])),
     )
     factory_test_graph(ir)
+    factory_test_metadata(ir)
 
 
 def test_sum_pool_2d():
@@ -222,3 +262,4 @@ def test_avg_pool_2d():
         ]
     )
     factory_test_graph(ir)
+    factory_test_metadata(ir)
