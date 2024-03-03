@@ -1,5 +1,6 @@
 import tempfile
-import inspect, sys
+import inspect
+import sys
 
 import numpy as np
 
