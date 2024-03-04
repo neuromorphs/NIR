@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, Dict
 
 from .conv import Conv1d, Conv2d
 from .delay import Delay
@@ -46,7 +46,7 @@ def str2NIRNode(type: str) -> NIRNode:
     return globals()[type]
 
 
-def dict2NIRNode(data_dict: dict[str, Any]) -> NIRNode:
+def dict2NIRNode(data_dict: Dict[str, Any]) -> NIRNode:
     """Assume data_dict["type"] exist and correspond to a subclass of NIRNode.
 
     Other items should match fields in the corresponding NIRNode subclass, unless

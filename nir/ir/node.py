@@ -1,5 +1,5 @@
 from dataclasses import asdict, dataclass
-from typing import Any
+from typing import Any, Dict
 
 
 @dataclass(eq=False)
@@ -17,7 +17,7 @@ class NIRNode:
     def __eq__(self, other):
         return self is other
 
-    def to_dict(self) -> dict[str, Any]:
+    def to_dict(self) -> Dict[str, Any]:
         """Serialize into a dictionary."""
         ret = asdict(self)
         # Note: The customization below won't be automatically done recursively for nested NIRNode.
@@ -27,7 +27,7 @@ class NIRNode:
         return ret
 
     @classmethod
-    def from_dict(cls, node: dict[str, Any]) -> "NIRNode":
+    def from_dict(cls, node: Dict[str, Any]) -> "NIRNode":
         assert node["type"] == cls.__name__
         del node["type"]
 

@@ -1,11 +1,14 @@
 import pathlib
-from typing import Any, Union
+from typing import Any, Dict, Union
 
 import h5py
 import numpy as np
 
 import nir
-from nir.ir.utils import try_byte_to_str
+
+
+def try_byte_to_str(a: Union[bytes, Any]) -> Union[str, Any]:
+    return a.decode("utf8") if isinstance(a, bytes) else a
 
 
 def read_node(node: Any) -> nir.typing.NIRNode:
@@ -97,7 +100,7 @@ def read_node(node: Any) -> nir.typing.NIRNode:
         raise ValueError(f"Unknown unit type: {node['type'][()]}")
 
 
-def hdf2dict(node: Any) -> dict[str, Any]:
+def hdf2dict(node: Any) -> Dict[str, Any]:
     ret = {}
 
     def read_hdf_to_dict(node, data_dict):

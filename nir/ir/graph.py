@@ -1,6 +1,6 @@
 from collections import Counter
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, Dict
 
 import numpy as np
 
@@ -12,8 +12,8 @@ from .typing import Edges, Nodes, Types
 from .utils import (
     calc_flatten_output,
     calculate_conv_output,
+    ensure_str,
     parse_shape_argument,
-    try_byte_to_str,
 )
 
 
@@ -96,21 +96,19 @@ class NIRGraph(NIRNode):
             node_key: self.nodes[node_key].output_type for node_key in output_node_keys
         }
 
-    def to_dict(self) -> dict[str, Any]:
+    def to_dict(self) -> Dict[str, Any]:
         ret = super().to_dict()
         ret["nodes"] = {k: n.to_dict() for k, n in self.nodes.items()}
         return ret
 
     @classmethod
-    def from_dict(cls, node: dict[str, Any]) -> "NIRNode":
+    def from_dict(cls, node: Dict[str, Any]) -> "NIRNode":
         from . import dict2NIRNode
 
         node["nodes"] = {k: dict2NIRNode(n) for k, n in node["nodes"].items()}
         # h5py deserializes edges into a numpy array of type bytes and dtype=object,
-        # hence using try_byte_to_str here
-        node["edges"] = [
-            (try_byte_to_str(a), try_byte_to_str(b)) for a, b in node["edges"]
-        ]
+        # hence using ensure_str here
+        node["edges"] = [(ensure_str(a), ensure_str(b)) for a, b in node["edges"]]
         return super().from_dict(node)
 
     def _check_types(self):
@@ -443,14 +441,14 @@ class Input(NIRNode):
         self.input_type = parse_shape_argument(self.input_type, "input")
         self.output_type = {"output": self.input_type["input"]}
 
-    def to_dict(self) -> dict[str, Any]:
+    def to_dict(self) -> Dict[str, Any]:
         ret = super().to_dict()
         del ret["input_type"]
         ret["shape"] = self.input_type["input"]
         return ret
 
     @classmethod
-    def from_dict(cls, node: dict[str, Any]) -> "NIRNode":
+    def from_dict(cls, node: Dict[str, Any]) -> "NIRNode":
         node["input_type"] = {"input": node["shape"]}
         del node["shape"]
         return super().from_dict(node)
@@ -471,14 +469,14 @@ class Output(NIRNode):
         self.output_type = parse_shape_argument(self.output_type, "output")
         self.input_type = {"input": self.output_type["output"]}
 
-    def to_dict(self) -> dict[str, Any]:
+    def to_dict(self) -> Dict[str, Any]:
         ret = super().to_dict()
         del ret["output_type"]
         ret["shape"] = self.output_type["output"]
         return ret
 
     @classmethod
-    def from_dict(cls, node: dict[str, Any]) -> "NIRNode":
+    def from_dict(cls, node: Dict[str, Any]) -> "NIRNode":
         node["output_type"] = {"output": node["shape"]}
         del node["shape"]
         return super().from_dict(node)

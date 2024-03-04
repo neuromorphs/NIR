@@ -102,5 +102,10 @@ def _index_tuple(
         raise TypeError(f"tuple must be int or np.ndarray, not {type(tuple)}")
 
 
-def try_byte_to_str(a: bytes | dict) -> dict:
-    return a.decode("utf-8") if isinstance(a, bytes) else a
+def ensure_str(a: Union[str, bytes]) -> str:
+    if isinstance(a, bytes):
+        return a.decode("utf8")
+    elif isinstance(a, str):
+        return a
+    else:
+        raise TypeError(f"Unexpected non-string type encountered: {type(a)}")
