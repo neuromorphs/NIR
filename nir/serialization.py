@@ -1,12 +1,17 @@
 import pathlib
-import typing
+from typing import Any, Dict, Union
 
 import h5py
+import numpy as np
 
 import nir
 
 
-def read_node(node: typing.Any) -> nir.NIRNode:
+def try_byte_to_str(a: Union[bytes, Any]) -> Union[str, Any]:
+    return a.decode("utf8") if isinstance(a, bytes) else a
+
+
+def read_node(node: Any) -> nir.typing.NIRNode:
     """Read a graph from a HDF/conn5 file."""
     if node["type"][()] == b"Affine":
         return nir.Affine(weight=node["weight"][()], bias=node["bias"][()])
@@ -95,14 +100,52 @@ def read_node(node: typing.Any) -> nir.NIRNode:
         raise ValueError(f"Unknown unit type: {node['type'][()]}")
 
 
-def read(filename: typing.Union[str, pathlib.Path]) -> nir.NIRGraph:
+def hdf2dict(node: Any) -> Dict[str, Any]:
+    ret = {}
+
+    def read_hdf_to_dict(node, data_dict):
+        for key, item in node.items():
+            key = try_byte_to_str(key)
+            if isinstance(item, h5py.Group):
+                data_dict[key] = {}
+                read_hdf_to_dict(item, data_dict[key])
+            elif isinstance(item, h5py.Dataset):
+                item = try_byte_to_str(item[()])
+                data_dict[key] = item
+
+    read_hdf_to_dict(node, ret)
+    return ret
+
+
+def read(filename: Union[str, pathlib.Path]) -> nir.NIRGraph:
     """Load a NIR from a HDF/conn5 file."""
     with h5py.File(filename, "r") as f:
-        return read_node(f["node"])
+        data_dict = hdf2dict(f["node"])
+        return nir.ir.dict2NIRNode(data_dict)
 
 
-def read_version(filename: typing.Union[str, pathlib.Path]) -> str:
+def read_version(filename: Union[str, pathlib.Path]) -> str:
     """Reads the filename of a given NIR file, and raises an exception if the version
     does not exist in the file."""
     with h5py.File(filename, "r") as f:
         return f["version"][()].decode("utf8")
+
+
+def write(filename: Union[str, pathlib.Path], graph: nir.typing.NIRNode) -> None:
+    """Write a NIR to a HDF5 file."""
+
+    def write_recursive(group: h5py.Group, node: dict) -> None:
+        for k, v in node.items():
+            if isinstance(v, str):
+                group.create_dataset(k, data=v, dtype=h5py.string_dtype())
+            elif isinstance(v, np.ndarray):
+                group.create_dataset(k, data=v, dtype=v.dtype)
+            elif isinstance(v, dict):
+                write_recursive(group.create_group(str(k)), v)
+            else:
+                group.create_dataset(k, data=v)
+
+    with h5py.File(filename, "w") as f:
+        f.create_dataset("version", data=nir.version)
+        node_group = f.create_group("node")
+        write_recursive(node_group, graph.to_dict())

@@ -3,8 +3,11 @@
 Documentation: https://nnir.readthedocs.io
 """
 
+from . import ir
 from .ir import *  # noqa: F403
-from .read import read  # noqa: F401
-from .write import write  # noqa: F401
+from .ir import typing  # noqa: F401
+from .serialization import read, write
+
+__all__ = ir.__all__ + ["read", "write"]
 
 version = __version__ = "1.0.1"
