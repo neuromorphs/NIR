@@ -5,7 +5,7 @@ import nir
 import lightning.pytorch as pl
 
 # %%
-g = nir.read("scnn_mnist.nir")
+g = nir.read("cnn_sinabs.nir")
 
 # %%
 model = norse.torch.from_nir(g)
@@ -54,6 +54,3 @@ trainer = pl.Trainer(max_epochs=100, accelerator="gpu", logger=logger)
 trainer.fit(model=cnn, train_dataloaders=loader)
 
 # %%
-
-
-

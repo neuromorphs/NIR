@@ -30,7 +30,7 @@ ann = nn.Sequential(
     nn.ReLU(),
 )
 
-ann.load_state_dict(torch.load("rate_based_gregor.pth"))
+ann.load_state_dict(torch.load("ann_pretraining/pretrained_ann_weights.pth"))
 input_shape = (2, 34, 34)
 # Convert ann to snn
 snn = from_model(
@@ -41,10 +41,10 @@ snn = from_model(
 nir_graph = to_nir(snn, sample_data=torch.rand((1, 2, 34, 34)))
 nir_graph.infer_types()
 # Save the graph
-nir.write("scnn_mnist.nir", nir_graph)
+nir.write("cnn_sinabs.nir", nir_graph)
 
 # Load the graph
-nir_graph = nir.read("scnn_mnist.nir")
+nir_graph = nir.read("cnn_sinabs.nir")
 
 # Load sinabs model from nir graph
 extracted_sinabs_model = from_nir(nir_graph, batch_size=1)
@@ -126,7 +126,7 @@ np.save("sinabs_accuracy.npy", accuracy.item())
 print(f"Final test accuracy {accuracy}")
 
 # Monitor first spiking layer activity for each digit sample
-digit_data = np.swapaxes(np.load("val_numbers.npy"), 0, 1)
+digit_data = np.swapaxes(np.load("cnn_numbers.npy"), 0, 1)
 set_batch_size(speck_model, 10)
 
 # Register a forward hook

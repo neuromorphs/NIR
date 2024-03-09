@@ -21,7 +21,7 @@ def xytp_collate(batch):
     return samples, torch.tensor(targets)
 
 
-nir_graph = nir.read("scnn_mnist.nir")
+nir_graph = nir.read("cnn_sinabs.nir")
 
 # Load sinabs model from nir graph
 extracted_sinabs_model = from_nir(nir_graph, batch_size=1)

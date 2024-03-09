@@ -11,7 +11,7 @@ from spinnaker2 import hardware, s2_nir, snn
 
 import nir
 
-nir_graph = nir.read("scnn_mnist.nir")
+nir_graph = nir.read("cnn_sinabs.nir")
 nlist = (
     [
         "input",
