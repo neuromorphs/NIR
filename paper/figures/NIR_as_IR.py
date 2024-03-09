@@ -35,7 +35,7 @@ for i in range(len(sw_labels)):
 ax.set_aspect('equal', 'box')
 ax.axis('off')
 plt.tight_layout()
-plt.savefig('compiler_withoutnir.pdf', dpi=300)
+plt.savefig('NIR_as_IR_without.pdf', dpi=300)
 plt.show()
 
 #########################################################################################
@@ -75,5 +75,5 @@ for i in range(len(hw_labels)):
 ax.set_aspect('equal', 'box')
 ax.axis('off')
 plt.tight_layout()
-plt.savefig('compiler_withnir.pdf', dpi=300)
+plt.savefig('NIR_as_IR_with.pdf', dpi=300)
 plt.show()
