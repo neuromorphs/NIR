@@ -1,22 +1,29 @@
 # CNN task: N-MNIST
 
-NIR graph exported from sinabs implementation (compatible with Speck).
+The NIR graph used for this task is exported from Sinabs (to ensure compatibility with the Speck chip). 
+The file `sinabs.py` defines an ANN, loads pretrained weights, converts it to SNN and then exports the corresponding NIR graph to `cnn_sinabs.nir`.
 
-hardware to run on: Loihi 2, SpiNNaker2, Speck 
+The final comparison plots for the paper are generated in `cnn_plots.ipynb`, including the comparison table.
 
-simulators to run on: Sinabs (+ others?)
+Hardware to run on:
+- [x] Loihi 2
+- [x] SpiNNaker2
+- [x] Speck
+
+Simulators to run on:
+- [x] Lava
+- [x] Spyx
+- [x] Nengo
+- [x] Norse
+- [x] Sinabs
+- [x] snnTorch
+- [x] Spyx
 
 ## Checklist per simulator
 
-1. Load the graph from `scnn_mnist.nir`
-2. Use the [NMNIST test dataset from Tonic](https://tonic.readthedocs.io/en/latest/generated/tonic.datasets.NMNIST.html#tonic.datasets.NMNIST) (emphasis on **test**) to provide an accuracy. Store that as a single number in `<PLATFORM>_accuracy.npy`.
-3. Pass the data from `val_numbers.npy` through the first two layers in the model, generating output data from the first convolution + neuron layer. That data should have (300, 10, 16, 16, 16) output. Store that in `<PLATFORM>_activity.npy`.
-
-## Things to visualize/compare
-- intermediate layer activations (which layer? perhaps first layer, for better visual features)
-  - TODO: description of which sample, which timesteps, etc.
-  - e.g. 1ms timebins, N-MNIST
-- output logits
+1. Load the graph from `cnn_sinabs.nir`
+2. Use the **test** dataset of N-MNIST from [Tonic](https://tonic.readthedocs.io/en/latest/generated/tonic.datasets.NMNIST.html#tonic.datasets.NMNIST) and compute the accuracy. Store that as a single number in `{platform}_accuracy.npy`.
+3. Load the data from `cnn_numbers.npy`, which contains input data from 10 digits in the shape `(300, 10, 2, 34, 34)`. Pass these through the first two layers in the model, generating output data from the first convolution + neuron layer (see model definition below). That output data should have shape `(300, 10, 16, 16, 16)`. Store that in `{platform}_activity.npy`.
 
 ## Model definition
 ```
@@ -42,6 +49,3 @@ nn.Sequential(
   nn.ReLU(),
 )
 ```
-
-**Model extraction**
-Execute the `mnist_sinabs_to_nir.py` which defines an ANN, loads pretrained weights, converts it to SNN and then generates the corresponding `NIRGraph`.

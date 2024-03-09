@@ -7,13 +7,13 @@ import nir
 import tqdm
 
 
-graph = nir.read("scnn_mnist.nir")
+graph = nir.read("cnn_sinabs.nir")
 graph.nodes.keys()
 
 net = import_nirtorch.from_nir(graph)
 print(net)
 
-inp_data = torch.from_numpy(np.load("val_numbers.npy")).float()
+inp_data = torch.from_numpy(np.load("cnn_numbers.npy")).float()
 print('input data:', inp_data.shape)
 modules = [e.elem for e in net.get_execution_order()]
 
