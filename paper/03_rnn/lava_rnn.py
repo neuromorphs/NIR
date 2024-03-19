@@ -2,6 +2,7 @@
 Sharp edges:
 - in lava-dl, the current and voltage state is not automatically reset. must do this manually after every forward pass.
 """
+
 import nir
 import nirtorch
 import torch

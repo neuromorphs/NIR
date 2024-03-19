@@ -1,4 +1,5 @@
 """Flatten Braille graph for SpiNNaker2 and fix some shapes."""
+
 import nir
 
 nir_model = nir.read("braille.nir")
