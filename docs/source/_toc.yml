@@ -6,6 +6,7 @@ parts:
   - file: what
     title: What is it?
   - file: about
+  - file: roadmap
 - caption: User guide
   chapters:
   - file: usage
