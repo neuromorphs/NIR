@@ -45,6 +45,12 @@ def read_node(node: Any) -> nir.typing.NIRNode:
             stride=node["stride"][()],
             padding=node["padding"][()],
         )
+    elif node["type"][()] == b"AvgPool2d":
+        return nir.AvgPool2d(
+            kernel_size=node["kernel_size"][()],
+            stride=node["stride"][()],
+            padding=node["padding"][()],
+        )
     elif node["type"][()] == b"Delay":
         return nir.Delay(delay=node["delay"][()])
     elif node["type"][()] == b"Flatten":
