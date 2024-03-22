@@ -7,7 +7,7 @@ import numpy as np
 from .conv import Conv1d, Conv2d
 from .flatten import Flatten
 from .node import NIRNode
-from .pooling import SumPool2d
+from .pooling import AvgPool2d, SumPool2d
 from .typing import Edges, Nodes, Types
 from .utils import (
     calc_flatten_output,
@@ -395,6 +395,19 @@ class NIRGraph(NIRNode):
                     post_node.output_type = {"output": output_type}
 
                 elif isinstance(post_node, SumPool2d):
+                    output_shape = calculate_conv_output(
+                        pre_node.output_type["output"][1:],
+                        post_node.padding,
+                        1,
+                        post_node.kernel_size,
+                        post_node.stride,
+                    )
+                    output_type = np.array(
+                        [post_node.input_type["input"][0], *output_shape]
+                    )
+                    post_node.output_type = {"output": output_type}
+
+                elif isinstance(post_node, AvgPool2d):
                     output_shape = calculate_conv_output(
                         pre_node.output_type["output"][1:],
                         post_node.padding,

@@ -207,3 +207,18 @@ def test_sum_pool_2d():
         ]
     )
     factory_test_graph(ir)
+
+
+def test_avg_pool_2d():
+    ir = nir.NIRGraph.from_list(
+        [
+            nir.Input(input_type=np.array([2, 2, 10, 10])),
+            nir.AvgPool2d(
+                kernel_size=np.array([2, 2]),
+                stride=np.array([1, 1]),
+                padding=np.ndarray([0, 0]),
+            ),
+            nir.Output(output_type=np.array([2, 2, 5, 5])),
+        ]
+    )
+    factory_test_graph(ir)

@@ -6,7 +6,7 @@ from .flatten import Flatten
 from .graph import Input, NIRGraph, Output
 from .linear import Affine, Linear, Scale
 from .neuron import IF, LI, LIF, CubaLIF, I
-from .pooling import SumPool2d
+from .pooling import AvgPool2d, SumPool2d
 from .surrogate_gradient import Threshold
 from .typing import NIRNode
 
@@ -34,6 +34,7 @@ __all_ir = [
     "LI",
     "LIF",
     # pooling
+    "AvgPool2d",
     "SumPool2d",
     # surrogate_gradient
     "Threshold",
@@ -81,6 +82,7 @@ __all__ = [
     "LI",
     "LIF",
     # pooling
+    "AvgPool2d",
     "SumPool2d",
     # surrogate_gradient
     "Threshold",
