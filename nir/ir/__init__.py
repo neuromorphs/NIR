@@ -81,6 +81,8 @@ __all__ = [
     "IF",
     "LI",
     "LIF",
+    # node
+    "NIRNode",
     # pooling
     "AvgPool2d",
     "SumPool2d",

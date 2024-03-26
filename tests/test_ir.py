@@ -9,6 +9,10 @@ def test_has_version():
     assert hasattr(nir, "__version__")
 
 
+def test_has_NIRNode():
+    assert hasattr(nir, "NIRNode")
+
+
 def test_eq():
     a = nir.Input(np.array([2, 3]))
     a2 = nir.Input(np.array([2, 3]))
