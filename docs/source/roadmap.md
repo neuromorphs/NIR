@@ -13,7 +13,7 @@ To make it self-sustaining, we are preparing to launch a series of projects that
 The most important pillar of NIR is the joint value for both industrial and academic partners alike.
 Therefore, the first phase of our roadmap will be to reach out to potential partners and invite them to joint projects for which we can raise funds---either through commercial or public sources.
 The coming phases will revolve around the fundraising and organization of these projects.
-Eventually, we will kickoff the projects and establish a steering group for NIR as the projects mature and futher direction is needed.
+Eventually, we will kick off the projects and establish a steering group for NIR as the projects mature and further direction is needed.
 
 ```
  _______________       _______________      _______________      _______________ 
