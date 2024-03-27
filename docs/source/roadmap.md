@@ -28,7 +28,7 @@ Eventually, we will kickoff the projects and establish a steering group for NIR 
 The follwing projects are concrete intiatives that are working to improve NIR.
 Feel free to reach out to the project owners if you are interested in contributing or if you have any projects you would like to add.
 
-## Improved SpiNNaker support
+### Improved SpiNNaker 2 support
 **Duration**: August 2024 </br>
 **Owner**: [Bernhard Vogginger](https://github.com/bvogginger) </br>
 **Description**: We are working on improving the support for the SpiNNaker 2 platform, including streaming data and additional neuron models.
