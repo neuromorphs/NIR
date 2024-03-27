@@ -3,6 +3,13 @@
 NIR is in its early stages but is developing fast.
 Here, we present an organizational roadmap for the immediate future of NIR governance, followed by a list of concrete projects that are currently developing NIR.
 
+```{admonition} Community involvement
+:class: tip
+We are dedicated to interacting and paying back to the community and we are continuously improving the accessibility of NIR by (1) releasing educational material, (2) updating our docs, and (3) engaging with the community in open events.
+
+For more information, see our [events](events) page and join the discussion on our [Discord](https://discord.gg/JRMRGP9h3c) server.
+```
+
 ## Organizational roadmap
 
 With [the NIR preprint](https://arxiv.org/abs/2311.14641), we have demonstrated the feasibility of NIR.
@@ -23,6 +30,7 @@ Eventually, we will kick off the projects and establish a steering group for NIR
 |_______________|     |_______________|    |_______________|    |_______________|  
 ```
 
+
 ## Active projects
 
 The follwing projects are concrete intiatives that are working to improve NIR.
@@ -31,7 +39,7 @@ Feel free to reach out to the project owners if you are interested in contributi
 ### Improved SpiNNaker 2 support
 **Duration**: August 2024 </br>
 **Owner**: [Bernhard Vogginger](https://github.com/bvogginger) </br>
-**Description**: We are working on improving the support for the SpiNNaker 2 platform. This includes speeding up SNN processing with the machine learning accelerator,  supporting more neuron models and streaming data.
+**Description**: We are working on improving the support for the SpiNNaker 2 platform. This includes speeding up SNN processing with the machine learning accelerator,  supporting more neuron models and streaming data. More information can be found at the [SpiNNaker 2 project milestone 5](https://gitlab.com/spinnaker2/py-spinnaker2/-/milestones/5).
 
 ### Improved Lava & Loihi support
 **Duration**: October 2024 </br>
@@ -47,5 +55,3 @@ Feel free to reach out to the project owners if you are interested in contributi
 **Timeline**: Start October 2024 </br>
 **Owner**: [Jens Egholm Pedersen](https://github.com/jegp) </br>
 **Description**: We are working on adding additional neuron models and plasticity rules to NIR, including the Fitzhugh-Nagumo model. Plasticity will require additional primitives that can, themselves, modify primitive parameters.
-
-
