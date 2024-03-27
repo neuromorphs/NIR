@@ -1,6 +1,6 @@
 # RNN task: Braille letter reading
 
-NIR graph exported from snnTorch.
+NIR graph exported after training in snnTorch.
 
 Hardware to run on: Xylo, Loihi 2, SpiNNaker2
 
