@@ -33,7 +33,7 @@ Feel free to reach out to the project owners if you are interested in contributi
 **Owner**: [Bernhard Vogginger](https://github.com/bvogginger) </br>
 **Description**: We are working on improving the support for the SpiNNaker 2 platform. This includes speeding up SNN processing with the machine learning accelerator,  supporting more neuron models and streaming data.
 
-## Improved Lava & Loihi support
+### Improved Lava & Loihi support
 **Duration**: October 2024 </br>
 **Owner**: [Steven Abreu](https://github.com/stevenabreu7/) </br>
 **Description**: We are working on improving the support for the Lava and Loihi platforms, focusing on neuron model support and applications.
