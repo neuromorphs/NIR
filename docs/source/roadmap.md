@@ -41,7 +41,7 @@ Feel free to reach out to the project owners if you are interested in contributi
 ### Energy comparisons on different computational substrates
 **Duration**: Until July 2024 </br>
 **Owner**: [Sadasivan Shankar](https://profiles.stanford.edu/sadasivan-shankar) </br>
-**Description**: It would be helpful to understand exactly how much energy we can save by lifting a NIR graph to neuromrophic hardware. In this project, we are developing a mapping from NIR graph to energy efficiency, given a computational platform. That is, we can take a NIR graph and calculate a rough estimate of the energy consumption of the graph on a given platform. This will help us to understand the potential energy savings **before** it is deployed.
+**Description**: It would be helpful to understand exactly how much energy we can save by lifting a NIR graph to neuromorphic hardware. In this project, we are developing a mapping from NIR graph to energy efficiency, given a computational platform. That is, we can take a NIR graph and calculate a rough estimate of the energy consumption of the graph on a given platform. This will help us to understand the potential energy savings **before** it is deployed.
 
 ## Additional neuron models and plasticity
 **Timeline**: Start October 2024 </br>
