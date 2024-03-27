@@ -43,7 +43,7 @@ Feel free to reach out to the project owners if you are interested in contributi
 **Owner**: [Sadasivan Shankar](https://profiles.stanford.edu/sadasivan-shankar) </br>
 **Description**: It would be helpful to understand exactly how much energy we can save by lifting a NIR graph to neuromorphic hardware. In this project, we are developing a mapping from NIR graph to energy efficiency, given a computational platform. That is, we can take a NIR graph and calculate a rough estimate of the energy consumption of the graph on a given platform. This will help us to understand the potential energy savings **before** it is deployed.
 
-## Additional neuron models and plasticity
+### Additional neuron models and plasticity
 **Timeline**: Start October 2024 </br>
 **Owner**: [Jens Egholm Pedersen](https://github.com/jegp) </br>
 **Description**: We are working on adding additional neuron models and plasticity rules to NIR, including the Fitzhugh-Nagumo model. Plasticity will require additional primitives that can, themselves, modify primitive parameters.
