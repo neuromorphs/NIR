@@ -1,6 +1,5 @@
-from dataclasses import asdict, dataclass, field
+from dataclasses import asdict, dataclass
 from typing import Any, Dict
-import numpy as np
 
 
 @dataclass(eq=False)
@@ -11,10 +10,11 @@ class NIRNode:
     instantiated.
     """
 
-    # Note: Adding input/output types as follows is ideal, but requires Python 3.10
-    input_type: Dict[str, np.ndarray] = field(init=False, kw_only=True)
-    output_type: Dict[str, np.ndarray] = field(init=False, kw_only=True)
-    metadata: Dict[str, Any] = field(init=True, kw_only=True, default_factory=dict)
+    # Note: Adding input/output types and metadata as follows is ideal, but requires Python 3.10
+    # TODO: implement this in 2025 when 3.9 is EOL
+    # input_type: Dict[str, np.ndarray] = field(init=False, kw_only=True)
+    # output_type: Dict[str, np.ndarray] = field(init=False, kw_only=True)
+    # metadata: Dict[str, Any] = field(init=True, default_factory=dict)
 
     def __eq__(self, other):
         return self is other

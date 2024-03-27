@@ -1,5 +1,5 @@
-from dataclasses import dataclass
-from typing import Optional, Tuple, Union
+from dataclasses import dataclass, field
+from typing import Any, Dict, Optional, Tuple, Union
 
 import numpy as np
 
@@ -41,6 +41,9 @@ class Conv1d(NIRNode):
     dilation: int  # Dilation
     groups: int  # Groups
     bias: np.ndarray  # Bias C_out
+    input_type: Optional[Dict[str, np.ndarray]] = None
+    output_type: Optional[Dict[str, np.ndarray]] = None
+    metadata: Dict[str, Any] = field(default_factory=dict)
 
     def __post_init__(self):
         if isinstance(self.padding, str) and self.padding not in ["same", "valid"]:

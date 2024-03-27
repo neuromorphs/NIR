@@ -1,6 +1,6 @@
 from collections import Counter
-from dataclasses import dataclass
-from typing import Any, Dict
+from dataclasses import dataclass, field
+from typing import Any, Dict, Optional
 
 import numpy as np
 
@@ -27,6 +27,9 @@ class NIRGraph(NIRNode):
 
     nodes: Nodes  # List of computational nodes
     edges: Edges  # List of edges between nodes
+    input_type: Optional[Dict[str, np.ndarray]] = None
+    output_type: Optional[Dict[str, np.ndarray]] = None
+    metadata: Dict[str, Any] = field(default_factory=dict)
 
     @property
     def inputs(self):
