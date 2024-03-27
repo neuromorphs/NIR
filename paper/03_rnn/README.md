@@ -2,11 +2,18 @@
 
 NIR graph exported after training in snnTorch.
 
-Hardware to run on: Xylo, Loihi 2, SpiNNaker2
+Hardware to run on:
+- [x] Loihi 2
+- [x] SpiNNaker2
+- [x] Xylo
 
-Simulators to run on: snnTorch, Norse, Lava-DL, (Nengo)
+Simulators to run in:
+- [x] Lava
+- [x] Nengo
+- [x] Norse
+- [x] snnTorch
+- [x] Spyx
 
-**Note:** the graphs use `dt=1e-4`
 
 ## The dataset
 
@@ -25,20 +32,28 @@ We apply two models to the Braille dataset
 
 Please use as many graphs as your platform supports. The more data in the paper, the better.
 
-## Checklist per simulator
+## Checklist per simulator 
 
-Examples are available in:
- - `Braille_training_.ipynb` to train a SRNN in snnTorch with optimized hyperparameters
- - `Braille_inference.ipynb` to perform inference with a pre-trained model and export the graph
- - `Norse inference.ipynb` to load a graph into Norse, make some analysis and inference 
-
-### Procedure
+### Procedure to exploit interoperability
 
 0. Choose whether to use reset by subtraction or reset to zero for the CuBa-LIF neurons of the model
 1. Load the two graphs above
    * **Note:** the graphs use `dt=1e-4`
 3. Use the `ds_test.pt` subset (from the `data` folder) to provide test accuracy. Store that as a single number in `<PLATFORM>_accuracy_<MODEL>.npy` (e. g. `norse_accuracy_noDelay_bias_zero.nir`)
 4. Pass the data from the first element in the `ds_test.pt` dataset (`torch.load("data/ds_test.pt")[0][0]`) through the models, and store the output spikes of the first LIF layer (the `"lif1.lif"` node in the graph). That data should have (256, 38) output for the `noDelay_bias_zero` graph and (256, 40) for the `noDelay_noBias_subtract` graph. Store that in `<PLATFORM>_activity_<MODEL>.npy`.
+
+### Already available examples
+
+The following examples can be used to get started with NIR export/import:
+ - `Braille_training_.ipynb` to train a SRNN in snnTorch with optimized hyperparameters
+ - `Braille_inference.ipynb` to perform inference with a pre-trained model and export the graph
+ - `Braille_inference_Rockpool.ipynb` to load a graph into Rockpool and perform inference
+ - `Braille_inference_spinnaker2.py` to load a graph deploying it onto SpiNNaker2 and perform inference
+ - `Braille_inference_Xylo.ipynb` to load a graph deploying it onto Xylo and perform inference
+ - `braille_spyx.ipynb` to load a graph into Spyx and perform inference
+ - `lava_inference.py` to load a graph into Lava and perform inference
+ - `Nengo.ipynb` to load a graph into Nengo and perform inference
+ - `Norse inference.ipynb` to load a graph into Norse, make some analysis and perform inference
 
 
 ## *Additional information for training*
