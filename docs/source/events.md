@@ -15,7 +15,7 @@ Would you like to invite us to an event or workshop? Get in touch with us via [D
 * [NICE workshop](https://flagship.kip.uni-heidelberg.de/jss/HBPm?mI=257&m=showAgenda&showAbstract=-1#9564), workshop, **April 26**
   * A tutorial on NIR with on-site SpiNNaker2 hardware.
 * [Open-Neuromorphic workshop](https://open-neuromorphic.org/workshops/neuromorphic-intermediate-representation/), video, **February 5** 
-  * Video introducing NIR with practical examples on [Speck](https://www.synsense.ai/products/speck-2/) and [SpiNNaker2](https://spinncloud.com/portfolio/spinnaker2/) from several of the NIR core developers
+  * Video introducing NIR with practical examples on [Speck](https://www.synsense.ai/products/speck-2/) and [SpiNNaker2](https://spinnaker2.gitlab.io/) from several of the NIR core developers
 
 ## 2023
 
