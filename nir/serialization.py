@@ -4,7 +4,6 @@ from typing import Any, Dict, Union
 import h5py
 import numpy as np
 
-import nir.ir as ir
 import nir
 
 
@@ -19,14 +18,14 @@ def try_byte_to_str(a: Union[bytes, Any]) -> Union[str, Any]:
     return a.decode("utf8") if isinstance(a, bytes) else a
 
 
-def read_node(node: Any) -> ir.NIRNode:
+def read_node(node: Any) -> nir.NIRNode:
     """Read a graph from a HDF/conn5 file."""
     if node["type"][()] == b"Affine":
-        return ir.Affine(
+        return nir.Affine(
             weight=node["weight"][()], bias=node["bias"][()], **_read_metadata(node)
         )
     elif node["type"][()] == b"Conv1d":
-        return ir.Conv1d(
+        return nir.Conv1d(
             input_shape=(
                 node["input_shape"][()] if "input_shape" in node.keys() else None
             ),
@@ -39,7 +38,7 @@ def read_node(node: Any) -> ir.NIRNode:
             **_read_metadata(node),
         )
     elif node["type"][()] == b"Conv2d":
-        return ir.Conv2d(
+        return nir.Conv2d(
             input_shape=(
                 node["input_shape"][()] if "input_shape" in node.keys() else None
             ),
@@ -52,7 +51,7 @@ def read_node(node: Any) -> ir.NIRNode:
             **_read_metadata(node),
         )
     elif node["type"][()] == b"SumPool2d":
-        return ir.SumPool2d(
+        return nir.SumPool2d(
             kernel_size=node["kernel_size"][()],
             stride=node["stride"][()],
             padding=node["padding"][()],
@@ -65,9 +64,9 @@ def read_node(node: Any) -> ir.NIRNode:
             padding=node["padding"][()],
         )
     elif node["type"][()] == b"Delay":
-        return ir.Delay(delay=node["delay"][()])
+        return nir.Delay(delay=node["delay"][()])
     elif node["type"][()] == b"Flatten":
-        return ir.Flatten(
+        return nir.Flatten(
             start_dim=node["start_dim"][()],
             end_dim=node["end_dim"][()],
             input_type={
@@ -76,24 +75,24 @@ def read_node(node: Any) -> ir.NIRNode:
             **_read_metadata(node),
         )
     elif node["type"][()] == b"I":
-        return ir.I(r=node["r"][()], **_read_metadata(node))
+        return nir.I(r=node["r"][()], **_read_metadata(node))
     elif node["type"][()] == b"IF":
-        return ir.IF(
+        return nir.IF(
             r=node["r"][()], v_threshold=node["v_threshold"][()], **_read_metadata(node)
         )
     elif node["type"][()] == b"Input":
-        return ir.Input(input_type={"input": node["shape"][()]}, **_read_metadata(node))
+        return nir.Input(input_type={"input": node["shape"][()]}, **_read_metadata(node))
     elif node["type"][()] == b"LI":
-        return ir.LI(
+        return nir.LI(
             tau=node["tau"][()],
             r=node["r"][()],
             v_leak=node["v_leak"][()],
             **_read_metadata(node),
         )
     elif node["type"][()] == b"Linear":
-        return ir.Linear(weight=node["weight"][()], **_read_metadata(node))
+        return nir.Linear(weight=node["weight"][()], **_read_metadata(node))
     elif node["type"][()] == b"LIF":
-        return ir.LIF(
+        return nir.LIF(
             tau=node["tau"][()],
             r=node["r"][()],
             v_leak=node["v_leak"][()],
@@ -101,7 +100,7 @@ def read_node(node: Any) -> ir.NIRNode:
             **_read_metadata(node),
         )
     elif node["type"][()] == b"CubaLIF":
-        return ir.CubaLIF(
+        return nir.CubaLIF(
             tau_mem=node["tau_mem"][()],
             tau_syn=node["tau_syn"][()],
             r=node["r"][()],
@@ -111,19 +110,19 @@ def read_node(node: Any) -> ir.NIRNode:
             **_read_metadata(node),
         )
     elif node["type"][()] == b"NIRGraph":
-        return ir.NIRGraph(
+        return nir.NIRGraph(
             nodes={k: read_node(n) for k, n in node["nodes"].items()},
             edges=[(a.decode("utf8"), b.decode("utf8")) for a, b in node["edges"][()]],
             **_read_metadata(node),
         )
     elif node["type"][()] == b"Output":
-        return ir.Output(
+        return nir.Output(
             output_type={"output": node["shape"][()]}, **_read_metadata(node)
         )
     elif node["type"][()] == b"Scale":
-        return ir.Scale(scale=node["scale"][()], **_read_metadata(node))
+        return nir.Scale(scale=node["scale"][()], **_read_metadata(node))
     elif node["type"][()] == b"Threshold":
-        return ir.Threshold(threshold=node["threshold"][()], **_read_metadata(node))
+        return nir.Threshold(threshold=node["threshold"][()], **_read_metadata(node))
     else:
         raise ValueError(f"Unknown unit type: {node['type'][()]}")
 
@@ -145,11 +144,11 @@ def hdf2dict(node: Any) -> Dict[str, Any]:
     return ret
 
 
-def read(filename: Union[str, pathlib.Path]) -> ir.NIRGraph:
+def read(filename: Union[str, pathlib.Path]) -> nir.NIRGraph:
     """Load a NIR from a HDF/conn5 file."""
     with h5py.File(filename, "r") as f:
         data_dict = hdf2dict(f["node"])
-        return ir.dict2NIRNode(data_dict)
+        return nir.dict2NIRNode(data_dict)
 
 
 def read_version(filename: Union[str, pathlib.Path]) -> str:
@@ -159,7 +158,7 @@ def read_version(filename: Union[str, pathlib.Path]) -> str:
         return f["version"][()].decode("utf8")
 
 
-def write(filename: Union[str, pathlib.Path], graph: ir.typing.NIRNode) -> None:
+def write(filename: Union[str, pathlib.Path], graph: nir.NIRNode) -> None:
     """Write a NIR to a HDF5 file."""
 
     def write_recursive(group: h5py.Group, node: dict) -> None:
