@@ -10,9 +10,11 @@ class NIRNode:
     instantiated.
     """
 
-    # Note: Adding input/output types as follows is ideal, but requires Python 3.10
-    # input_type: Types = field(init=False, kw_only=True)
-    # output_type: Types = field(init=False, kw_only=True)
+    # Note: Adding input/output types and metadata as follows is ideal, but requires Python 3.10
+    # TODO: implement this in 2025 when 3.9 is EOL
+    # input_type: Dict[str, np.ndarray] = field(init=False, kw_only=True)
+    # output_type: Dict[str, np.ndarray] = field(init=False, kw_only=True)
+    # metadata: Dict[str, Any] = field(init=True, default_factory=dict)
 
     def __eq__(self, other):
         return self is other
@@ -20,6 +22,10 @@ class NIRNode:
     def to_dict(self) -> Dict[str, Any]:
         """Serialize into a dictionary."""
         ret = asdict(self)
+        if "input_type" in ret.keys():
+            del ret["input_type"]
+        if "output_type" in ret.keys():
+            del ret["output_type"]
         # Note: The customization below won't be automatically done recursively for nested NIRNode.
         # Therefore, classes with nested NIRNode e.g. NIRGraph must implement its own to_dict
         ret["type"] = type(self).__name__

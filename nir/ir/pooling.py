@@ -1,4 +1,5 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
+from typing import Any, Dict, Optional
 
 import numpy as np
 
@@ -12,6 +13,9 @@ class SumPool2d(NIRNode):
     kernel_size: np.ndarray  # (Height, Width)
     stride: np.ndarray  # (Height, width)
     padding: np.ndarray  # (Height, width)
+    input_type: Optional[Dict[str, np.ndarray]] = None
+    output_type: Optional[Dict[str, np.ndarray]] = None
+    metadata: Dict[str, Any] = field(default_factory=dict)
 
     def __post_init__(self):
         self.input_type = {"input": None}

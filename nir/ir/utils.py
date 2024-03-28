@@ -62,7 +62,7 @@ def calculate_conv_output(
                 / _index_tuple(stride, i)
                 + 1
             )
-        shapes.append(int(shape))
+        shapes.append(int(shape.item()))
     return np.array(shapes)
 
 
