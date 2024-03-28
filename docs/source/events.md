@@ -5,7 +5,7 @@ We are dedicated to interacting and paying back to the community both to (1) lis
 Below, you will find a list of events that we are hosting or participating in where you can meet us and learn more about NIR.
 
 ```{admonition} Would you like to invite us?
-Would you like to invite us to an event or workshop? Get in touch with via [Discord](https://discord.gg/JRMRGP9h3c) or [GitHub](https://github.com/neuromorphs/nir).
+Would you like to invite us to an event or workshop? Get in touch with us via [Discord](https://discord.gg/JRMRGP9h3c) or [GitHub](https://github.com/neuromorphs/nir).
 ```
 
 ## 2024
