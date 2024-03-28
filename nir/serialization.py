@@ -1,3 +1,4 @@
+import io
 import pathlib
 from typing import Any, Dict, Union
 
@@ -158,7 +159,7 @@ def read_version(filename: Union[str, pathlib.Path]) -> str:
         return f["version"][()].decode("utf8")
 
 
-def write(filename: Union[str, pathlib.Path], graph: nir.NIRNode) -> None:
+def write(filename: Union[str, pathlib.Path, io.RawIOBase], graph: nir.NIRNode) -> None:
     """Write a NIR to a HDF5 file."""
 
     def write_recursive(group: h5py.Group, node: dict) -> None:
