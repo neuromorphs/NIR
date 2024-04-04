@@ -3,6 +3,7 @@ from snntorch import functional as SF
 import torch
 from torch.utils.data import DataLoader
 import nir
+
 # NOTE: this requires snntorch/nir (PR) and nirtorch/master (unreleased)
 from snntorch import import_nirtorch
 import nirtorch
@@ -18,7 +19,9 @@ SHUFFLE = False
 def val_test_loop_nirtorch(dataset, batch_size, net, loss_fn, device, shuffle=True):
     with torch.no_grad():
         net.eval()
-        loader = DataLoader(dataset, batch_size=batch_size, shuffle=shuffle, drop_last=False)
+        loader = DataLoader(
+            dataset, batch_size=batch_size, shuffle=shuffle, drop_last=False
+        )
 
         batch_loss = []
         batch_acc = []
@@ -29,8 +32,10 @@ def val_test_loop_nirtorch(dataset, batch_size, net, loss_fn, device, shuffle=Tr
 
             h_state = nirtorch.from_nir.GraphExecutorState(
                 state={
-                    'lif1': net._modules['lif1'].init_rsynaptic(),  # 3-tuple: spk, syn, mem
-                    'lif2': net._modules['lif2'].init_synaptic(),  # 2-tuple: syn, mem
+                    "lif1": net._modules[
+                        "lif1"
+                    ].init_rsynaptic(),  # 3-tuple: spk, syn, mem
+                    "lif2": net._modules["lif2"].init_synaptic(),  # 2-tuple: syn, mem
                 }
             )
 
@@ -45,7 +50,9 @@ def val_test_loop_nirtorch(dataset, batch_size, net, loss_fn, device, shuffle=Tr
 
             act_total_out = torch.sum(spk_out, 0)  # sum over time
             _, neuron_max_act_total_out = torch.max(act_total_out, 1)
-            batch_acc.extend((neuron_max_act_total_out == labels).detach().cpu().numpy())
+            batch_acc.extend(
+                (neuron_max_act_total_out == labels).detach().cpu().numpy()
+            )
 
         return [np.mean(batch_loss), np.mean(batch_acc)]
 
@@ -53,7 +60,9 @@ def val_test_loop_nirtorch(dataset, batch_size, net, loss_fn, device, shuffle=Tr
 # import from NIR - using nirtorch
 ###########################
 
-nir_graph = nir.read('braille_subtract.nir')
+nir_graph = nir.read("braille_subtract.nir")
 net2 = import_nirtorch.from_nir(nir_graph)
-test_results = val_test_loop_nirtorch(ds_test, 64, net2, loss_fn, device, shuffle=SHUFFLE)
+test_results = val_test_loop_nirtorch(
+    ds_test, 64, net2, loss_fn, device, shuffle=SHUFFLE
+)
 print("test accuracy: {}%".format(np.round(test_results[1] * 100, 2)))

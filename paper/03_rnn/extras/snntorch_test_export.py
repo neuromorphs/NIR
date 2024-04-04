@@ -8,6 +8,7 @@ import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader
 import nir
+
 # NOTE: this requires snntorch/nir (PR) and nirtorch/master (unreleased)
 from snntorch import export_nirtorch
 
@@ -126,7 +127,9 @@ def val_test_loop(
 
             act_total_out = torch.sum(spk_out, 0)  # sum over time
             _, neuron_max_act_total_out = torch.max(act_total_out, 1)
-            batch_acc.extend((neuron_max_act_total_out == labels).detach().cpu().numpy())
+            batch_acc.extend(
+                (neuron_max_act_total_out == labels).detach().cpu().numpy()
+            )
 
         return [np.mean(batch_loss), np.mean(batch_acc)]
 
@@ -134,18 +137,25 @@ def val_test_loop(
 # build initial network
 ###########################
 
-print('\nload snnTorch module from checkpoint\n')
+print("\nload snnTorch module from checkpoint\n")
 batch_size = 4
 input_size = 12
 num_steps = next(iter(ds_test))[0].shape[0]
 net = model_build(parameters, input_size, num_steps, device, bias)
-test_results = val_test_loop(ds_test, batch_size, net, loss_fn, device,
-                             shuffle=SHUFFLE, saved_state_dict=best_val_layers)
+test_results = val_test_loop(
+    ds_test,
+    batch_size,
+    net,
+    loss_fn,
+    device,
+    shuffle=SHUFFLE,
+    saved_state_dict=best_val_layers,
+)
 print("test accuracy: {}%".format(np.round(test_results[1] * 100, 2)))
 
 # export to NIR
 ###########################
 
-print('\nexport to NIR graph\n')
+print("\nexport to NIR graph\n")
 nir_graph = export_nirtorch.to_nir(net, ds_test[0][0], ignore_dims=[0])
 nir.write(f"braille_{model_name}.nir", nir_graph)

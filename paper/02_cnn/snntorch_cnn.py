@@ -49,9 +49,13 @@ np.save("snnTorch_activity.npy", arr_spk_layer.numpy())
 
 bs = 128
 collate = tonic.collation.PadTensors(batch_first=False)
-to_frame = tonic.transforms.ToFrame(sensor_size=tonic.datasets.NMNIST.sensor_size, time_window=1e3)
+to_frame = tonic.transforms.ToFrame(
+    sensor_size=tonic.datasets.NMNIST.sensor_size, time_window=1e3
+)
 test_ds = tonic.datasets.NMNIST("./nmnist", transform=to_frame, train=False)
-test_dl = torch.utils.data.DataLoader(test_ds, shuffle=True, batch_size=bs, collate_fn=collate)
+test_dl = torch.utils.data.DataLoader(
+    test_ds, shuffle=True, batch_size=bs, collate_fn=collate
+)
 
 accuracies = []
 pbar = tqdm.tqdm(total=len(test_dl), desc="Processing", position=0, leave=True)
@@ -79,10 +83,10 @@ for idx, (x, y) in enumerate(test_dl):
     pred = out.mean(0).argmax(-1)
     accuracy = (pred == y).sum() / x.shape[1]
     accuracies.append(accuracy)
-    pbar.set_postfix(accuracy="{:.2f}%".format(sum(accuracies)/len(accuracies)*100))
+    pbar.set_postfix(accuracy="{:.2f}%".format(sum(accuracies) / len(accuracies) * 100))
     pbar.update(1)
 pbar.close()
 accuracies = np.array(accuracies)
-print(f'accuracy: {accuracies.mean():.2%} +/- {accuracies.std():.2%}')
-np.save('snntorch_accuracies.npy', accuracies)
-np.save('snntorch_accuracy.npy', accuracies.mean())
+print(f"accuracy: {accuracies.mean():.2%} +/- {accuracies.std():.2%}")
+np.save("snntorch_accuracies.npy", accuracies)
+np.save("snntorch_accuracy.npy", accuracies.mean())

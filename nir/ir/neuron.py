@@ -1,4 +1,5 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
+from typing import Any, Dict, Optional
 
 import numpy as np
 
@@ -45,6 +46,9 @@ class CubaLIF(NIRNode):
     v_leak: np.ndarray  # Leak voltage
     v_threshold: np.ndarray  # Firing threshold
     w_in: np.ndarray = 1.0  # Input current weight
+    input_type: Optional[Dict[str, np.ndarray]] = None
+    output_type: Optional[Dict[str, np.ndarray]] = None
+    metadata: Dict[str, Any] = field(default_factory=dict)
 
     def __post_init__(self):
         assert (
@@ -71,6 +75,9 @@ class I(NIRNode):  # noqa: E742
     """
 
     r: np.ndarray
+    input_type: Optional[Dict[str, np.ndarray]] = None
+    output_type: Optional[Dict[str, np.ndarray]] = None
+    metadata: Dict[str, Any] = field(default_factory=dict)
 
     def __post_init__(self):
         self.input_type = {"input": np.array(self.r.shape)}
@@ -101,6 +108,9 @@ class IF(NIRNode):
 
     r: np.ndarray  # Resistance
     v_threshold: np.ndarray  # Firing threshold
+    input_type: Optional[Dict[str, np.ndarray]] = None
+    output_type: Optional[Dict[str, np.ndarray]] = None
+    metadata: Dict[str, Any] = field(default_factory=dict)
 
     def __post_init__(self):
         assert (
@@ -127,6 +137,9 @@ class LI(NIRNode):
     tau: np.ndarray  # Time constant
     r: np.ndarray  # Resistance
     v_leak: np.ndarray  # Leak voltage
+    input_type: Optional[Dict[str, np.ndarray]] = None
+    output_type: Optional[Dict[str, np.ndarray]] = None
+    metadata: Dict[str, Any] = field(default_factory=dict)
 
     def __post_init__(self):
         assert (
@@ -166,6 +179,9 @@ class LIF(NIRNode):
     r: np.ndarray  # Resistance
     v_leak: np.ndarray  # Leak voltage
     v_threshold: np.ndarray  # Firing threshold
+    input_type: Optional[Dict[str, np.ndarray]] = None
+    output_type: Optional[Dict[str, np.ndarray]] = None
+    metadata: Dict[str, Any] = field(default_factory=dict)
 
     def __post_init__(self):
         assert (

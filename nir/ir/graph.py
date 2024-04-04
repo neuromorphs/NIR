@@ -1,13 +1,13 @@
 from collections import Counter
-from dataclasses import dataclass
-from typing import Any, Dict
+from dataclasses import dataclass, field
+from typing import Any, Dict, Optional
 
 import numpy as np
 
 from .conv import Conv1d, Conv2d
 from .flatten import Flatten
 from .node import NIRNode
-from .pooling import SumPool2d
+from .pooling import AvgPool2d, SumPool2d
 from .typing import Edges, Nodes, Types
 from .utils import (
     calc_flatten_output,
@@ -27,6 +27,9 @@ class NIRGraph(NIRNode):
 
     nodes: Nodes  # List of computational nodes
     edges: Edges  # List of edges between nodes
+    input_type: Optional[Dict[str, np.ndarray]] = None
+    output_type: Optional[Dict[str, np.ndarray]] = None
+    metadata: Dict[str, Any] = field(default_factory=dict)
 
     @property
     def inputs(self):
@@ -407,6 +410,19 @@ class NIRGraph(NIRNode):
                     )
                     post_node.output_type = {"output": output_type}
 
+                elif isinstance(post_node, AvgPool2d):
+                    output_shape = calculate_conv_output(
+                        pre_node.output_type["output"][1:],
+                        post_node.padding,
+                        1,
+                        post_node.kernel_size,
+                        post_node.stride,
+                    )
+                    output_type = np.array(
+                        [post_node.input_type["input"][0], *output_shape]
+                    )
+                    post_node.output_type = {"output": output_type}
+
                 elif isinstance(post_node, Flatten):
                     print("updateing flatten output")
                     post_node.output_type = {
@@ -443,7 +459,6 @@ class Input(NIRNode):
 
     def to_dict(self) -> Dict[str, Any]:
         ret = super().to_dict()
-        del ret["input_type"]
         ret["shape"] = self.input_type["input"]
         return ret
 
@@ -471,7 +486,6 @@ class Output(NIRNode):
 
     def to_dict(self) -> Dict[str, Any]:
         ret = super().to_dict()
-        del ret["output_type"]
         ret["shape"] = self.output_type["output"]
         return ret
 

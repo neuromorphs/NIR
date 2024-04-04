@@ -1,4 +1,5 @@
 """Analyze weight distribution of Braille graph."""
+
 import matplotlib.pyplot as plt
 import numpy as np
 

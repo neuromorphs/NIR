@@ -1,4 +1,5 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
+from typing import Any, Dict, Optional
 
 import numpy as np
 
@@ -20,6 +21,9 @@ class Affine(NIRNode):
 
     weight: np.ndarray  # Weight term
     bias: np.ndarray  # Bias term
+    input_type: Optional[Dict[str, np.ndarray]] = None
+    output_type: Optional[Dict[str, np.ndarray]] = None
+    metadata: Dict[str, Any] = field(default_factory=dict)
 
     def __post_init__(self):
         assert len(self.weight.shape) >= 2, "Weight must be at least 2D"
