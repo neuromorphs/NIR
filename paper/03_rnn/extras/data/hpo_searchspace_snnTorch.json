@@ -1,0 +1,11 @@
+{
+    "nb_hidden": {"_type": "quniform", "_value": [30, 63, 1]},
+    "alpha_r": {"_type": "quniform", "_value": [0, 1, 0.05]}, 
+    "alpha_out": {"_type": "quniform", "_value": [0, 1, 0.05]}, 
+    "beta_r": {"_type": "quniform", "_value": [0, 1, 0.05]}, 
+    "beta_out": {"_type": "quniform", "_value": [0, 1, 0.05]}, 
+    "lr": {"_type": "choice", "_value": [0.0001, 0.00015, 0.0005, 0.001, 0.0015, 0.002, 0.005, 0.01, 0.1]}, 
+    "reg_l1": {"_type": "quniform", "_value": [0, 0.001, 0.0001]}, 
+    "reg_l2": {"_type": "quniform", "_value": [0, 1e-05, 1e-06]}, 
+    "slope": {"_type": "quniform", "_value": [5, 20, 5]}
+}

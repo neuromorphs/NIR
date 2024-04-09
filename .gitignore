@@ -12,3 +12,6 @@ _autosummary
 paper/02_cnn/NMNIST/
 lightning_logs/
 *.log
+paper/03/data/ds_train.pt
+paper/03/data/ds_val.pt
+env_NIR.yml
