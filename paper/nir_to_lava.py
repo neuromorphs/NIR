@@ -10,12 +10,12 @@ from functools import partial
 from enum import Enum
 
 # from lava.proc.embedded_io.spike import PyToNxAdapter, NxToPyAdapter
-from lava.proc.monitor.process import Monitor
-from lava.magma.core.run_conditions import RunSteps
-from lava.proc.io.source import RingBuffer
+# from lava.proc.monitor.process import Monitor
+# from lava.magma.core.run_conditions import RunSteps
+# from lava.proc.io.source import RingBuffer
+# from lava.proc.io.sink import RingBuffer as Sink
 from lava.proc.lif.process import LIF
 from lava.proc.dense.process import Dense
-from lava.proc.io.sink import RingBuffer as Sink
 import lava.lib.dl.slayer as slayer
 import torch
 
@@ -33,20 +33,6 @@ class ImportConfig:
     def __post_init__(self):
         assert not (not self.fixed_pt and self.on_chip), "On-chip must use fixed-point"
 
-
-def handle_imports(import_config: ImportConfig):
-    if import_config.library_preference == LavaLibrary.Lava:
-        from lava.proc.monitor.process import Monitor
-        from lava.magma.core.run_conditions import RunSteps
-        from lava.proc.io.source import RingBuffer
-        from lava.proc.lif.process import LIF
-        from lava.proc.dense.process import Dense
-        if import_config.on_chip:
-            from lava.proc.io.sink import RingBuffer as Sink
-            from lava.proc.embedded_io.spike import PyToNxAdapter, NxToPyAdapter
-    if import_config.library_preference == LavaLibrary.LavaDl:
-        import lava.lib.dl.slayer as slayer
-        import torch
 
 ##############################
 # Lava helpers
@@ -611,8 +597,6 @@ def import_from_nir_to_lava_dl(graph: nir.NIRGraph, import_config: ImportConfig,
 def import_from_nir(graph: nir.NIRGraph, import_config: ImportConfig = None):
     if import_config is None:
         import_config = ImportConfig()
-
-    handle_imports(import_config)
 
     if import_config.library_preference == LavaLibrary.Lava:
         return import_from_nir_to_lava(graph, import_config)
