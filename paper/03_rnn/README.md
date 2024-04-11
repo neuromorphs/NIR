@@ -25,10 +25,10 @@ As in the above mentioned paper, the binning procedure resulting in a $\Delta t 
 We apply two models to the Braille dataset
 1. `braille_noDelay_bias_zero.nir`
     * Membrane reset to zero without delay (in the same timestep), *with* bias
-    * A version with subgraph is available in `braille_noDelay_bias_zero_subgraph.nir`
+    * A version with subgraph is available in `extras\braille_noDelay_bias_zero_subgraph.nir`
 3. `braille_noDelay_noBias_subtract.nir`
     * Membrane reset by subtraction without delay (in the same timestep), *without* bias
-    * A version with subgraph is available in `braille_noDelay_noBias_subtract_subgraph.nir`
+    * A version with subgraph is available in `extras\braille_noDelay_noBias_subtract_subgraph.nir`
 
 Please use as many graphs as your platform supports. The more data in the paper, the better.
 
@@ -45,17 +45,17 @@ Please use as many graphs as your platform supports. The more data in the paper,
 ### Already available examples
 
 The following examples can be used to get started with NIR export/import:
- - `Braille_training_.ipynb` to train a SRNN in snnTorch with optimized hyperparameters
- - `Braille_inference.ipynb` to perform inference with a pre-trained model and export the graph
- - `Braille_inference_Rockpool.ipynb` to load a graph into Rockpool and perform inference
- - `Braille_inference_spinnaker2.py` to load a graph deploying it onto SpiNNaker2 and perform inference
- - `Braille_inference_Xylo.ipynb` to load a graph deploying it onto Xylo and perform inference
- - `braille_spyx.ipynb` to load a graph into Spyx and perform inference
- - `lava_inference.py` to load a graph into Lava and perform inference
- - `Nengo.ipynb` to load a graph into Nengo and perform inference
- - `Norse inference.ipynb` to load a graph into Norse, make some analysis and perform inference
+ - `snntorch_apply.ipynb` to train a SRNN in snnTorch with optimized hyperparameters
+ - `lava_apply.py` to load a graph into Lava and perform inference
+ - `nengo_apply.ipynb` to load a graph into Nengo and perform inference
+ - `norse_apply.ipynb` to load a graph into Norse, make some analysis and perform inference
+ - `rockpool_apply.ipynb` to load a graph into Rockpool and perform inference
+ - `snntorch_apply.ipynb` to perform inference in snnTorch with a pre-trained model and export its graph
+ - `s2_apply.py` to load a graph deploying it onto SpiNNaker2 and perform inference
+ - `spyx_apply.ipynb` to load a graph into Spyx and perform inference
+ - `xylo_apply.ipynb` to load a graph deploying it onto Xylo and perform inference
 
 
 ## *Additional information for training*
 
-To train the Braille reading model in snnTorch, the `Braille_training.ipynb` notebook is available. By setting the `reset_mechanism`, `reset_delay` and `parameters_filename` variables, the different models (and corresponding hyperparameters) can be selected. `use_bias` allows instead to specify if bias can be used or not depending on the target platform. At the very beginning of the notebook, the `store_weights` can be set as True or False according to what is needed. A cell for GPU usage is also present.
+To train the Braille reading model in snnTorch, use the above listed `braille_training_snntorch.ipynb` notebook. By setting the `reset_mechanism`, `reset_delay` and `parameters_filename` variables, the different models (and corresponding hyperparameters) can be selected. The variable `use_bias` allows to specify if bias can be used or not depending on the target platform. At the very beginning of the notebook, the `store_weights` variable can be set as True or False according to what is needed. A cell for GPU usage is also present.
