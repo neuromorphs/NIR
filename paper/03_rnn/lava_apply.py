@@ -1,10 +1,18 @@
 import nir
-from _lava_rnn import from_nir as from_nir_to_lava
+from functools import partial
+# from _lava_rnn import from_nir as from_nir_to_lava
+import sys
+sys.path.append("/Users/steve/Code/NIR/paper")
+from nir_to_lava import import_from_nir as from_nir_to_lava_full, ImportConfig, LavaLibrary
 import torch
 import numpy as np
 from torch.utils.data import DataLoader
 from snntorch import functional as SF
 import lava.lib.dl.slayer as slayer
+
+
+import_config = ImportConfig(library_preference=LavaLibrary.LavaDl)
+from_nir_to_lava = partial(from_nir_to_lava_full, import_config=import_config)
 
 
 seed = 42
