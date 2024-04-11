@@ -45,17 +45,17 @@ Please use as many graphs as your platform supports. The more data in the paper,
 ### Already available examples
 
 The following examples can be used to get started with NIR export/import:
- - `Braille_training_snntorch.ipynb` to train a SRNN in snnTorch with optimized hyperparameters
- - `Braille_inference_lava.py` to load a graph into Lava and perform inference
- - `Braille_inference_nengo.ipynb` to load a graph into Nengo and perform inference
- - `Braille_inference_norse.ipynb` to load a graph into Norse, make some analysis and perform inference
- - `Braille_inference_rockpool.ipynb` to load a graph into Rockpool and perform inference
- - `Braille_inference_snntorch.ipynb` to perform inference in snnTorch with a pre-trained model and export its graph
- - `Braille_inference_spinnaker2.py` to load a graph deploying it onto SpiNNaker2 and perform inference
- - `Braille_inference_spyx.ipynb` to load a graph into Spyx and perform inference
- - `Braille_inference_xylo.ipynb` to load a graph deploying it onto Xylo and perform inference
+ - `snntorch_apply.ipynb` to train a SRNN in snnTorch with optimized hyperparameters
+ - `lava_apply.py` to load a graph into Lava and perform inference
+ - `nengo_apply.ipynb` to load a graph into Nengo and perform inference
+ - `norse_apply.ipynb` to load a graph into Norse, make some analysis and perform inference
+ - `rockpool_apply.ipynb` to load a graph into Rockpool and perform inference
+ - `snntorch_apply.ipynb` to perform inference in snnTorch with a pre-trained model and export its graph
+ - `s2_apply.py` to load a graph deploying it onto SpiNNaker2 and perform inference
+ - `spyx_apply.ipynb` to load a graph into Spyx and perform inference
+ - `xylo_apply.ipynb` to load a graph deploying it onto Xylo and perform inference
 
 
 ## *Additional information for training*
 
-To train the Braille reading model in snnTorch, use the above listed `Braille_training_snntorch.ipynb` notebook. By setting the `reset_mechanism`, `reset_delay` and `parameters_filename` variables, the different models (and corresponding hyperparameters) can be selected. The variable `use_bias` allows to specify if bias can be used or not depending on the target platform. At the very beginning of the notebook, the `store_weights` variable can be set as True or False according to what is needed. A cell for GPU usage is also present.
+To train the Braille reading model in snnTorch, use the above listed `braille_training_snntorch.ipynb` notebook. By setting the `reset_mechanism`, `reset_delay` and `parameters_filename` variables, the different models (and corresponding hyperparameters) can be selected. The variable `use_bias` allows to specify if bias can be used or not depending on the target platform. At the very beginning of the notebook, the `store_weights` variable can be set as True or False according to what is needed. A cell for GPU usage is also present.
