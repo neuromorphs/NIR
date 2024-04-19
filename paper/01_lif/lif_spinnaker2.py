@@ -27,9 +27,18 @@ assert isinstance(Affine_node, nir.Affine)
 Affine_node.weight = Affine_node.weight * scale
 Affine_node.bias = Affine_node.bias * scale
 
-net, inp, outp = s2_nir.from_nir(
-    nir_model, outputs=["v", "spikes"], discretization_timestep=0.0001, conn_delay=0
+# Configuration for converting NIR graph to SpiNNaker2
+conversion_cfg = s2_nir.ConversionConfig()
+conversion_cfg.output_record = ["v", "spikes"]
+conversion_cfg.dt = 0.0001
+conversion_cfg.conn_delay = 0
+conversion_cfg.scale_weights = (
+    False  # We have done scaling before, so no need for automatic scaling
 )
+conversion_cfg.reset = s2_nir.ResetMethod.ZERO  # Reset voltage to zero at spike
+conversion_cfg.integrator = s2_nir.IntegratorMethod.FORWARD  # Euler-Forward
+
+net, inp, outp = s2_nir.from_nir(nir_model, conversion_cfg)
 
 print(outp[0].params)
 

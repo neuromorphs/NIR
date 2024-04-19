@@ -39,6 +39,13 @@ def input_array_to_spike_list(input_array):
 # model_name = "noDelay_bias_zero"
 model_name = "noDelay_noBias_subtract"
 
+# the models can be run both on the SpiNNaker2 Chip and in the Brian2 simulator.
+# However, there is a small difference in the implementation of the lif_curr_exp neuron model
+# between the two which leads to reduced accuracy in the Brian2:
+# noDelay_bias_zero       S2: 85.00%, Brian2: 84.39%
+# noDelay_noBias_subtract S2: 93.57%, Brian2: 90.71%
+# The difference is described here:
+# https://gitlab.com/spinnaker2/py-spinnaker2/-/blob/main/docs/brian2.md?ref_type=heads#deviation-for-lif_curr_exp-models
 backend = "S2"  # "S2" or "brian2"
 brian2_quantize_weights = True
 
