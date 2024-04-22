@@ -15,3 +15,9 @@ lightning_logs/
 paper/03/data/ds_train.pt
 paper/03/data/ds_val.pt
 env_NIR.yml
+# tmp (steve)
+venv_lif/
+paper/01_lif/lava
+paper/01_lif/.venv
+paper/02_cnn/lava-dl
+paper/02_cnn/ann_pretraining/data/MNIST

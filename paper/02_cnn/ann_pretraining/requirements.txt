@@ -1,0 +1,4 @@
+pytorch_lightning==1.9.5
+sinabs==1.2.10
+tonic
+ipykernel
