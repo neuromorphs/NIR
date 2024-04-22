@@ -2,6 +2,7 @@
 
 The NIR graph used for this task is exported from Sinabs (to ensure compatibility with the Speck chip). 
 The file `sinabs.py` defines an ANN, loads pretrained weights, converts it to SNN and then exports the corresponding NIR graph to `cnn_sinabs.nir`.
+The ANN itself is pretrained using the script in the `ann_pretraining` folder.
 
 The final comparison plots for the paper are generated in `cnn_plots.ipynb`, including the comparison table.
 
