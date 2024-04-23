@@ -43,7 +43,7 @@ testpaths = ["tests"]
 [tool.setuptools_scm] 
 
 [tool.setuptools.packages]
-find = {} 
+find={include = ["nir*"]}
 
 [tool.ruff]
 line-length = 100
