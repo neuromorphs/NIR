@@ -1,5 +1,8 @@
 [build-system]
-requires = ["setuptools"]
+requires = [
+  "setuptools>=60",
+  "setuptools-scm>=8.0"
+]
 
 [project]
 name = "nir"
@@ -37,8 +40,7 @@ homepage = "https://github.com/neuromorphs/nir"
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 
-[tool.setuptools.dynamic]
-version = {attr = "nir.__version__"}
+[tool.setuptools_scm] 
 
 [tool.setuptools.packages]
 find = {} 

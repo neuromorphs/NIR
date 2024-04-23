@@ -82,7 +82,9 @@ def read_node(node: Any) -> nir.NIRNode:
             r=node["r"][()], v_threshold=node["v_threshold"][()], **_read_metadata(node)
         )
     elif node["type"][()] == b"Input":
-        return nir.Input(input_type={"input": node["shape"][()]}, **_read_metadata(node))
+        return nir.Input(
+            input_type={"input": node["shape"][()]}, **_read_metadata(node)
+        )
     elif node["type"][()] == b"LI":
         return nir.LI(
             tau=node["tau"][()],
