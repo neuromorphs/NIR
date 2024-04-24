@@ -36,15 +36,15 @@ Eventually, we will kick off the projects and establish a steering group for NIR
 The follwing projects are concrete intiatives that are working to improve NIR.
 Feel free to reach out to the project owners if you are interested in contributing or if you have any projects you would like to add.
 
-### Improved SpiNNaker 2 support
+### Extending SpiNNaker 2 support
 **Duration**: August 2024 </br>
 **Owner**: [Bernhard Vogginger](https://github.com/bvogginger) </br>
-**Description**: We are working on improving the support for the SpiNNaker 2 platform. This includes speeding up SNN processing with the machine learning accelerator,  supporting more neuron models and streaming data. More information can be found at the [SpiNNaker 2 project milestone 5](https://gitlab.com/spinnaker2/py-spinnaker2/-/milestones/5).
+**Description**: The current implementation for SpiNNaker2 is static in the sense that we cannot stream input to the chip. We are working to support streaming inputs and, at the same time, speedup SNN processing. More information can be found at the [SpiNNaker 2 project milestone 5](https://gitlab.com/spinnaker2/py-spinnaker2/-/milestones/5).
 
-### Improved Lava & Loihi support
+### Extending Lava & Loihi support
 **Duration**: October 2024 </br>
 **Owner**: [Steven Abreu](https://github.com/stevenabreu7/) </br>
-**Description**: We are working on improving the support for the Lava and Loihi platforms, focusing on neuron model support and applications.
+**Description**: Currently, Lava and Loihi support the bare minimum primitives for the paper. We are working to expand the support for neuron models and run additional applications.
 
 ### Energy comparisons on different computational substrates
 **Duration**: Until July 2024 </br>
