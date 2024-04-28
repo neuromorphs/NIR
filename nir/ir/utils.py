@@ -50,7 +50,7 @@ def calculate_conv_output(
     shapes = []
     for i in range(ndim):
         if isinstance(padding, str) and padding == "same":
-            shape = input_shape[i]
+            shape = _index_tuple(input_shape, i)
         else:
             shape = np.floor(
                 (
