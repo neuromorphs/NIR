@@ -43,8 +43,8 @@ jobs:
           cp -r docs/neuroir.org _site
       - name: Build Jupyter Book
         run: |
-         jupyter-book build docs # Will put this in docs/_build/html
-         mv docs/_build/html _site/docs
+         jupyter-book build docs/source # Will put this in docs/source/_build/html
+         mv docs/source/_build/html _site/docs
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
 
