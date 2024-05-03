@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Neuromorphic Intermediate Representation</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/iconoir-icons/iconoir@main/css/iconoir.css" />
+
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Cinzel&display=swap');
+
+    @font-face {
+      font-family: 'Cinzel';
+      font-style: normal;
+      font-weight: 400;
+      font-display: swap;
+      src: url(static/Cinzel-Regular.ttf) format('ttf');
+    }
+
+    .font-cinzel {
+      font-family: 'Cinzel', serif;
+    }
+    [class*="iconoir-"] {
+      vertical-align: middle;
+      margin-top: -0.2rem;
+    }
+  </style>
+</head>
+
+<body class="bg-stone-100">
+
+  <!-- Header Section -->
+  <header class="bg-gray-800 py-4">
+    <div class="mx-auto flex flex-row">
+      <div class="basis-2/4">
+        <a href="https://neuroir.org">
+          <h1 class="text-white text-5xl font-bold text-right font-cinzel">Neuromorphic
+            <br />Intermediate
+            <br />Representation
+          </h1>
+        </a>
+      </div>
+      <div class="basis-1/6 p-4">
+        <div class="flex flex-col">
+          <a href="https://neuroir.org/docs" class="bg-amber-500 text-white py-2 px-4 rounded-md font-semibold shadow-md m-2
+          hover:bg-amber-600 hover:text-stone-100 transition duration-300 ease-in-out text-lg">
+            <i class="iconoir-book-stack"></i> Read the docs</a>
+          <a href="https://github.com/neuromorphs/nir" class="bg-white text-amber-600 py-2 px-4 rounded-md font-semibold shadow-md m-2 text-lg
+          hover:bg-stone-100 transition duration-300 ease-in-out">
+            <i class="iconoir-github"></i> Visit out GitHub</a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content Section -->
+  <section class="container mx-auto py-8">
+    <div class="max-w-3xl mx-auto">
+      <img src="https://github.com/neuromorphs/NIR/raw/main/docs/logo_light.png"
+        class="rounded border-slate-500 shadow-md m-2" alt="Logo">
+      <div class="text-gray-800 m-2 text-lg">
+        <p class="leading-relaxed">
+          The Neuromorphic Intermediate Representation (NIR) is an exchange format that translates <a class="text-stone-600" href="https://en.wikipedia.org/wiki/Neuromorphic">neuromorphic software</a> from one platform to another.
+          NIR is supported by numerous neuromorphic simulators, and is the preferred choice for <span class="text-black font-bold">porting models to neuromorphic hardware platforms</span>.</p>
+        <p class="leading-relaxed mt-4">NIR allows researchers and companies to build their software independently from the hardware&emdash;and vice versa.
+          Developers save time by focusing on the NIR graph integration.
+          Users save time by letting them use their favourite toolchain.
+          The seamless translation between software and hardware let's you focus on the job instead of the ecosystem.
+        </p>
+        <p class="m-4 grid">
+          <a href="https://github.com/neuromorphs/nir" class="bg-white text-amber-600 py-2 px-4 rounded-md font-semibold shadow-md text-lg text-center
+          hover:bg-stone-100 transition duration-300 ease-in-out col-span-8">
+            <i class="iconoir-link"></i> Check out our supported platforms</a>
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Acknowledgement Section -->
+  <footer class="bg-gray-900 text-white py-8">
+    <div class="container mx-auto text-center">
+      <h2 class="text-2xl font-semibold">Acknowledgement</h2>
+      <p class="text-lg mt-2">If you use NIR in your research, please cite the following:</p>
+      <pre class="text-lg mt-2 bg-gray-800 p-4 rounded-md text-left"><code>@misc{nir2024,
+    author = {Your Name},
+    title = {Neuromorphic Intermediate Representation: A Bridge Between Biological Nervous Systems and Artificial Intelligence},
+    year = {2024},
+    howpublished = {GitHub repository},
+    url = {https://github.com/yourusername/nir},
+}</code></pre>
+      <p class="text-lg mt-2">All rights reserved &copy; 2024 the NIR authors.</p>
+    </div>
+  </footer>
+
+</body>
+
+</html>
