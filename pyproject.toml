@@ -47,5 +47,5 @@ find={include = ["nir*"]}
 
 [tool.ruff]
 line-length = 100
-per-file-ignores = {"docs/conf.py" = ["E402"]}
+lint.per-file-ignores = {"docs/conf.py" = ["E402"]}
 exclude  = ["paper/"]
