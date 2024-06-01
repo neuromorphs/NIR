@@ -134,6 +134,27 @@ def test_conv2d():
     assert np.allclose(a.output_type["output"], np.array([3, 100, 50]))
 
 
+def test_conv2d_same():
+    # Create a NIR Network
+    conv_weights = np.array([[[1.0, 1.0, 1.0], [1.0, 1.0, 1.0], [1.0, 1.0, 1.0]]])
+    li_tau = np.array([0.9, 0.8])
+    li_r = np.array([1.0, 1.0])
+    li_v_leak = np.array([0.0, 0.0])
+
+    nir_network = nir.NIRGraph.from_list(
+        nir.Conv2d(
+            input_shape=(3, 3),
+            weight=conv_weights,
+            stride=1,
+            padding="same",
+            dilation=1,
+            groups=1,
+            bias=np.array([0.0] * 9),
+        ),
+        nir.LI(li_tau, li_r, li_v_leak),
+    )
+
+
 def test_cuba_lif():
     a = np.random.randn(10, 10)
     lif = nir.CubaLIF(tau_mem=a, tau_syn=a, r=a, v_leak=a, v_threshold=a)

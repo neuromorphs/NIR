@@ -87,15 +87,15 @@ def calc_flatten_output(input_shape: Sequence[int], start_dim: int, end_dim: int
     )
 
 
-def _index_tuple(
-    tuple: Union[int, Sequence[int]], index: int
-) -> Union[int, np.ndarray]:
+def _index_tuple(tuple: Union[int, Sequence[int]], index: int) -> np.ndarray:
     """If the input is a tuple/array, index it.
 
     Otherwise, return it as-is.
     """
-    if isinstance(tuple, np.ndarray) or isinstance(tuple, Sequence):
+    if isinstance(tuple, np.ndarray):
         return tuple[index]
+    elif isinstance(tuple, Sequence):
+        return np.array(tuple[index])
     elif isinstance(tuple, (int, np.integer)):
         return np.array([tuple])
     else:
