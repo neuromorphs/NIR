@@ -1,10 +1,11 @@
 import numpy as np
 import pytest
 
-import importlib
-_TORCH_SPEC = importlib.util.find_spec('torch') is not None
-
 from nir.ir.utils import _index_tuple
+
+import importlib
+
+_TORCH_SPEC = importlib.util.find_spec("torch") is not None
 
 
 def test_index_tuple():
@@ -14,6 +15,7 @@ def test_index_tuple():
     assert np.all(
         np.equal(_index_tuple(np.array([[1, 2], [3, 4]]), 1), np.array([3, 4]))
     )
+
 
 @pytest.mark.skipif(_TORCH_SPEC is not None, reason="requires torch")
 def test_index_tuple_torch():
