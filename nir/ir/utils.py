@@ -99,7 +99,10 @@ def _index_tuple(tuple: Union[int, Sequence[int]], index: int) -> np.ndarray:
     elif isinstance(tuple, (int, np.integer)):
         return np.array([tuple])
     else:
-        raise TypeError(f"tuple must be int or np.ndarray, not {type(tuple)}")
+        try:
+            return tuple[index]
+        except TypeError:
+            raise TypeError(f"tuple must be int or np.ndarray, not {type(tuple)}")
 
 
 def ensure_str(a: Union[str, bytes]) -> str:
