@@ -153,6 +153,7 @@ def test_conv2d_same():
         ),
         nir.LI(li_tau, li_r, li_v_leak),
     )
+    assert np.allclose(nir_network.nodes["conv2d"].output_type["output"], [1, 3, 3])
 
 
 def test_cuba_lif():
