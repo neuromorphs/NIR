@@ -50,7 +50,7 @@ def calculate_conv_output(
     shapes = []
     for i in range(ndim):
         if isinstance(padding, str) and padding == "same":
-            shape = input_shape[i]
+            shape = _index_tuple(input_shape, i)
         else:
             shape = np.floor(
                 (
@@ -87,19 +87,22 @@ def calc_flatten_output(input_shape: Sequence[int], start_dim: int, end_dim: int
     )
 
 
-def _index_tuple(
-    tuple: Union[int, Sequence[int]], index: int
-) -> Union[int, np.ndarray]:
+def _index_tuple(tuple: Union[int, Sequence[int]], index: int) -> np.ndarray:
     """If the input is a tuple/array, index it.
 
     Otherwise, return it as-is.
     """
-    if isinstance(tuple, np.ndarray) or isinstance(tuple, Sequence):
+    if isinstance(tuple, np.ndarray):
         return tuple[index]
+    elif isinstance(tuple, Sequence):
+        return np.array(tuple[index])
     elif isinstance(tuple, (int, np.integer)):
         return np.array([tuple])
     else:
-        raise TypeError(f"tuple must be int or np.ndarray, not {type(tuple)}")
+        try:
+            return tuple[index]
+        except TypeError:
+            raise TypeError(f"tuple must be int or np.ndarray, not {type(tuple)}")
 
 
 def ensure_str(a: Union[str, bytes]) -> str:
