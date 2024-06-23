@@ -55,3 +55,8 @@ Feel free to reach out to the project owners if you are interested in contributi
 **Timeline**: Start October 2024 </br>
 **Owner**: [Jens Egholm Pedersen](https://github.com/jegp) </br>
 **Description**: We are working on adding additional neuron models and plasticity rules to NIR, including the Fitzhugh-Nagumo model. Plasticity will require additional primitives that can, themselves, modify primitive parameters.
+
+### Optimizing NIR graphs
+**Timeline**: Start November 2024 </br>
+**Owner**: [Jason Eshraghian](https://ncg.ucsc.edu/) </br>
+**Description**: We are working on optimizing NIR graphs to reduce the number of primitives and connections. This will help to reduce the energy consumption of the graph and make it more efficient to run on neuromorphic hardware.
