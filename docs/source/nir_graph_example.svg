@@ -1,0 +1,250 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="96.562302mm"
+   height="25.716787mm"
+   viewBox="0 0 96.562302 25.716787"
+   version="1.1"
+   id="svg1"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview1"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:document-units="mm" />
+  <defs
+     id="defs1">
+    <marker
+       style="overflow:visible"
+       id="marker4"
+       refX="5"
+       refY="0"
+       orient="auto-start-reverse"
+       inkscape:stockid="Dart arrow"
+       markerWidth="1"
+       markerHeight="1"
+       viewBox="0 0 1 1"
+       inkscape:isstock="true"
+       inkscape:collect="always"
+       preserveAspectRatio="xMidYMid">
+      <path
+         style="fill:context-stroke;fill-rule:evenodd;stroke:none"
+         d="M 0,0 5,-5 -12.5,0 5,5 Z"
+         transform="scale(-0.5)"
+         id="path4" />
+    </marker>
+    <marker
+       style="overflow:visible"
+       id="DartArrow"
+       refX="0"
+       refY="0"
+       orient="auto-start-reverse"
+       inkscape:stockid="Dart arrow"
+       markerWidth="1"
+       markerHeight="1"
+       viewBox="0 0 1 1"
+       inkscape:isstock="true"
+       inkscape:collect="always"
+       preserveAspectRatio="xMidYMid">
+      <path
+         style="fill:context-stroke;fill-rule:evenodd;stroke:none"
+         d="M 0,0 5,-5 -12.5,0 5,5 Z"
+         transform="scale(-0.5)"
+         id="path6" />
+    </marker>
+    <marker
+       style="overflow:visible"
+       id="marker4-2"
+       refX="5"
+       refY="0"
+       orient="auto-start-reverse"
+       inkscape:stockid="Dart arrow"
+       markerWidth="1"
+       markerHeight="1"
+       viewBox="0 0 1 1"
+       inkscape:isstock="true"
+       inkscape:collect="always"
+       preserveAspectRatio="xMidYMid">
+      <path
+         style="fill:context-stroke;fill-rule:evenodd;stroke:none"
+         d="M 0,0 5,-5 -12.5,0 5,5 Z"
+         transform="scale(-0.5)"
+         id="path4-8" />
+    </marker>
+    <marker
+       style="overflow:visible"
+       id="marker4-2-1"
+       refX="5"
+       refY="0"
+       orient="auto-start-reverse"
+       inkscape:stockid="Dart arrow"
+       markerWidth="1"
+       markerHeight="1"
+       viewBox="0 0 1 1"
+       inkscape:isstock="true"
+       inkscape:collect="always"
+       preserveAspectRatio="xMidYMid">
+      <path
+         style="fill:context-stroke;fill-rule:evenodd;stroke:none"
+         d="M 0,0 5,-5 -12.5,0 5,5 Z"
+         transform="scale(-0.5)"
+         id="path4-8-2" />
+    </marker>
+    <marker
+       style="overflow:visible"
+       id="DartArrow-4"
+       refX="0"
+       refY="0"
+       orient="auto-start-reverse"
+       inkscape:stockid="Dart arrow"
+       markerWidth="1"
+       markerHeight="1"
+       viewBox="0 0 1 1"
+       inkscape:isstock="true"
+       inkscape:collect="always"
+       preserveAspectRatio="xMidYMid">
+      <path
+         style="fill:context-stroke;fill-rule:evenodd;stroke:none"
+         d="M 0,0 5,-5 -12.5,0 5,5 Z"
+         transform="scale(-0.5)"
+         id="path6-7" />
+    </marker>
+  </defs>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(-29.84364,-46.643468)">
+    <text
+       xml:space="preserve"
+       style="font-size:5.64444px;line-height:1.05;font-family:'CMU Sans Serif';-inkscape-font-specification:'CMU Sans Serif';text-align:center;text-anchor:middle;stroke-width:0.264583"
+       x="72.557617"
+       y="53.641499"
+       id="text1"><tspan
+         sodipodi:role="line"
+         id="tspan1"
+         style="font-size:5.64444px;stroke-width:0.264583"
+         x="72.557617"
+         y="53.641499">NIRGraph</tspan></text>
+    <path
+       style="fill:none;stroke:#000000;stroke-width:0.465;stroke-linecap:butt;stroke-linejoin:miter;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#DartArrow)"
+       d="m 29.84364,63.440481 h 8.810142"
+       id="path2"
+       sodipodi:nodetypes="cc" />
+    <path
+       style="fill:none;stroke:#000000;stroke-width:0.465;stroke-linecap:butt;stroke-linejoin:miter;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#DartArrow-4)"
+       d="m 114.68955,63.440477 h 8.81014"
+       id="path2-4"
+       sodipodi:nodetypes="cc" />
+    <rect
+       style="fill:none;stroke:#1a1a1a;stroke-width:0.4;stroke-miterlimit:4.8;stroke-dasharray:none"
+       id="rect2"
+       width="79.348076"
+       height="25.316788"
+       x="37.683422"
+       y="46.843468"
+       ry="2.2695796"
+       rx="2.2695796" />
+    <rect
+       style="fill:none;stroke:#1a1a1a;stroke-width:0.265;stroke-miterlimit:4.8;stroke-dasharray:none"
+       id="rect3"
+       width="12.752279"
+       height="7.7561779"
+       x="41.692532"
+       y="59.562389"
+       ry="0.57155228"
+       rx="0.48090759" />
+    <text
+       xml:space="preserve"
+       style="font-size:4.23333px;line-height:1.05;font-family:'CMU Sans Serif';-inkscape-font-specification:'CMU Sans Serif';text-align:center;text-anchor:middle;stroke-width:0.264583"
+       x="47.931087"
+       y="64.496696"
+       id="text3"><tspan
+         sodipodi:role="line"
+         id="tspan3"
+         style="stroke-width:0.264583"
+         x="47.931087"
+         y="64.496696">Input</tspan></text>
+    <rect
+       style="fill:none;stroke:#1a1a1a;stroke-width:0.265;stroke-miterlimit:4.8;stroke-dasharray:none"
+       id="rect3-1"
+       width="12.752279"
+       height="7.7561779"
+       x="59.408474"
+       y="59.469261"
+       ry="0.57155228"
+       rx="0.48090759" />
+    <text
+       xml:space="preserve"
+       style="font-size:4.23333px;line-height:1.05;font-family:'CMU Sans Serif';-inkscape-font-specification:'CMU Sans Serif';text-align:center;text-anchor:middle;stroke-width:0.264583"
+       x="65.784615"
+       y="64.816315"
+       id="text3-2"><tspan
+         sodipodi:role="line"
+         id="tspan3-7"
+         style="stroke-width:0.264583"
+         x="65.784615"
+         y="64.816315">LI</tspan></text>
+    <rect
+       style="fill:none;stroke:#1a1a1a;stroke-width:0.265;stroke-miterlimit:4.8;stroke-dasharray:none"
+       id="rect3-1-8"
+       width="17.567415"
+       height="7.7561779"
+       x="77.12442"
+       y="59.634361"
+       ry="0.57155228"
+       rx="0.48090759" />
+    <text
+       xml:space="preserve"
+       style="font-size:4.23333px;line-height:1.05;font-family:'CMU Sans Serif';-inkscape-font-specification:'CMU Sans Serif';text-align:center;text-anchor:middle;stroke-width:0.264583"
+       x="85.914482"
+       y="65.04068"
+       id="text3-2-7"><tspan
+         sodipodi:role="line"
+         id="tspan3-7-9"
+         style="stroke-width:0.264583"
+         x="85.914482"
+         y="65.04068">Affine</tspan></text>
+    <rect
+       style="fill:none;stroke:#1a1a1a;stroke-width:0.265;stroke-miterlimit:4.8;stroke-dasharray:none"
+       id="rect3-5"
+       width="15.03406"
+       height="7.7561779"
+       x="99.655495"
+       y="59.562389"
+       ry="0.57155228"
+       rx="0.48090759" />
+    <text
+       xml:space="preserve"
+       style="font-size:4.23333px;line-height:1.05;font-family:'CMU Sans Serif';-inkscape-font-specification:'CMU Sans Serif';text-align:center;text-anchor:middle;stroke-width:0.264583"
+       x="107.11749"
+       y="64.543259"
+       id="text3-3"><tspan
+         sodipodi:role="line"
+         id="tspan3-5"
+         style="stroke-width:0.264583"
+         x="107.11749"
+         y="64.543259">Output</tspan></text>
+    <path
+       style="fill:none;stroke:#000000;stroke-width:0.35;stroke-linecap:butt;stroke-linejoin:miter;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#marker4)"
+       d="m 94.691831,63.51245 h 4.963663"
+       id="path3" />
+    <path
+       style="fill:none;stroke:#000000;stroke-width:0.35;stroke-linecap:butt;stroke-linejoin:miter;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#marker4-2)"
+       d="m 72.273156,63.51245 h 4.963663"
+       id="path3-7" />
+    <path
+       style="fill:none;stroke:#000000;stroke-width:0.35;stroke-linecap:butt;stroke-linejoin:miter;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#marker4-2-1)"
+       d="m 54.57731,63.440478 h 4.963663"
+       id="path3-7-3" />
+  </g>
+</svg>

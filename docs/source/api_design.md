@@ -1,6 +1,6 @@
 # API design
 
-The reference implementation simply consists of a series of Python classes that *represent* [NIR structures](primitives).
+NIR is simple: it consists of a series of objects that *represent* [NIR structures](primitives).
 In other words, they do not implement the functionality of the nodes, but simply represent the necessary parameters required to *eventually* evaluate the node.
 
 We chose Python because the language is straight-forward, known by most, and has excellent [dataclasses](https://docs.python.org/3/library/dataclasses.html) exactly for our purpose.
@@ -16,6 +16,14 @@ In this example, we create a class that inherits from the parent [`NIRNode`](htt
 Instantiating the class is simply `MyNIRNode(np.array([...]))`.
 
 ## NIR Graphs and edges
+```{figure} nir_graph_example.svg
+---
+height: 200px
+name: nir-graph-example
+---
+An example of a NIR graph with four nodes: Input, Leaky-Integrator, Affine map, and Output.
+```
+
 A collection of nodes is a `NIRGraph`, which is, you guessed it, a `NIRNode`.
 But the graph node is special in that it contains a number of named nodes (`.nodes`) and connections between them (`.edges`).
 The nodes are named because we need to uniquely distinguish them from each other, so `.nodes` is actually a dictionary (`Dict[str, NIRNode]`).

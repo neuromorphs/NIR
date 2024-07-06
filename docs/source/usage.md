@@ -32,7 +32,7 @@ sample_data = torch.randn(batch_size, 10)
 nir_model = norse.to_nir(model, sample_data)
 ```
 
-### Part 2: Convert NIR model to 
+### Part 2: Convert NIR model to chip
 ```python
 import sinabs
 from sinabs.backend.dynapcnn import DynapcnnNetwork
