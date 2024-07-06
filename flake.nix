@@ -1,7 +1,7 @@
 {
   description = "Neuromorphic Intermediate Representation reference implementation"; 
   inputs = {
-    nixpkgs.url = "nixpkgs/nixos-23.05";
+    nixpkgs.url = "nixpkgs/nixos-24.05";
     flake-utils.url = "github:numtide/flake-utils";
   };
   outputs = { self, nixpkgs, flake-utils }:
@@ -9,7 +9,7 @@
       let pkgs = nixpkgs.legacyPackages.${system}; 
       in { 
         devShells.default = 
-          let pythonPackages = pkgs.python39Packages;
+          let pythonPackages = pkgs.python3Packages;
           in pkgs.mkShell rec {
             name = "impurePythonEnv";
             venvDir = "./.venv";
@@ -20,6 +20,7 @@
               pythonPackages.h5py
               pythonPackages.black
               pkgs.ruff
+              pkgs.autoPatchelfHook
             ];
             postVenvCreation = ''
               unset SOURCE_DATE_EPOCH

@@ -24,8 +24,9 @@ parts:
   - file: examples/snntorch/nir-conversion
   - file: examples/spinnaker2/import
   - file: examples/spyx/conversion
+  - file: examples/snntorch_to_norse
 - caption: Developer guide
   chapters:
+  - file: porting_nir
   - file: api_design
-  - file: dev
-    title: Contributing
+  - file: contributing
