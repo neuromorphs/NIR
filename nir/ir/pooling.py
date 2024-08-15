@@ -29,6 +29,7 @@ class AvgPool2d(NIRNode):
     kernel_size: np.ndarray  # (Height, Width)
     stride: np.ndarray  # (Height, width)
     padding: np.ndarray  # (Height, width)
+    metadata: Dict[str, Any] = field(default_factory=dict)
 
     def __post_init__(self):
         self.input_type = {"input": None}

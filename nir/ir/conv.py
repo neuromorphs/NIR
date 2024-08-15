@@ -106,6 +106,7 @@ class Conv2d(NIRNode):
     dilation: Union[int, Tuple[int, int]]  # Dilation
     groups: int  # Groups
     bias: np.ndarray  # Bias C_out
+    metadata: Dict[str, Any] = field(default_factory=dict)
 
     def __post_init__(self):
         if isinstance(self.padding, str) and self.padding not in ["same", "valid"]:
