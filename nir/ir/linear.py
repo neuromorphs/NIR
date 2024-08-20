@@ -46,6 +46,7 @@ class Linear(NIRNode):
     """
 
     weight: np.ndarray  # Weight term
+    metadata: Dict[str, Any] = field(default_factory=dict)
 
     def __post_init__(self):
         assert len(self.weight.shape) >= 2, "Weight must be at least 2D"
@@ -69,6 +70,7 @@ class Scale(NIRNode):
     """
 
     scale: np.ndarray  # Scaling factor
+    metadata: Dict[str, Any] = field(default_factory=dict)
 
     def __post_init__(self):
         self.input_type = {"input": np.array(self.scale.shape)}

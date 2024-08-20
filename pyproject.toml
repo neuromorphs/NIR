@@ -49,3 +49,5 @@ find={include = ["nir*"]}
 line-length = 100
 lint.per-file-ignores = {"docs/conf.py" = ["E402"]}
 exclude  = ["paper/"]
+extend-exclude = ["*.ipynb"]
+

@@ -1,11 +1,11 @@
-import tempfile
 import inspect
 import sys
+import tempfile
 
 import numpy as np
 
 import nir
-from tests import mock_affine, mock_conv
+from tests import mock_affine, mock_conv, mock_linear
 
 ALL_NODES = []
 for name, obj in inspect.getmembers(sys.modules["nir.ir"]):
@@ -47,7 +47,7 @@ def factory_test_graph(ir: nir.NIRGraph):
     assert_equivalence(ir, ir2)
 
 
-def factory_test_metadata(node):
+def factory_test_metadata(ir: nir.NIRGraph):
     def compare_dicts(d1, d2):
         for k, v in d1.items():
             if isinstance(v, np.ndarray):
@@ -58,12 +58,14 @@ def factory_test_metadata(node):
                 assert v == d2[k]
 
     metadata = {"some": "metadata", "with": 2, "data": np.array([1, 2, 3])}
-    node.metadata = metadata
-    compare_dicts(node.metadata, metadata)
+    for node in ir.nodes.values():
+        node.metadata = metadata
+        compare_dicts(node.metadata, metadata)
     tmp = tempfile.mktemp()
-    nir.write(tmp, node)
-    node2 = nir.read(tmp)
-    compare_dicts(node2.metadata, metadata)
+    nir.write(tmp, ir)
+    ir2 = nir.read(tmp)
+    for node in ir2.nodes.values():
+        compare_dicts(node.metadata, metadata)
 
 
 def test_simple():
@@ -146,7 +148,7 @@ def test_linear():
     tau = np.array([1, 1, 1])
     r = np.array([1, 1, 1])
     v_leak = np.array([1, 1, 1])
-    ir = nir.NIRGraph.from_list(mock_affine(2, 2), nir.LI(tau, r, v_leak))
+    ir = nir.NIRGraph.from_list(mock_linear(2, 2), nir.LI(tau, r, v_leak))
     factory_test_graph(ir)
     factory_test_metadata(ir)
 

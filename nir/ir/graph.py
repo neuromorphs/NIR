@@ -452,6 +452,7 @@ class Input(NIRNode):
     # Shape of incoming data (overrrides input_type from
     # NIRNode to allow for non-keyword (positional) initialization)
     input_type: Types
+    metadata: Dict[str, Any] = field(default_factory=dict)
 
     def __post_init__(self):
         self.input_type = parse_shape_argument(self.input_type, "input")
@@ -479,6 +480,7 @@ class Output(NIRNode):
     # Type of incoming data (overrrides input_type from
     # NIRNode to allow for non-keyword (positional) initialization)
     output_type: Types
+    metadata: Dict[str, Any] = field(default_factory=dict)
 
     def __post_init__(self):
         self.output_type = parse_shape_argument(self.output_type, "output")
