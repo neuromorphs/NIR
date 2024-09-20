@@ -67,12 +67,16 @@ This work was originally conceived at the [Telluride Neuromorphic Workshop 2023]
 If you use NIR in your work, please cite the [following arXiv preprint](https://arxiv.org/abs/2311.14641)
 
 ```
-@inproceedings{NIR2023,
-  title={Neuromorphic Intermediate Representation: A Unified Instruction Set for Interoperable Brain-Inspired Computing},
-  author={Jens E. Pedersen and Steven Abreu and Matthias Jobst and Gregor Lenz and Vittorio Fra and Felix C. Bauer and Dylan R. Muir and Peng Zhou and Bernhard Vogginger and Kade Heckel and Gianvito Urgese and Sadasivan Shankar and Terrence C. Stewart and Jason K. Eshraghian and Sadique Sheik},
-  year={2023},
-  doi={https://doi.org/10.48550/arXiv.2311.14641}
-  archivePrefix={arXiv},
-  primaryClass={cs.NE}
+article{NIR2024, 
+    title={Neuromorphic intermediate representation: A unified instruction set for interoperable brain-inspired computing}, 
+    author={Pedersen, Jens E. and Abreu, Steven and Jobst, Matthias and Lenz, Gregor and Fra, Vittorio and Bauer, Felix Christian and Muir, Dylan Richard and Zhou, Peng and Vogginger, Bernhard and Heckel, Kade and Urgese, Gianvito and Shankar, Sadasivan and Stewart, Terrence C. and Sheik, Sadique and Eshraghian, Jason K.}, 
+    rights={2024 The Author(s)},
+    DOI={10.1038/s41467-024-52259-9}, 
+    number={1},
+    journal={Nature Communications}, 
+    volume={15},
+    year={2024}, 
+    month=sep, 
+    pages={8122},
 }
 ```

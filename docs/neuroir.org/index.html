@@ -22,6 +22,7 @@
     .font-cinzel {
       font-family: 'Cinzel', serif;
     }
+
     [class*="iconoir-"] {
       vertical-align: middle;
       margin-top: -0.2rem;
@@ -50,6 +51,9 @@
           <a href="https://github.com/neuromorphs/nir" class="bg-white text-amber-600 py-2 px-4 rounded-md font-semibold shadow-md m-2 text-xl md:text-lg
           hover:bg-stone-200 transition duration-300 ease-in-out">
             <i class="iconoir-github"></i> Inspect our code</a>
+          <a href="https://neuroir.org/docs/porting_nir.html" class="bg-amber-700 text-stone-100 py-2 px-4 rounded-md font-semibold shadow-md m-2 text-xl md:text-lg
+            hover:bg-amber-900 transition duration-300 ease-in-out">
+              <i class="iconoir-cube"></i> Use NIR on your platform</a>
         </div>
       </div>
     </div>
@@ -60,20 +64,28 @@
     <div class="max-w-3xl mx-auto">
       <img src="https://github.com/neuromorphs/NIR/raw/main/docs/logo_light.png"
         class="rounded border-slate-500 shadow-md m-2" alt="Logo">
-      <div class="text-gray-800 m-2 text-lg">
+      <div class="text-gray-800 m-2 text-lg text-justify">
         <p class="leading-relaxed">
-          The Neuromorphic Intermediate Representation (NIR) is an exchange format that translates <a class="text-stone-600" href="https://en.wikipedia.org/wiki/Neuromorphic">neuromorphic software</a> from one platform to another.
-          NIR is supported by numerous neuromorphic simulators, and is the preferred choice for <span class="text-black font-bold">porting models to neuromorphic hardware platforms</span>.</p>
-        <p class="leading-relaxed mt-4">NIR allows researchers and companies to build their software independently from the hardware&emdash;and vice versa.
+          The Neuromorphic Intermediate Representation (NIR) is an exchange format that translates <a
+            class="text-stone-600" href="https://en.wikipedia.org/wiki/Neuromorphic">neuromorphic software</a> from one
+          platform to another.
+          NIR is supported by numerous neuromorphic simulators, and is the preferred choice for <span
+            class="text-black font-bold">porting models to neuromorphic hardware platforms</span>.</p>
+        <p class="leading-relaxed mt-4">NIR allows researchers and companies to build their software independently from
+            the hardware—and vice versa.
           Developers save time by focusing on the NIR graph integration.
           Users save time by letting them use their favourite toolchain.
           The seamless translation between software and hardware let's you focus on the job instead of the ecosystem.
         </p>
         <p class="m-4 grid">
-          <a href="https://github.com/neuromorphs/nir" class="bg-white text-amber-600 py-2 px-4 rounded-md font-semibold shadow-md text-lg text-center
+          <a href="https://neuroir.org/docs/support.html" class="bg-white text-amber-600 py-2 px-4 rounded-md font-semibold shadow-md text-lg text-center
           hover:bg-stone-100 transition duration-300 ease-in-out col-span-8">
             <i class="iconoir-link"></i> See our supported platforms</a>
         </p>
+      </div>
+
+      <div class="text-gray-800 m-2 text-lg text-justify">
+
       </div>
     </div>
   </section>
@@ -84,20 +96,17 @@
       <h2 class="text-2xl font-semibold">Acknowledgement</h2>
       <p class="text-lg mt-2">If you use NIR in your research, please cite the following:</p>
       <pre class="text-lg mt-2 bg-gray-800 p-4 rounded-md text-left"><code>
-@article{NIR_2023, 
-  title={Neuromorphic Intermediate Representation: A Unified Instruction Set for Interoperable Brain-Inspired Computing},
-  url={http://arxiv.org/abs/2311.14641},
-  DOI={10.48550/arXiv.2311.14641},
-  note={arXiv:2311.14641 [cs]},
-  number={arXiv:2311.14641},
-  publisher={arXiv},
-  author={Pedersen, Jens E. and Abreu, Steven and Jobst, Matthias and Lenz, Gregor 
-    and Fra, Vittorio and Bauer, Felix C. and Muir, Dylan R. and Zhou, Peng and 
-    Vogginger, Bernhard and Heckel, Kade and Urgese, Gianvito and Shankar, Sadasivan 
-    and Stewart, Terrence C. and Eshraghian, Jason K. and Sheik, Sadique
-  }, 
-  year={2023},
-  month=nov
+@article{NIR2024, 
+    title={Neuromorphic intermediate representation: A unified instruction set for interoperable brain-inspired computing}, 
+    author={Pedersen, Jens E. and Abreu, Steven and Jobst, Matthias and Lenz, Gregor and Fra, Vittorio and Bauer, Felix Christian and Muir, Dylan Richard and Zhou, Peng and Vogginger, Bernhard and Heckel, Kade and Urgese, Gianvito and Shankar, Sadasivan and Stewart, Terrence C. and Sheik, Sadique and Eshraghian, Jason K.}, 
+    rights={2024 The Author(s)},
+    DOI={10.1038/s41467-024-52259-9}, 
+    number={1},
+    journal={Nature Communications}, 
+    volume={15},
+    year={2024}, 
+    month=sep, 
+    pages={8122},
 }
 </code></pre>
       <p class="text-lg mt-2">All rights reserved &copy; 2024 the NIR authors.</p>
