@@ -496,3 +496,23 @@ class Output(NIRNode):
         node["output_type"] = {"output": node["shape"]}
         del node["shape"]
         return super().from_dict(node)
+
+@dataclass(eq=False)
+class Identity(NIRNode):
+    """Identity Node.
+
+    This is a virtual node, which allows for the identity operation.
+    """
+    input_type: Types
+
+    def __post_init__(self):
+        self.output_type = self.input_type
+
+    def to_dict(self) -> Dict[str, Any]:
+        ret = super().to_dict()
+        ret["shape"] = self.output_type["output"]
+        return ret
+
+    @classmethod
+    def from_dict(cls, node: Dict[str, Any]) -> "NIRNode":
+        return super().from_dict(node)
