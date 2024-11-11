@@ -1,5 +1,8 @@
 format: jb-book
 root: index
+options:
+  html:
+    show_navbar_depth: 2
 parts:
 - caption: Introduction
   chapters:
@@ -14,17 +17,17 @@ parts:
   - file: primitives
   - file: support
     title: Platform support
-- caption: Examples
-  chapters:
-  - file: examples/lava/nir-conversion
-  - file: examples/nengo/nir-conversion
-  - file: examples/norse/nir-conversion
-  - file: examples/rockpool/nir-conversion
-  - file: examples/sinabs/nir-conversion
-  - file: examples/snntorch/nir-conversion
-  - file: examples/spinnaker2/import
-  - file: examples/spyx/conversion
-  - file: examples/snntorch_to_norse
+  - file: examples/index
+    sections:
+    - file: examples/lava/nir-conversion
+    - file: examples/nengo/nir-conversion
+    - file: examples/norse/nir-conversion
+    - file: examples/rockpool/nir-conversion
+    - file: examples/sinabs/nir-conversion
+    - file: examples/snntorch/nir-conversion
+    - file: examples/spinnaker2/import
+    - file: examples/spyx/conversion
+    - file: examples/snntorch_to_norse
 - caption: Developer guide
   chapters:
   - file: porting_nir

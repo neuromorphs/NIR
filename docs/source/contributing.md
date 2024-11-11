@@ -1,5 +1,9 @@
 # Contributing
 
+NIR is a community-led initiative, and we welcome contributions from everyone.
+Here, we outline some technical details on getting started.
+Join the conversation on our [Discord server](https://discord.gg/JRMRGP9h3c) or [GitHub](https://github.com/neuromophs/nir) if you have any questions.
+
 ## Developer guide: Getting started
 
 Use the standard github workflow.

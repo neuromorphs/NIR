@@ -5,41 +5,39 @@
 
 # NIR - Neuromorphic Intermediate Representation
 
+[![Nature Communications Paper](https://zenodo.org/badge/DOI/10.1038/s41467-024-52259-9.svg)](https://doi.org/10.1038/s41467-024-52259-9)
+![PyPI - Downloads](https://img.shields.io/pypi/dm/nir?logo=pypi)
+![GitHub Tag](https://img.shields.io/github/v/tag/neuromorphs/nir?logo=github)
+![Discord](https://img.shields.io/discord/1209533869733453844?logo=discord)
+
 NIR is a set of computational primitives, shared across different neuromorphic frameworks and technology stacks.
 **NIR is currently supported by 7 simulators and 4 hardware platforms**, allowing users to seamlessly move between any of these platforms.
-The goal of NIR is to decouple the evolution of neuromorphic hardware and software, ultimately increasing the interoperability between platforms and improving accessibility to neuromorphic technologies.
 
-## Installation
-NIR is installable via [pip](https://pypi.org/)
-```bash 
-pip install nir
-```
+NIR is useful when you want to move a model from one platform to another, for instance from a simulator to a hardware platform.
 
-Check your [local framework]([https://neuroir.org/docs](https://neuroir.org/docs/support.html)) for NIR support.
+> Read more about NIR in our [documentation about NIR primitives](https://neuroir.org/docs/primitives.html)
+
+> See [which frameworks are currently supported by NIR]([https://neuroir.org/docs](https://neuroir.org/docs/support.html))
 
 ## Usage
-> Read more in our [documentation about NIR usage](https://neuroir.org/docs)
+> Read more in our [documentation about NIR usage](https://neuroir.org/docs) and see more examples in our [examples section](https://neuroir.org/docs/examples)
 
-To end-users, NIR is just a declarative format that sits between formats and will hopefully be as invisible as possible.
-However, it is possible to export Python objects or NIR files.
+NIR serves as a format between neuromorphic platforms and will be installed alongside your framework of choice.
+Using NIR is typically a part of your favorite framework's workflow, but follows the same pattern when you want to move from a *source* to a *target* platform:
 
 ```python
-import nir
-# Write to file
-nir.write("my_graph.nir", nir_graph) 
-
-# Read file
+# Define a model
+my_model = ...
+# Save the model (source platform)
+nir.write("my_graph.nir", my_model) 
+# Load the model (target platform)
 imported_graph = nir.read("my_graph.nir")
 ```
 
-## About NIR
-> Read more in our [documentation about NIR primitives](https://neuroir.org/docs/primitives.html)
-
-On top of popular primitives such as convolutional or fully connected/linear computations, we define additional compuational primitives that are specific to neuromorphic computing and hardware implementations thereof. 
-Computational units that are not specifically neuromorphic take inspiration from the Pytorch ecosystem in terms of naming and parameters (such as Conv2d that uses groups/strides).
-
+See our [example section](https://neuroir.org/docs/examples) for how to use NIR with your favorite framework.
 
 ## Frameworks that currently support NIR
+> Read more in our [documentation about NIR support](https://neuroir.org/docs/support.html)
 
 | **Framework** | **Write to NIR** | **Read from NIR** | **Examples** |
 | --------------- | :--: | :--: | :------: |
@@ -64,7 +62,7 @@ This work was originally conceived at the [Telluride Neuromorphic Workshop 2023]
 * [Sadique Sheik](https://github.com/sheiksadique)
 * [Peng Zhou](https://github.com/pengzhouzp)
 
-If you use NIR in your work, please cite the [following arXiv preprint](https://arxiv.org/abs/2311.14641)
+If you use NIR in your work, please cite the [following paper](https://www.nature.com/articles/s41467-024-52259-9)
 
 ```
 article{NIR2024, 
