@@ -6,9 +6,9 @@
 # NIR - Neuromorphic Intermediate Representation
 
 [![Nature Communications Paper](https://zenodo.org/badge/DOI/10.1038/s41467-024-52259-9.svg)](https://doi.org/10.1038/s41467-024-52259-9)
-![PyPI - Downloads](https://img.shields.io/pypi/dm/nir?logo=pypi)
-![GitHub Tag](https://img.shields.io/github/v/tag/neuromorphs/nir?logo=github)
-![Discord](https://img.shields.io/discord/1209533869733453844?logo=discord)
+[![PyPI - Downloads](https://img.shields.io/pypi/dm/nir?logo=pypi)](https://pypi.org/project/nir/)
+[![GitHub Tag](https://img.shields.io/github/v/tag/neuromorphs/nir?logo=github)](https://github.com/neuromorphs/NIR/releases)
+[![Discord](https://img.shields.io/discord/1209533869733453844?logo=discord)](https://discord.gg/JRMRGP9h3c)
 
 NIR is a set of computational primitives, shared across different neuromorphic frameworks and technology stacks.
 **NIR is currently supported by 7 simulators and 4 hardware platforms**, allowing users to seamlessly move between any of these platforms.
@@ -17,7 +17,7 @@ NIR is useful when you want to move a model from one platform to another, for in
 
 > Read more about NIR in our [documentation about NIR primitives](https://neuroir.org/docs/primitives.html)
 
-> See [which frameworks are currently supported by NIR]([https://neuroir.org/docs](https://neuroir.org/docs/support.html))
+> See [which frameworks are currently supported by NIR](https://neuroir.org/docs/support.html).
 
 ## Usage
 > Read more in our [documentation about NIR usage](https://neuroir.org/docs) and see more examples in our [examples section](https://neuroir.org/docs/examples)
@@ -52,7 +52,7 @@ See our [example section](https://neuroir.org/docs/examples) for how to use NIR 
 
 
 ## Acknowledgements
-This work was originally conceived at the [Telluride Neuromorphic Workshop 2023](tellurideneuromorphic.org) by the authors below (in alphabetical order):
+This work was originally conceived at the [Telluride Neuromorphic Workshop 2023](https://tellurideneuromorphic.org) by the authors below (in alphabetical order):
 * [Steven Abreu](https://github.com/stevenabreu7)
 * [Felix Bauer](https://github.com/bauerfe)
 * [Jason Eshraghian](https://github.com/jeshraghian)
