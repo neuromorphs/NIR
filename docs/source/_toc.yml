@@ -14,19 +14,24 @@ parts:
   - file: primitives
   - file: support
     title: Platform support
-- caption: Examples
-  chapters:
-  - file: examples/lava/nir-conversion
-  - file: examples/nengo/nir-conversion
-  - file: examples/norse/nir-conversion
-  - file: examples/rockpool/nir-conversion
-  - file: examples/sinabs/nir-conversion
-  - file: examples/snntorch/nir-conversion
-  - file: examples/spinnaker2/import
-  - file: examples/spyx/conversion
-  - file: examples/snntorch_to_norse
+  - file: examples/index
+    sections:
+    - file: examples/lava/nir-conversion
+    - file: examples/nengo/nir-conversion
+    - file: examples/norse/nir-conversion
+    - file: examples/rockpool/nir-conversion
+    - file: examples/sinabs/nir-conversion
+    - file: examples/snntorch/nir-conversion
+    - file: examples/spinnaker2/import
+    - file: examples/spyx/conversion
+    - file: examples/snntorch_to_norse
 - caption: Developer guide
   chapters:
   - file: porting_nir
-  - file: api_design
+  - file: dev_pytorch
+  - file: dev_jax
   - file: contributing
+- caption: API documentation
+  chapters:
+  - file: api_design
+  - file: doctrees

@@ -10,7 +10,16 @@ repository:
 execute:
   execute_notebooks: off
 
+parse:
+  myst_enable_extensions:
+      - amsmath
+
 launch_buttons:
   notebook_interface: "jupyterlab"
   binderhub_url: "https://mybinder.org/v2/gh/neuromorphs/nir/main?urlpath=lab"
   colab_url: "https://colab.research.google.com"
+
+sphinx:
+  extra_extensions:
+  - 'sphinx.ext.autodoc'
+    
