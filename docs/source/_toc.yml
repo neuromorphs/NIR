@@ -1,8 +1,5 @@
 format: jb-book
 root: index
-options:
-  html:
-    show_navbar_depth: 2
 parts:
 - caption: Introduction
   chapters:
@@ -31,5 +28,10 @@ parts:
 - caption: Developer guide
   chapters:
   - file: porting_nir
-  - file: api_design
+  - file: dev_pytorch
+  - file: dev_jax
   - file: contributing
+- caption: API documentation
+  chapters:
+  - file: api_design
+  - file: doctrees

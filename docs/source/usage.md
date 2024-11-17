@@ -13,6 +13,9 @@ Please refer to the **Examples** section in the sidebar for code for each suppor
 More code examples are available [in the repository for our paper](https://github.com/neuromorphs/NIR/tree/main/paper/).
 
 ## Example: Norse model to Sinabs Speck
+This example demonstrates how to convert a Norse model to a Sinabs model and then to a Speck chip.
+Note that Norse is based on PyTorch and uses [NIRTorch](#dev_pytorch) to convert PyTorch models to NIR.
+You can also do this manually, by constructing your own NIR graphs as shown in our [API design documentation](#api_desige).
 
 ### Part 1: Convert Norse model to NIR
 ```python
@@ -20,10 +23,8 @@ import torch
 import norse.torch as norse
 
 # Define our neural network model
-model = norse.SequentialState(
-  norse.LIFCell(),
-  ...
-)
+model = ...
+
 # Convert model to NIR
 #   Note that we use some sample data to "trace" the graph in PyTorch.
 #   You need to ensure that shape of the data fits your model
@@ -44,3 +45,30 @@ dynapcnn_model = DynapcnnNetwork(sinabs_model, input_shape=sample_data.shape[-1]
 # Move model to chip!
 dynapcnn_model.to("speck2fdevkit")
 ```
+
+## Example: Manually writing and reading NIR files
+You can also manually write and read NIR files.
+This is useful if you want to save a model to disk and use it later.
+Or if you want to load in a model that someone else has created.
+
+### Writing a NIR file
+[NIR consists of graphs](#primitives) that describe the structure of a neural network.
+Our reference implementation uses Python to describe these graphs, so you can imagine having a graph in an object, say `nir_model`.
+To write this graph to file, you can use
+
+```python
+import nir
+nir.write(nir_model, "my_model.nir")
+```
+
+### Reading a NIR file
+Reading a NIR file is similarly easy and will give you a graph object that you can use in your code.
+
+```python
+import nir
+nir_model = nir.read("my_model.nir")
+```
+
+Note that the graph object (`nir_model`) doesn't do anything by itself.
+You still need to convert it to a format that your hardware or simulator can understand.
+Read more about this in the [Using NIR in hardware guide](#porting_nir).
