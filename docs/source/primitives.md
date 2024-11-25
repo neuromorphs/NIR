@@ -27,7 +27,7 @@ NIR defines 16 fundamental primitives listed in the table below, which backends 
 | **Scale**                          | $s$                                                                       | $s I$                                                    | -                                                                                      |
 | **SumPooling**                     | $p$                                                                       | $\sum_{j} x_j$                                           | -                                                                                      |
 | **AvgPooling**                     | $p$                                                                       | **SumPooling**; **Scale**                                | -                                                                                      |
-| **Spike**                          | $\theta_\text{thr}$                                                       | $\dirac(I - \theta_\text{thr})$                               | -                                                                                      |
+| **Spike**                          | $\theta_\text{thr}$                                                       | $\delta(I - \theta_\text{thr})$                               | -                                                                                      |
 
 
 Each primitive is defined by their own dynamical equation, specified in the [API docs](https://nnir.readthedocs.io/en/latest/).
