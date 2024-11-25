@@ -12,7 +12,8 @@ execute:
 
 parse:
   myst_enable_extensions:
-      - amsmath
+    - amsmath
+    - dollarmath
 
 launch_buttons:
   notebook_interface: "jupyterlab"
