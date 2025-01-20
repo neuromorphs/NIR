@@ -582,3 +582,13 @@ def test_conv_type_inference():
             raise AssertionError(f"type check failed for: {name}")
         graph.infer_types()
         assert graph._check_types(), f"type inference failed for: {name}"
+
+
+def test_node():
+    try:
+        node = nir.ir.NIRNode()
+        assert (
+            node is None
+        ), f"test failed, we should not be able to construct an NIRNode: {node}"
+    except AttributeError:
+        pass
