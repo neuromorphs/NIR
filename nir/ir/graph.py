@@ -31,9 +31,11 @@ class NIRGraph(NIRNode):
     output_type: Optional[Dict[str, np.ndarray]] = None
     metadata: Dict[str, Any] = field(default_factory=dict)
 
-    def __init__(self, nodes, edges, type_check: bool = True):
+    def __init__(self, nodes: Nodes, edges: Edges, metadata: Dict[str, Any] 
+                 = field(default_factory=dict), type_check: bool = True):
         self.nodes = nodes
         self.edges = edges
+        self.metadata = metadata
         if type_check:
             self._check_types()
         
