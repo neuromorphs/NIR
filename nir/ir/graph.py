@@ -23,6 +23,13 @@ class NIRGraph(NIRNode):
     edges.
 
     A graph of computational nodes and identity edges.
+
+    Arguments:
+        nodes: Dictionary of nodes in the graph.
+        edges: List of edges in the graph.
+        metadata: Dictionary of metadata for the graph.
+        type_check: Whether to check that input and output types match for all nodes in the graph.
+            Will not be stored in the graph as an attribute. Defaults to True.
     """
 
     nodes: Nodes  # List of computational nodes
@@ -31,14 +38,28 @@ class NIRGraph(NIRNode):
     output_type: Optional[Dict[str, np.ndarray]] = None
     metadata: Dict[str, Any] = field(default_factory=dict)
 
-    def __init__(self, nodes: Nodes, edges: Edges, metadata: Dict[str, Any] 
-                 = field(default_factory=dict), type_check: bool = True):
+    def __init__(
+        self,
+        nodes: Nodes,
+        edges: Edges,
+        input_type: Optional[Dict[str, np.ndarray]] = None,
+        output_type: Optional[Dict[str, np.ndarray]] = None,
+        metadata: Dict[str, Any] = dict,
+        type_check: bool = True,
+    ):
         self.nodes = nodes
         self.edges = edges
         self.metadata = metadata
+        self.input_type = input_type
+        self.output_type = output_type
+
+        # Check that all nodes have input and output types, if requested (default)
         if type_check:
             self._check_types()
-        
+
+        # Call post init to set input_type and output_type
+        self.__post_init__()
+
     @property
     def inputs(self):
         return {
@@ -52,7 +73,7 @@ class NIRGraph(NIRNode):
         }
 
     @staticmethod
-    def from_list(*nodes: NIRNode) -> "NIRGraph":
+    def from_list(*nodes: NIRNode, type_check: bool = False) -> "NIRGraph":
         """Create a sequential graph from a list of nodes by labelling them after
         indices."""
 
@@ -89,6 +110,7 @@ class NIRGraph(NIRNode):
         return NIRGraph(
             nodes=node_dict,
             edges=edges,
+            type_check=type_check,
         )
 
     def __post_init__(self):
@@ -96,7 +118,10 @@ class NIRGraph(NIRNode):
             k for k, node in self.nodes.items() if isinstance(node, Input)
         ]
         self.input_type = (
-            {node_key: self.nodes[node_key].input_type for node_key in input_node_keys}
+            {
+                node_key: self.nodes[node_key].input_type["input"]
+                for node_key in input_node_keys
+            }
             if len(input_node_keys) > 0
             else None
         )
@@ -104,8 +129,12 @@ class NIRGraph(NIRNode):
             k for k, node in self.nodes.items() if isinstance(node, Output)
         ]
         self.output_type = {
-            node_key: self.nodes[node_key].output_type for node_key in output_node_keys
+            node_key: self.nodes[node_key].output_type["output"]
+            for node_key in output_node_keys
         }
+        # Assign the metadata attribute if left unset to avoid issues with serialization
+        if not isinstance(self.metadata, dict):
+            self.metadata = {}
 
     def to_dict(self) -> Dict[str, Any]:
         ret = super().to_dict()
@@ -463,12 +492,14 @@ class Output(NIRNode):
         del node["shape"]
         return super().from_dict(node)
 
+
 @dataclass(eq=False)
 class Identity(NIRNode):
     """Identity Node.
 
     This is a virtual node, which allows for the identity operation.
     """
+
     input_type: Types
 
     def __post_init__(self):
