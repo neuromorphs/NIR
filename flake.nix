@@ -19,6 +19,7 @@
               pythonPackages.numpy
               pythonPackages.h5py
               pythonPackages.black
+              pythonPackages.pytest
               pkgs.ruff
               pkgs.autoPatchelfHook
             ];
