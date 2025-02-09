@@ -1,9 +1,10 @@
+from abc import ABC
 from dataclasses import asdict, dataclass
 from typing import Any, Dict
 
 
 @dataclass(eq=False)
-class NIRNode:
+class NIRNode(ABC):
     """Base superclass of Neural Intermediate Representation Unit (NIR).
 
     All NIR primitives inherit from this class, but NIRNodes should never be
@@ -15,6 +16,9 @@ class NIRNode:
     # input_type: Dict[str, np.ndarray] = field(init=False, kw_only=True)
     # output_type: Dict[str, np.ndarray] = field(init=False, kw_only=True)
     # metadata: Dict[str, Any] = field(init=True, default_factory=dict)
+
+    def __init__(self) -> None:
+        raise AttributeError("NIRNode does not have a default constructor.")
 
     def __eq__(self, other):
         return self is other
