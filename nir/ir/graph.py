@@ -73,7 +73,7 @@ class NIRGraph(NIRNode):
         }
 
     @staticmethod
-    def from_list(*nodes: NIRNode, type_check: bool = False) -> "NIRGraph":
+    def from_list(*nodes: NIRNode, type_check: bool = True) -> "NIRGraph":
         """Create a sequential graph from a list of nodes by labelling them after
         indices."""
 
