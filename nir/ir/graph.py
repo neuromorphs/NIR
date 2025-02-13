@@ -23,6 +23,13 @@ class NIRGraph(NIRNode):
     edges.
 
     A graph of computational nodes and identity edges.
+
+    Arguments:
+        nodes: Dictionary of nodes in the graph.
+        edges: List of edges in the graph.
+        metadata: Dictionary of metadata for the graph.
+        type_check: Whether to check that input and output types match for all nodes in the graph.
+            Will not be stored in the graph as an attribute. Defaults to True.
     """
 
     nodes: Nodes  # List of computational nodes
@@ -30,6 +37,28 @@ class NIRGraph(NIRNode):
     input_type: Optional[Dict[str, np.ndarray]] = None
     output_type: Optional[Dict[str, np.ndarray]] = None
     metadata: Dict[str, Any] = field(default_factory=dict)
+
+    def __init__(
+        self,
+        nodes: Nodes,
+        edges: Edges,
+        input_type: Optional[Dict[str, np.ndarray]] = None,
+        output_type: Optional[Dict[str, np.ndarray]] = None,
+        metadata: Dict[str, Any] = dict,
+        type_check: bool = True,
+    ):
+        self.nodes = nodes
+        self.edges = edges
+        self.metadata = metadata
+        self.input_type = input_type
+        self.output_type = output_type
+
+        # Check that all nodes have input and output types, if requested (default)
+        if type_check:
+            self._check_types()
+
+        # Call post init to set input_type and output_type
+        self.__post_init__()
 
     @property
     def inputs(self):
@@ -44,7 +73,7 @@ class NIRGraph(NIRNode):
         }
 
     @staticmethod
-    def from_list(*nodes: NIRNode) -> "NIRGraph":
+    def from_list(*nodes: NIRNode, type_check: bool = True) -> "NIRGraph":
         """Create a sequential graph from a list of nodes by labelling them after
         indices."""
 
@@ -81,6 +110,7 @@ class NIRGraph(NIRNode):
         return NIRGraph(
             nodes=node_dict,
             edges=edges,
+            type_check=type_check,
         )
 
     def __post_init__(self):
@@ -88,7 +118,10 @@ class NIRGraph(NIRNode):
             k for k, node in self.nodes.items() if isinstance(node, Input)
         ]
         self.input_type = (
-            {node_key: self.nodes[node_key].input_type for node_key in input_node_keys}
+            {
+                node_key: self.nodes[node_key].input_type["input"]
+                for node_key in input_node_keys
+            }
             if len(input_node_keys) > 0
             else None
         )
@@ -96,8 +129,12 @@ class NIRGraph(NIRNode):
             k for k, node in self.nodes.items() if isinstance(node, Output)
         ]
         self.output_type = {
-            node_key: self.nodes[node_key].output_type for node_key in output_node_keys
+            node_key: self.nodes[node_key].output_type["output"]
+            for node_key in output_node_keys
         }
+        # Assign the metadata attribute if left unset to avoid issues with serialization
+        if not isinstance(self.metadata, dict):
+            self.metadata = {}
 
     def to_dict(self) -> Dict[str, Any]:
         ret = super().to_dict()
@@ -105,56 +142,26 @@ class NIRGraph(NIRNode):
         return ret
 
     @classmethod
-    def from_dict(cls, node: Dict[str, Any]) -> "NIRNode":
+    def from_dict(cls, kwargs: Dict[str, Any]) -> "NIRGraph":
         from . import dict2NIRNode
 
-        node["nodes"] = {k: dict2NIRNode(n) for k, n in node["nodes"].items()}
+        kwargs_local = kwargs.copy() # Copy the input to avoid overwriting attributes
+        
+        # Assert that we have nodes and edges
+        assert "nodes" in kwargs, "The incoming dictionary must hade a 'nodes' entry"
+        assert "edges" in kwargs, "The incoming dictionary must hade a 'edges' entry"
+        # Assert that the type is well-formed
+        if "type" in kwargs:
+            assert kwargs["type"] == "NIRGraph", "You are calling NIRGraph.from_dict with a different type "
+            f"{type}. Either remove the entry or use <Specific NIRNode>.from_dict, such as Input.from_dict"
+        kwargs_local["type"] = "NIRGraph"
+
+
+        kwargs_local["nodes"] = {k: dict2NIRNode(n) for k, n in kwargs_local["nodes"].items()}
         # h5py deserializes edges into a numpy array of type bytes and dtype=object,
         # hence using ensure_str here
-        node["edges"] = [(ensure_str(a), ensure_str(b)) for a, b in node["edges"]]
-        return super().from_dict(node)
-
-    def _check_types(self):
-        """Check that all nodes in the graph have input and output types.
-
-        Will raise ValueError if any node has no input or output type, or if the types
-        are inconsistent.
-        """
-        for edge in self.edges:
-            pre_node = self.nodes[edge[0]]
-            post_node = self.nodes[edge[1]]
-
-            # make sure all types are defined
-            undef_out_type = pre_node.output_type is None or any(
-                v is None for v in pre_node.output_type.values()
-            )
-            if undef_out_type:
-                raise ValueError(f"pre node {edge[0]} has no output type")
-            undef_in_type = post_node.input_type is None or any(
-                v is None for v in post_node.input_type.values()
-            )
-            if undef_in_type:
-                raise ValueError(f"post node {edge[1]} has no input type")
-
-            # make sure the length of types is equal
-            if len(pre_node.output_type) != len(post_node.input_type):
-                pre_repr = f"len({edge[0]}.output)={len(pre_node.output_type)}"
-                post_repr = f"len({edge[1]}.input)={len(post_node.input_type)}"
-                raise ValueError(f"type length mismatch: {pre_repr} -> {post_repr}")
-
-            # make sure the type values match up
-            if len(pre_node.output_type.keys()) == 1:
-                post_input_type = list(post_node.input_type.values())[0]
-                pre_output_type = list(pre_node.output_type.values())[0]
-                if not np.array_equal(post_input_type, pre_output_type):
-                    pre_repr = f"{edge[0]}.output: {pre_output_type}"
-                    post_repr = f"{edge[1]}.input: {post_input_type}"
-                    raise ValueError(f"type mismatch: {pre_repr} -> {post_repr}")
-            else:
-                raise NotImplementedError(
-                    "multiple input/output types not supported yet"
-                )
-        return True
+        kwargs_local["edges"] = [(ensure_str(a), ensure_str(b)) for a, b in kwargs_local["edges"]]
+        return super().from_dict(kwargs_local)
 
     def _forward_type_inference(self, debug=True):
         """Infer the types of all nodes in this graph. Will modify the input_type and
@@ -497,12 +504,14 @@ class Output(NIRNode):
         del node["shape"]
         return super().from_dict(node)
 
+
 @dataclass(eq=False)
 class Identity(NIRNode):
     """Identity Node.
 
     This is a virtual node, which allows for the identity operation.
     """
+
     input_type: Types
 
     def __post_init__(self):

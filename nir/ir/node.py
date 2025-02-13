@@ -37,8 +37,8 @@ class NIRNode(ABC):
         return ret
 
     @classmethod
-    def from_dict(cls, node: Dict[str, Any]) -> "NIRNode":
-        assert node["type"] == cls.__name__
-        del node["type"]
+    def from_dict(cls, kwargs: Dict[str, Any]) -> "NIRNode":
+        assert kwargs["type"] == cls.__name__
+        del kwargs["type"]
 
-        return cls(**node)
+        return cls(**kwargs)
