@@ -161,7 +161,6 @@ class NIRGraph(NIRNode):
         # h5py deserializes edges into a numpy array of type bytes and dtype=object,
         # hence using ensure_str here
         kwargs_local["edges"] = [(ensure_str(a), ensure_str(b)) for a, b in kwargs_local["edges"]]
-        kwargs_local["type_check"] = getattr(kwargs, "type_check", True) # Defaults to True
         return super().from_dict(kwargs_local)
 
     def _forward_type_inference(self, debug=True):
