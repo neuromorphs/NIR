@@ -1,4 +1,4 @@
-# Developing JAX extensions
+# JAX extensions
 
 JAX is a popular deep learning framework that more and more of the NIR-supported libraries are built on.
 For PyTorch, we have built the [`nirtorch` package](https://github.com/neuromorphs/nirtorch), but *no such package exists for JAX*.

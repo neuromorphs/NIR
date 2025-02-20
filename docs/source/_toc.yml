@@ -27,11 +27,17 @@ parts:
     - file: examples/snntorch_to_norse
 - caption: Developer guide
   chapters:
+  - file: working_with_nir
   - file: porting_nir
   - file: dev_pytorch
+    sections:
+    - file: nirtorch/tracing
+    - file: nirtorch/interpreting
+    - file: nirtorch/state
   - file: dev_jax
   - file: contributing
 - caption: API documentation
   chapters:
   - file: api_design
-  - file: doctrees
+  - file: api_nir
+  - file: api_nirtorch
