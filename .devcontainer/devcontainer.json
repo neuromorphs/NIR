@@ -14,13 +14,13 @@
 				"ms-toolsai.jupyter"
 			]
 		}
-	}
+	},
 
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
 	// "forwardPorts": [],
 
-	// Use 'postCreateCommand' to run commands after the container is created.
-	// "postCreateCommand": "pip3 install -e .",
+	// Install docs dependencies
+	"postCreateCommand": "pip3 install -r docs/requirements.txt",
 
 	// Configure tool-specific properties.>
 	// "customizations": {}
