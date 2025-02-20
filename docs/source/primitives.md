@@ -29,8 +29,7 @@ NIR defines 16 fundamental primitives listed in the table below, which backends 
 | **AvgPooling**                     | $p$                                                                       | **SumPooling**; **Scale**                                | -                                                                                      |
 | **Spike**                          | $\theta_\text{thr}$                                                       | $\delta(I - \theta_\text{thr})$                               | -                                                                                      |
 
-
-Each primitive is defined by their own dynamical equation, specified in the [API docs](https://nnir.readthedocs.io/en/latest/).
+More details about the equations the computational primitives are implementing are available in the [paper on Neuromorphic Intermediate Representation](https://www.nature.com/articles/s41467-024-52259-9).
 
 ## Connectivity 
 
@@ -65,25 +64,6 @@ nir.Output(
 )
 ```
 
-## A Graph Example in Python
-To illustrate how a computational graph can be defined using the NIR Python primitives, here is an example of a graph with a single `LIF` neuron with input and output nodes:
-
-```python
-import nir
-
-nir.NIRGraph(
-    nodes = {
-        "input" : nir.Input({"input": np.array([1])}),
-        "lif"   : nir.LIF(...),
-        "output": nir.Output{"output": np.array([1])}
-    },
-    edges = [
-        ("Input", "LIF"),
-        ("LIF"  , "Output"),
-    ],
-)
-```
-
 ## Metadata
 
 Each node in the graph can have metadata attached to it.
@@ -111,8 +91,33 @@ If the backend would strictly rely this metadata, it would require everyone else
 NIR graphs should be self-contained and unambiguous, such that the graph itself (without the metadata) contains all the necessary information to execute the graph.
 ```
 
-## Importing and exporting
-While the NIR librray is written in Python, the graph can be defined and used in any language.
-We provide import and export functions to and from the [Hierarchical Data Format](https://en.wikipedia.org/wiki/Hierarchical_Data_Format) which allows for easy storage and retrieval of the graph.
+## How to program with primitives
 
-See [the usage page](usage) for more information.
+```{admonition} See also
+:class: info
+See [the usage page](usage) for more information on how to use NIR in practice.
+```
+
+Programming with primitives involves creating a graph of nodes whose (directional) connections indicate where signals travel.
+For this, we typically import and export one single graph node containing multiple subnodes (which can themselves contain nodes, and so on).
+
+NIR graphs can be loaded from [HDF5 files](https://en.wikipedia.org/wiki/Hierarchical_Data_Format), but we also provide a reference implementation in Python in this repo.
+
+### A Graph Example in Python
+To illustrate how a computational graph can be defined using the NIR Python primitives, here is an example of a graph with a single `LIF` neuron with input and output nodes:
+
+```python
+import nir
+
+nir.NIRGraph(
+    nodes = {
+        "input" : nir.Input({"input": np.array([1])}),
+        "lif"   : nir.LIF(...),
+        "output": nir.Output{"output": np.array([1])}
+    },
+    edges = [
+        ("Input", "LIF"),
+        ("LIF"  , "Output"),
+    ],
+)
+```
