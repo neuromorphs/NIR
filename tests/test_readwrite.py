@@ -169,6 +169,20 @@ def test_leaky_integrator_and_fire():
     factory_test_metadata(ir)
 
 
+def test_current_based_leaky_integrator():
+    tau_mem = np.array([1, 1, 1])
+    tau_syn = np.array([2, 2, 2])
+    r = np.array([1, 1, 1])
+    v_leak = np.array([1, 1, 1])
+    w_in = np.array([2, 2, 2])
+    ir = nir.NIRGraph.from_list(
+        mock_affine(2, 3),
+        nir.CubaLI(tau_mem, tau_syn, r, v_leak, w_in=w_in),
+    )
+    factory_test_graph(ir)
+    factory_test_metadata(ir)
+
+
 def test_current_based_leaky_integrator_and_fire():
     tau_mem = np.array([1, 1, 1])
     tau_syn = np.array([2, 2, 2])

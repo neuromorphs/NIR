@@ -5,7 +5,7 @@ from .delay import Delay
 from .flatten import Flatten
 from .graph import Input, NIRGraph, Output
 from .linear import Affine, Linear, Scale
-from .neuron import IF, LI, LIF, CubaLIF, I
+from .neuron import IF, LI, LIF, CubaLI, CubaLIF, I
 from .pooling import AvgPool2d, SumPool2d
 from .threshold import Threshold
 from .typing import NIRNode
@@ -28,6 +28,7 @@ __all_ir = [
     "Linear",
     "Scale",
     # neuron
+    "CubaLI",
     "CubaLIF",
     "I",
     "IF",
@@ -76,6 +77,7 @@ __all__ = [
     "Linear",
     "Scale",
     # neuron
+    "CubaLI",
     "CubaLIF",
     "I",
     "IF",
