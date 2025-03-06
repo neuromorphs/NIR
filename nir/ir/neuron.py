@@ -7,6 +7,49 @@ from .node import NIRNode
 
 
 @dataclass(eq=False)
+class CubaLI(NIRNode):
+    r"""Current based leaky integrator model.
+
+    The current based leaky integrator neuron model
+    is defined by the following equations:
+
+    .. math::
+        \tau_{syn} \dot {I} = - I + w_{in} S
+
+    .. math::
+        \tau_{mem} \dot {v} = (v_{leak} - v) + R I
+
+    Where :math:`\tau_{syn}` is the synaptic time constant,
+    :math:`\tau_{mem}` is the membrane time constant,
+    :math:`R` is the resistance,
+    :math:`v_{leak}` is the leak voltage,
+    :math:`w_{in}` is the input current weight (elementwise),
+    and :math:`S` is the input spike.
+    """
+
+    tau_syn: np.ndarray  # Time constant
+    tau_mem: np.ndarray  # Time constant
+    r: np.ndarray  # Resistance
+    v_leak: np.ndarray  # Leak voltage
+    w_in: np.ndarray = 1.0  # Input current weight
+    input_type: Optional[Dict[str, np.ndarray]] = None
+    output_type: Optional[Dict[str, np.ndarray]] = None
+    metadata: Dict[str, Any] = field(default_factory=dict)
+
+    def __post_init__(self):
+        assert (
+            self.tau_syn.shape
+            == self.tau_mem.shape
+            == self.r.shape
+            == self.v_leak.shape
+        ), "All parameters must have the same shape"
+        # If w_in is a scalar, make it an array of same shape as v_leak
+        self.w_in = np.ones_like(self.v_leak) * self.w_in
+        self.input_type = {"input": np.array(self.v_leak.shape)}
+        self.output_type = {"output": np.array(self.v_leak.shape)}
+
+
+@dataclass(eq=False)
 class CubaLIF(NIRNode):
     r"""Current based leaky integrate and-fire-neuron model.
 

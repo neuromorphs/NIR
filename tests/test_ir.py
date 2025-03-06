@@ -159,6 +159,12 @@ def test_conv2d_same():
     assert np.allclose(nir_network.nodes["conv2d"].output_type["output"], [1, 3, 3])
 
 
+def test_cuba_li():
+    a = np.random.randn(10, 10)
+    lif = nir.CubaLI(tau_mem=a, tau_syn=a, r=a, v_leak=a)
+    assert np.allclose(lif.tau_mem, a)
+
+
 def test_cuba_lif():
     a = np.random.randn(10, 10)
     lif = nir.CubaLIF(tau_mem=a, tau_syn=a, r=a, v_leak=a, v_threshold=a)

@@ -102,6 +102,15 @@ def read_node(node: Any) -> nir.NIRNode:
             v_threshold=node["v_threshold"][()],
             **_read_metadata(node),
         )
+    elif node["type"][()] == b"CubaLI":
+        return nir.CubaLI(
+            tau_mem=node["tau_mem"][()],
+            tau_syn=node["tau_syn"][()],
+            r=node["r"][()],
+            v_leak=node["v_leak"][()],
+            w_in=node["w_in"][()],
+            **_read_metadata(node),
+        )
     elif node["type"][()] == b"CubaLIF":
         return nir.CubaLIF(
             tau_mem=node["tau_mem"][()],
