@@ -23,4 +23,5 @@ launch_buttons:
 sphinx:
   extra_extensions:
   - 'sphinx.ext.autodoc'
+  - sphinxcontrib.mermaid
     

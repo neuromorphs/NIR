@@ -6,23 +6,9 @@ We have a reference implementation in Python, but can export [HDF5](https://en.w
 That's all.
 Let us unpack that statement.
 
-## The NIR format
-NIR is an intermediate representation and **only consists of declarations**.
-That is, we do not implement any dynamic or describe any runtime behavior---that is up to the individual platforms.
-NIR consists of a *hierarchical* structure, with the top-most level being a single [`NIRGraph` object](api_design.md#nir-graphs-and-edges).
-
-```{figure} nir_graph_example.svg
----
-height: 200px
-name: nir-graph-example
----
-An example of a NIR graph with four nodes: Input, Leaky-Integrator, Affine map, and Output.
-```
-
-```{note}
-See our [API design](api_design.md) for more information about the NIR hierarchical structure.
-
-See the [NIR primitives](primitives.md) for more information about the individual nodes.
+```{admonition} More about graphs and nodes
+:class: info
+Read more about NIR graphs in [Working with NIR](#working_with_nir), more about nodes in [NIR primitives](#primitives), and more about the graph structure itself in [API design](#api_design).
 ```
 
 ## Integrating with Python
@@ -38,7 +24,7 @@ my_graph = nir.read("path_to_my_graph.nir")
 
 Once that is done, the graph can be parsed by (1) matching the nodes to your platform's primitives and (2) connecting the nodes together.
 Note that the top-level graph may be recursive, so we recommend a recursive function that traverses the graph and evaluates the nodes.
-Here's a simple example (without recursion):
+Here's a simple example (with recursion):
 
 ```python
 
@@ -57,6 +43,8 @@ def parse_graph(graph: nir.NIRGraph):
             nodes[name] = MyPlatformAffine(node.weights, node.bias)
         elif isinstance(node, nir.Output):
             nodes[name] = MyPlatformOutput()
+        elif isinstance(node, nir.NIRGraph): # Recurse through subgraphs
+            nodes[name] = parse_graph(node)
         else:
             raise NotImplementedError(f"Node {node} not supported.")
     
@@ -68,6 +56,14 @@ def parse_graph(graph: nir.NIRGraph):
     return nodes
 
 ```
+
+Matching the nodes to your primitives is the critical part here.
+The output of the above parsing phase is, hopefully, a structure that you can use for your platform.
+The simplified `MyPlatformX` where `X` stands for all the primitives, can be anything: a Python object that can be executed, a description of a hardware node, an XML object, etc.
+Familiarity with the hardware helps understand exactly what steps to take for the NIR graph to be mapped to hardware.
+In the case of PyTorch, for example, we can map NIRGraphs directly to executable objects.
+That is probably not the case for hardware, but we will use it as a case study on how NIR can "compile" to other platforms.
+
 
 ```{note}
 See the [NIR primitives](primitives.md) for more information about the content of each node.
@@ -90,9 +86,9 @@ def parse_module(node: nir.NIRNode) -> Optional[torch.nn.Module]:
     else:
         return None # Return none to allow nirtorch to map the node
 
-# Load a graph as a PyTorch module (`torch.nn.Module`)
+# Interpret a NIR graph as a PyTorch module (`torch.nn.Module`)
 nir_graph = ...
-torch_graph = nirtorch.load(nir_graph, parse_module)
+torch_graph = nirtorch.nir_to_torch(nir_graph, parse_module)
 ```
 
 ## Integrating via HDF5 files
