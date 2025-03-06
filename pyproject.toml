@@ -51,3 +51,12 @@ lint.per-file-ignores = {"docs/conf.py" = ["E402"]}
 exclude  = ["paper/"]
 extend-exclude = ["*.ipynb"]
 
+[dependency-groups]
+dev = [
+    "black>=25.1.0",
+    "pre-commit>=4.1.0",
+    "pytest>=8.3.5",
+    "ruff>=0.9.9",
+    "sphinx>=7.4.7",
+]
+
