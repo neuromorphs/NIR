@@ -129,8 +129,9 @@ def test_integrator():
 def test_integrate_and_fire():
     r = np.array([1, 1])
     v_threshold = np.array([1, 1])
+    v_reset = np.array([0, 0])
     ir = nir.NIRGraph(
-        nodes={"a": mock_affine(2, 2), "b": nir.IF(r, v_threshold)},
+        nodes={"a": mock_affine(2, 2), "b": nir.IF(r, v_reset, v_threshold)},
         edges=[("a", "b")],
     )
     factory_test_graph(ir)
@@ -160,10 +161,11 @@ def test_leaky_integrator_and_fire():
     tau = np.array([1, 1, 1])
     r = np.array([1, 1, 1])
     v_leak = np.array([1, 1, 1])
+    v_reset = np.array([0, 0, 0])
     v_threshold = np.array([3, 3, 3])
     ir = nir.NIRGraph.from_list(
         mock_affine(2, 3),
-        nir.LIF(tau, r, v_leak, v_threshold),
+        nir.LIF(tau, r, v_leak, v_reset, v_threshold),
     )
     factory_test_graph(ir)
     factory_test_metadata(ir)
@@ -188,11 +190,14 @@ def test_current_based_leaky_integrator_and_fire():
     tau_syn = np.array([2, 2, 2])
     r = np.array([1, 1, 1])
     v_leak = np.array([1, 1, 1])
+    v_reset = np.array([0, 0, 0])
     v_threshold = np.array([3, 3, 3])
     w_in = np.array([2, 2, 2])
     ir = nir.NIRGraph.from_list(
         mock_affine(2, 3),
-        nir.CubaLIF(tau_mem, tau_syn, r, v_leak, v_threshold, w_in=w_in),
+        nir.CubaLIF(tau_mem, tau_syn, r,
+                    v_leak, v_reset, v_threshold,
+                    w_in=w_in),
     )
     factory_test_graph(ir)
     factory_test_metadata(ir)

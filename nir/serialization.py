@@ -79,7 +79,10 @@ def read_node(node: Any) -> nir.NIRNode:
         return nir.I(r=node["r"][()], **_read_metadata(node))
     elif node["type"][()] == b"IF":
         return nir.IF(
-            r=node["r"][()], v_threshold=node["v_threshold"][()], **_read_metadata(node)
+            r=node["r"][()],
+            v_reset=node["v_reset"][()],
+            v_threshold=node["v_threshold"][()],
+            **_read_metadata(node)
         )
     elif node["type"][()] == b"Input":
         return nir.Input(
@@ -99,6 +102,7 @@ def read_node(node: Any) -> nir.NIRNode:
             tau=node["tau"][()],
             r=node["r"][()],
             v_leak=node["v_leak"][()],
+            v_reset=node["v_reset"][()],
             v_threshold=node["v_threshold"][()],
             **_read_metadata(node),
         )
@@ -117,6 +121,7 @@ def read_node(node: Any) -> nir.NIRNode:
             tau_syn=node["tau_syn"][()],
             r=node["r"][()],
             v_leak=node["v_leak"][()],
+            v_reset=node["v_reset"][()],
             v_threshold=node["v_threshold"][()],
             w_in=node["w_in"][()],
             **_read_metadata(node),
