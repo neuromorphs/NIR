@@ -13,6 +13,7 @@ def test_sequential():
         tau=np.array([10, 20, 30]),
         r=np.array([1, 1, 1]),
         v_leak=np.array([0, 0, 0]),
+        v_reset=np.array([0, 0, 0]),
         v_threshold=np.array([1, 2, 3]),
     )
     d = mock_affine(3, 2)
@@ -40,6 +41,7 @@ def test_two_independent_branches():
         tau=np.array([10, 20, 30]),
         r=np.array([1, 1, 1]),
         v_leak=np.array([0, 0, 0]),
+        v_reset=np.array([0, 0, 0]),
         v_threshold=np.array([1, 2, 3]),
     )
     d = mock_affine(3, 2)
@@ -52,6 +54,7 @@ def test_two_independent_branches():
         tau=np.array([10, 20]),
         r=np.array([1, 1]),
         v_leak=np.array([0, 0]),
+        v_reset=np.array([0, 0]),
         v_threshold=np.array([1, 2]),
     )
     g = mock_affine(2, 2)
@@ -85,6 +88,7 @@ def test_two_independent_branches_merging():
         tau=np.array([10, 20, 30]),
         r=np.array([1, 1, 1]),
         v_leak=np.array([0, 0, 0]),
+        v_reset=np.array([0, 0, 0]),
         v_threshold=np.array([1, 2, 3]),
     )
     d = mock_affine(3, 3)
@@ -97,6 +101,7 @@ def test_two_independent_branches_merging():
         tau=np.array([10, 20]),
         r=np.array([1, 1]),
         v_leak=np.array([0, 0]),
+        v_reset=np.array([0, 0]),
         v_threshold=np.array([1, 2]),
     )
     g = mock_affine(2, 3)
@@ -109,6 +114,7 @@ def test_two_independent_branches_merging():
         tau=np.array([5, 2, 1]),
         r=np.array([1, 1, 1]),
         v_leak=np.array([0, 0, 0]),
+        v_reset=np.array([0, 0, 0]),
         v_threshold=np.array([1, 1, 1]),
     )
 
@@ -138,6 +144,7 @@ def test_merge_and_split_single_output():
         tau=np.array([10, 20, 30]),
         r=np.array([1, 1, 1]),
         v_leak=np.array([0, 0, 0]),
+        v_reset=np.array([0, 0, 0]),
         v_threshold=np.array([1, 2, 3]),
     )
     pre_split = nir.NIRGraph.from_list(a, b)
@@ -148,6 +155,7 @@ def test_merge_and_split_single_output():
         tau=np.array([10, 20]),
         r=np.array([1, 1]),
         v_leak=np.array([0, 0]),
+        v_reset=np.array([0, 0]),
         v_threshold=np.array([1, 2]),
     )
     branch_1 = nir.NIRGraph.from_list(c, d)
@@ -158,6 +166,7 @@ def test_merge_and_split_single_output():
         tau=np.array([15, 5]),
         r=np.array([1, 1]),
         v_leak=np.array([0, 0]),
+        v_reset=np.array([0, 0]),
         v_threshold=np.array([1, 1]),
     )
     branch_2 = nir.NIRGraph.from_list([e, f])
@@ -190,6 +199,7 @@ def test_merge_and_split_different_output_type():
         tau=np.array([10, 20, 30]),
         r=np.array([1, 1, 1]),
         v_leak=np.array([0, 0, 0]),
+        v_reset=np.array([0, 0, 0]),
         v_threshold=np.array([1, 2, 3]),
     )
     pre_split = nir.NIRGraph.from_list([a, b])
@@ -200,6 +210,7 @@ def test_merge_and_split_different_output_type():
         tau=np.array([10, 20]),
         r=np.array([1, 1]),
         v_leak=np.array([0, 0]),
+        v_reset=np.array([0, 0]),
         v_threshold=np.array([1, 2]),
     )
     branch_1 = nir.NIRGraph.from_list([c, d])
@@ -210,6 +221,7 @@ def test_merge_and_split_different_output_type():
         tau=np.array([15, 5]),
         r=np.array([1, 1]),
         v_leak=np.array([0, 0]),
+        v_reset=np.array([0, 0]),
         v_threshold=np.array([1, 1]),
     )
     branch_2 = nir.NIRGraph.from_list([e, f])
@@ -255,6 +267,7 @@ def test_residual():
         tau=np.array([10, 20]),
         r=np.array([1, 1]),
         v_leak=np.array([0, 0]),
+        v_reset=np.array([0, 0]),
         v_threshold=np.array([1, 2]),
     )
     c = mock_affine(2, 2)
@@ -262,6 +275,7 @@ def test_residual():
         tau=np.array([10, 20]),
         r=np.array([1, 1]),
         v_leak=np.array([0, 0]),
+        v_reset=np.array([0, 0]),
         v_threshold=np.array([1, 2]),
     )
 
@@ -272,6 +286,7 @@ def test_residual():
         tau=np.array([15, 5]),
         r=np.array([1, 1]),
         v_leak=np.array([0, 0]),
+        v_reset=np.array([0, 0]),
         v_threshold=np.array([1, 1]),
     )
 
@@ -313,12 +328,14 @@ def test_complex():
         tau=np.array([10, 20, 30]),
         r=np.array([1, 1, 1]),
         v_leak=np.array([0, 0, 0]),
+        v_reset=np.array([0, 0, 0]),
         v_threshold=np.array([1, 2, 3]),
     )
     c = nir.LIF(
         tau=np.array([5, 20, 1]),
         r=np.array([1, 1, 1]),
         v_leak=np.array([0, 0, 0]),
+        v_reset=np.array([0, 0, 0]),
         v_threshold=np.array([1, 1, 1]),
     )
     # TODO: This should be a node that accepts two input_type
