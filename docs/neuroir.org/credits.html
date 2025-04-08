@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,11 +9,20 @@
     <link rel="icon" type="image/png" href="favicon.png" />
 
     <meta name="title" content="NIR Credits - Neuromorphic Intermediate Representation">
-    <meta name="description" content="Think biologically. Deploy universally. The open-source standard for neuromorphic computing.">
+    <meta name="description"
+        content="Think biologically. Deploy universally. The open-source standard for neuromorphic computing.">
     <meta name="keywords" content="neuromorphic, computing, open-source, standard, NIR, intermediate representation">
     <title>NIR Credits - Neuromorphic Intermediate Representation</title>
 </head>
+
 <body>
+    <div id="mobile-navbar">
+        <img class="menu-toggle" src="assets/x.svg" style="cursor: pointer" />
+        <a href="https://neuroir.org/docs" class="gothic" style="margin-top: 60px">Documentation</a>
+        <a href="https://github.com/neuromorphs/nir" class="gothic">Github</a>
+        <a href="https://neuroir.org/docs/porting_nir.html" class="gothic"
+            style="background-color: black; color: white">Use NIR on your platform</a>
+    </div>
     <div id="navbar">
         <div class="widthed" id="items">
             <div>
@@ -21,7 +31,7 @@
                 </a>
             </div>
             <div id="last">
-                <a id="menu-toggle" href="javascript:void(0)"><img src="assets/menu.svg" /></a>
+                <a class="menu-toggle" href="javascript:void(0)"><img src="assets/menu.svg" /></a>
                 <a href="https://neuroir.org/docs" class="gothic desktop">Documentation</a>
                 <a href="https://github.com/neuromorphs/nir" class="gothic desktop">Github</a>
                 <a href="https://neuroir.org/docs/porting_nir.html" class="gothic desktop">Use NIR on your platform</a>
@@ -32,7 +42,10 @@
         <div class="widthed">
             <h1 id="hero">Credits.</h1>
             <div>
-                <p>NIR is made possible by the invaluable contribution of the advisory board, the authors of our <a href="https://www.nature.com/articles/s41467-024-52259-9" target="_blank">Nature paper</a>, and our <a href="https://github.com/neuromorphs/NIR/graphs/contributors" target="_blank">contributors on Github</a>.</p>
+                <p>NIR is made possible by the invaluable contribution of the advisory board, the authors of our <a
+                        href="https://www.nature.com/articles/s41467-024-52259-9" target="_blank">Nature paper</a>, and
+                    our <a href="https://github.com/neuromorphs/NIR/graphs/contributors" target="_blank">contributors on
+                        Github</a>.</p>
                 <h2>Advisory Board</h2>
                 <ul>
                     <li>Jason Eshraghian (UC Santa Cruz)</li>
@@ -60,10 +73,18 @@
     <div id="footer">
         <div class="widthed">
             <div style="margin-right: 50px;">
-                Website built with ❤️ by <a href="https://www.linkedin.com/in/grantou" target="_blank" class="blank">Grant Ou</a>.
+                Website built with ❤️ by <a href="https://www.linkedin.com/in/grantou" target="_blank"
+                    class="blank">Grant Ou</a>.
             </div>
-            <div>Copyright &copy; 2025. <a href="/credits" target="_blank" class="blank">NIR contributors</a>. All Rights Reserved.</div>
+            <div>Copyright &copy; 2025. <a href="/credits" target="_blank" class="blank">NIR contributors</a>. All
+                Rights Reserved.</div>
         </div>
     </div>
+    <script src="assets/jquery-3.7.1.min.js"></script>
+    <script>
+        $('.menu-toggle').click(function () {
+            $("#mobile-navbar").toggleClass('visible')
+        })</script>
 </body>
+
 </html>
