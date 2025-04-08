@@ -2,101 +2,157 @@
 <html lang="en">
 
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Neuromorphic Intermediate Representation</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/iconoir-icons/iconoir@main/css/iconoir.css" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="index.css" />
+    <link rel="stylesheet" href="assets/aos.css" />
+    <link rel="icon" type="image/png" href="favicon.png" />
 
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=Cinzel&display=swap');
-
-    @font-face {
-      font-family: 'Cinzel';
-      font-style: normal;
-      font-weight: 400;
-      font-display: swap;
-      src: url(static/Cinzel-Regular.ttf) format('ttf');
-    }
-
-    .font-cinzel {
-      font-family: 'Cinzel', serif;
-    }
-
-    [class*="iconoir-"] {
-      vertical-align: middle;
-      margin-top: -0.2rem;
-    }
-  </style>
+    <meta name="title" content="NIR - Neuromorphic Intermediate Representation">
+    <meta name="description" content="Think biologically. Deploy universally. The open-source standard for neuromorphic computing.">
+    <meta name="keywords" content="neuromorphic, computing, open-source, standard, NIR, intermediate representation">
+    <title>NIR - Neuromorphic Intermediate Representation</title>
 </head>
 
-<body class="bg-stone-100">
-
-  <!-- Header Section -->
-  <header class="bg-gray-800 py-20">
-    <div class="mx-auto md:flex flex-row">
-      <div class="basis-1/1 md:basis-2/4">
-        <a href="https://neuroir.org">
-          <h1 class="text-white text-4xl md:text-7xl font-bold text-center md:text-right font-cinzel">Neuromorphic
-            <br />Intermediate
-            <br />Representation
-          </h1>
-        </a>
-      </div>
-      <div class="basis-1/1 md:basis-1/6 m-2" style="align-content: center;">
-        <div class="flex flex-col">
-          <a href="https://neuroir.org/docs" class="bg-amber-500 text-white py-2 px-4 rounded-md font-semibold shadow-md m-2
-          hover:bg-amber-600 hover:text-stone-100 transition duration-300 ease-in-out text-xl md:text-lg">
-            <i class="iconoir-book-stack"></i> Read the docs</a>
-          <a href="https://github.com/neuromorphs/nir" class="bg-white text-amber-600 py-2 px-4 rounded-md font-semibold shadow-md m-2 text-xl md:text-lg
-          hover:bg-stone-200 transition duration-300 ease-in-out">
-            <i class="iconoir-github"></i> Inspect our code</a>
-          <a href="https://neuroir.org/docs/porting_nir.html" class="bg-amber-700 text-stone-100 py-2 px-4 rounded-md font-semibold shadow-md m-2 text-xl md:text-lg
-            hover:bg-amber-900 transition duration-300 ease-in-out">
-              <i class="iconoir-cube"></i> Use NIR on your platform</a>
+<body>
+    <div id="navbar">
+        <div class="widthed" id="items">
+            <div>
+                <a href="/">
+                    <img src="../assets/logo_light.png" />
+                </a>
+            </div>
+            <div id="last">
+                <a id="menu-toggle" href="javascript:void(0)"><img src="assets/menu.svg" /></a>
+                <a href="https://neuroir.org/docs" class="gothic desktop">Documentation</a>
+                <a href="https://github.com/neuromorphs/nir" class="gothic desktop">Github</a>
+                <a href="https://neuroir.org/docs/porting_nir.html" class="gothic desktop">Use NIR on your platform</a>
+            </div>
         </div>
-      </div>
     </div>
-  </header>
-
-  <!-- Main Content Section -->
-  <section class="container mx-auto py-8">
-    <div class="max-w-3xl mx-auto">
-      <img src="https://github.com/neuromorphs/NIR/raw/main/docs/logo_light.png"
-        class="rounded border-slate-500 shadow-md m-2" alt="Logo">
-      <div class="text-gray-800 m-2 text-lg text-justify">
-        <p class="leading-relaxed">
-          The Neuromorphic Intermediate Representation (NIR) is an exchange format that translates <a
-            class="text-stone-600" href="https://en.wikipedia.org/wiki/Neuromorphic">neuromorphic software</a> from one
-          platform to another.
-          NIR is supported by numerous neuromorphic simulators, and is the preferred choice for <span
-            class="text-black font-bold">porting models to neuromorphic hardware platforms</span>.</p>
-        <p class="leading-relaxed mt-4">NIR allows researchers and companies to build their software independently from
-            the hardware—and vice versa.
-          Developers save time by focusing on the NIR graph integration.
-          Users save time by letting them use their favourite toolchain.
-          The seamless translation between software and hardware let's you focus on the job instead of the ecosystem.
-        </p>
-        <p class="m-4 grid">
-          <a href="https://neuroir.org/docs/support.html" class="bg-white text-amber-600 py-2 px-4 rounded-md font-semibold shadow-md text-lg text-center
-          hover:bg-stone-100 transition duration-300 ease-in-out col-span-8">
-            <i class="iconoir-link"></i> See our supported platforms</a>
-        </p>
-      </div>
-
-      <div class="text-gray-800 m-2 text-lg text-justify">
-
-      </div>
+    <div id="hero-container">
+        <div class="widthed">
+            <h1 id="hero">Think biologically.<br />Deploy universally.</h1>
+            <h2 id="subhero" class="gothic">The open-source standard<br />for neuromorphic computing.</h2>
+            <a href="https://neuroir.org/docs/" target="_blank"><button class="gothic" style="cursor: pointer">Get started</button></a>
+            <img src="assets/hero.png" id="heroimg" />
+        </div>
     </div>
-  </section>
+    <div id="sponsors">
+        <div class="widthed">
+            <h2 class="gothic">TRUSTED BY</h2>
+            <div id="images">
+                <a href="https://neuromorphs.github.io/" target="_blank">
+                    <img src="assets/ine.png" />
+                </a>
+                <a href="https://sites.google.com/view/telluride-2025/home" target="_blank">
+                    <img src="assets/telluride.png" />
+                </a>
+                <a href="https://www.nsf.org/" target="_blank">
+                    <img src="assets/nsf.png" />
+                </a>
+                <a href="https://www.stanford.edu/" target="_blank">
+                    <img src="assets/stanford.png" />
+                </a>
+                <a href="https://www.ucsc.edu/" target="_blank">
+                    <img src="assets/ucsc.png" />
+                </a>
+                <a href="https://apt.cs.manchester.ac.uk/projects/SpiNNaker/" target="_blank">
+                    <img src="assets/spinnaker.png" />
+                </a>
+            </div>
+        </div>
+    </div>
+    <div id="why">
+        <div class="widthed">
+            <div id="left">
+                <h1>Why NIR?</h1>
+                <div class="reason active">
+                    <h2>Cross-platform</h2>
+                    <p style="display: block;">Build once, run anywhere. NIR works seamlessly with 12+ neuromorphic
+                        simulators and hardware platforms.</p>
+                    <div class="progress">
+                        <div class="inner"></div>
+                    </div>
+                </div>
+                <div class="reason">
+                    <h2>Simplicity</h2>
+                    <p>Skip the complexity. NIR standardizes models so you don’t need to master every hardware platform.
+                    </p>
+                    <div class="progress">
+                        <div class="inner"></div>
+                    </div>
+                </div>
+                <div class="reason">
+                    <h2>Reduce development time</h2>
+                    <p>Stick with your favorite tools—NIR handles the hardware quirks and boilerplate for you.</p>
+                    <div class="progress">
+                        <div class="inner"></div>
+                    </div>
+                </div>
+                <div class="reason">
+                    <h2>Software decoupling</h2>
+                    <p>Design faster. NIR lets models and hardware evolve independently without breaking compatibility.
+                    </p>
+                    <div class="progress">
+                        <div class="inner"></div>
+                    </div>
+                </div>
+                <div class="reason">
+                    <h2>Future-proof</h2>
+                    <p>Built on continuous-time equations, NIR stays compatible with today’s tools—and ready for
+                        tomorrow’s hardware.</p>
+                    <div class="progress">
+                        <div class="inner"></div>
+                    </div>
+                </div>
+            </div>
+            <div id="right">
+                <div class="scroll-image active">
+                    <img src="assets/platforms.png" />
+                </div>
+                <div class="scroll-image">
+                    <img src="assets/simplicity.png" />
+                </div>
+                <div class="scroll-image">
+                    <img src="assets/devtime.png" />
+                </div>
+                <div class="scroll-image">
+                    <img src="assets/compatibility.svg" />
+                </div>
+                <div class="scroll-image">
+                    <img src="assets/futureproof.png" />
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="stats">
+        <div id="bg"></div>
+        <div class="widthed">
+            <h1>Global impact.</h1>
+            <div class="stats-list">
+                <div class="stat" data-aos="fade-up" data-aos-id="downloads">
+                    <div class="number"><span id="stat-downloads"></span>+</div>
+                    <p>downloads</p>
+                </div>
+                <div class="stat" data-aos="fade-up" data-aos-id="citations">
+                    <div class="number"><span id="stat-citations"></span>+</div>
+                    <p>citations</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="cta">
+        <div class="widthed">
+            <h1 style="font-size: 40px">Let's change neuromorphic computing together.</h1>
+            <p style="font-size: 25px">Be part of the open-source revolution with NIR.</p>
+            <a href="https://neuroir.org/docs/" target="_blank"><button class="gothic" style="cursor: pointer">Get started</button></a>
+            <br />
 
-  <!-- Acknowledgement Section -->
-  <footer class="bg-gray-900 text-white py-8">
-    <div class="container mx-auto text-center">
-      <h2 class="text-2xl font-semibold">Acknowledgement</h2>
-      <p class="text-lg mt-2">If you use NIR in your research, please cite the following:</p>
-      <pre class="text-lg mt-2 bg-gray-800 p-4 rounded-md text-left"><code>
-@article{NIR2024, 
+            <div id="citation">Cite the NIR</div>
+            <div id="citation-content" style="display: none">
+                <pre>
+article{NIR2024, 
     title={Neuromorphic intermediate representation: A unified instruction set for interoperable brain-inspired computing}, 
     author={Pedersen, Jens E. and Abreu, Steven and Jobst, Matthias and Lenz, Gregor and Fra, Vittorio and Bauer, Felix Christian and Muir, Dylan Richard and Zhou, Peng and Vogginger, Bernhard and Heckel, Kade and Urgese, Gianvito and Shankar, Sadasivan and Stewart, Terrence C. and Sheik, Sadique and Eshraghian, Jason K.}, 
     rights={2024 The Author(s)},
@@ -107,12 +163,24 @@
     year={2024}, 
     month=sep, 
     pages={8122},
-}
-</code></pre>
-      <p class="text-lg mt-2">All rights reserved &copy; 2024 the NIR authors.</p>
+}</pre>
+                <a id="copy" href="javascript:void(0)">copy to clipboard</a>
+            </div>
+        </div>
     </div>
-  </footer>
+    <div id="footer">
+        <div class="widthed">
+            <div style="margin-right: 50px;">
+                Website built with ❤️ by <a href="https://www.linkedin.com/in/grantou" target="_blank" class="blank">Grant Ou</a>.
+            </div>
+            <div>Copyright &copy; 2025. <a href="/credits" target="_blank" class="blank">NIR contributors</a>. All Rights Reserved.</div>
+        </div>
+    </div>
 
+    <script src="assets/aos.js"></script>
+    <script src="assets/countUp.min.js" type="module"></script>
+    <script src="assets/jquery-3.7.1.min.js"></script>
+    <script src="script.js" type="module"></script>
 </body>
 
 </html>
