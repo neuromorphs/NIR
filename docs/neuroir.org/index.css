@@ -41,6 +41,37 @@ body {
     padding: 13px 0 5px 0;
 }
 
+#mobile-navbar {
+    position: fixed;
+    top: 0;
+    right: -60%;
+    z-index: 2;
+    width: 60%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    background: #f7f4ed;
+    transition: 0.5s;
+}
+
+#mobile-navbar.visible {
+    right: 0;
+    box-shadow: 0 0 100vh rgba(0, 0, 0, 0.5);
+}
+
+#mobile-navbar a{
+    padding: 17px 50px;
+    color: inherit;
+    text-decoration: none;
+}
+
+#mobile-navbar .menu-toggle{
+    width: 25px;
+    position: absolute;
+    right: 20px;
+    top: 20px;
+}
+
 #items {
     display: flex;
     justify-content: space-between;
@@ -156,18 +187,18 @@ button {
     font-weight: bold;
 }
 
-#why #right .scroll-image{
+#why #right .scroll-image {
     position: absolute;
     opacity: 0;
     transition: opacity 0.5s;
 }
 
-#why #right .scroll-image.active{
+#why #right .scroll-image.active {
     position: static;
     opacity: 1;
 }
 
-#why #right .scroll-image img{
+#why #right .scroll-image img {
     width: 100%;
 }
 
@@ -327,7 +358,7 @@ button {
     flex-wrap: wrap;
 }
 
-#footer a.blank::after{
+#footer a.blank::after {
     filter: invert(1);
 }
 
@@ -337,14 +368,14 @@ a.blank::after {
     display: inline-block;
 }
 
-#citation{
+#citation {
     margin-top: 30px;
     text-align: left;
     cursor: pointer;
     text-decoration: underline;
 }
 
-#citation:after  {
+#citation:after {
     content: "\203A";
     font-size: 30px;
     display: inline-block;
@@ -353,74 +384,74 @@ a.blank::after {
     vertical-align: middle;
 }
 
-#citation.open:after{
-    transform:rotate(-90deg);
+#citation.open:after {
+    transform: rotate(-90deg);
 }
 
-#citation-content{
+#citation-content {
     text-align: left;
 }
 
-#citation-content pre{
+#citation-content pre {
     overflow: auto;
 }
 
-#copy{
+#copy {
     font-size: 12px;
 }
 
 
 /* mobile responsiveness styling */
 
-#menu-toggle{
+.menu-toggle {
     display: none;
 }
 
 @media (max-width: 800px) {
-    #navbar a.desktop{
+    #navbar a.desktop {
         display: none;
     }
 
-    #navbar #menu-toggle{
+    .menu-toggle {
         display: block;
     }
 
-    #heroimg{
+    #heroimg {
         opacity: 0.25;
     }
 
-    #hero-container #hero{
+    #hero-container #hero {
         font-size: 50px;
     }
 
-    #hero-container #subhero{
+    #hero-container #subhero {
         font-size: 25px;
     }
 
-    #stats .stats-list .stat .number  {
+    #stats .stats-list .stat .number {
         font-size: 50px;
     }
 
-    #stats h1{
+    #stats h1 {
         font-size: 50px;
     }
 }
 
-@media (max-width: 560px){
-    #hero-container #hero{
+@media (max-width: 560px) {
+    #hero-container #hero {
         font-size: 40px;
     }
 
-    #sponsors #images{
+    #sponsors #images {
         gap: 20px;
     }
 
-    #sponsors #images img{
+    #sponsors #images img {
         height: 30px;
     }
 
-    #why h1{
+    #why h1 {
         font-size: 40px;
         margin-top: 40px;
     }
-} 
+}
