@@ -14,6 +14,8 @@ parts:
   - file: primitives
   - file: support
     title: Platform support
+  - file: hub
+    title: NIR Hub
   - file: examples/index
     sections:
     - file: examples/lava/nir-conversion

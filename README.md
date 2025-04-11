@@ -11,7 +11,7 @@
 [![Discord](https://img.shields.io/discord/1209533869733453844?logo=discord)](https://discord.gg/JRMRGP9h3c)
 
 NIR is a set of computational primitives, shared across different neuromorphic frameworks and technology stacks.
-**NIR is currently supported by 7 simulators and 4 hardware platforms**, allowing users to seamlessly move between any of these platforms.
+**NIR is currently supported by 7 simulators and 4 hardware platforms**, allowing users to seamlessly move between any of these platforms and share models via the NIR Hub.
 
 NIR is useful when you want to move a model from one platform to another, for instance from a simulator to a hardware platform.
 
@@ -32,9 +32,13 @@ my_model = ...
 nir.write("my_graph.nir", my_model) 
 # Load the model (target platform)
 imported_graph = nir.read("my_graph.nir")
+
+# Or share your model via the NIR Hub
+nir.hub.upload(my_model, "My Model", tags=["demo"])
+downloaded_model = nir.hub.download("My Model")
 ```
 
-See our [example section](https://neuroir.org/docs/examples) for how to use NIR with your favorite framework.
+See our [example section](https://neuroir.org/docs/examples) for how to use NIR with your favorite framework and the [NIR Hub documentation](https://neuroir.org/docs/hub.html) for how to share and discover models.
 
 ## Frameworks that currently support NIR
 > Read more in our [documentation about NIR support](https://neuroir.org/docs/support.html)
