@@ -59,13 +59,13 @@ body {
     box-shadow: 0 0 100vh rgba(0, 0, 0, 0.5);
 }
 
-#mobile-navbar a{
+#mobile-navbar a {
     padding: 17px 50px;
     color: inherit;
     text-decoration: none;
 }
 
-#mobile-navbar .menu-toggle{
+#mobile-navbar .menu-toggle {
     width: 25px;
     position: absolute;
     right: 20px;
@@ -370,6 +370,7 @@ a.blank::after {
 
 #citation {
     margin-top: 30px;
+    font-size: 1.5em;
     text-align: left;
     cursor: pointer;
     text-decoration: underline;
@@ -453,5 +454,28 @@ a.blank::after {
     #why h1 {
         font-size: 40px;
         margin-top: 40px;
+    }
+}
+
+@media (max-height: 600px) {
+    #why h1 {
+        font-size: 40px;
+        margin-top: 40px;
+    }
+}
+
+@media (max-height: 520px) {
+    #why .reason h2 {
+        font-size: 15px;
+    }
+
+
+    #why .reason p {
+        font-size: 13px;
+    }
+
+
+    #why .reason .progress {
+        margin-bottom: 10px;
     }
 }
