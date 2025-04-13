@@ -370,6 +370,7 @@ a.blank::after {
 
 #citation {
     margin-top: 30px;
+    font-size: 1.5em;
     text-align: left;
     cursor: pointer;
     text-decoration: underline;
