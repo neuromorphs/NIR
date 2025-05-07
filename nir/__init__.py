@@ -17,4 +17,7 @@ from .ir import *  # noqa: F403
 from .ir import typing  # noqa: F401
 from .serialization import read, write
 
-__all__ = ir.__all__ + ["read", "write"]
+# Import hub functionality
+from . import hub
+
+__all__ = ir.__all__ + ["read", "write", "hub"]

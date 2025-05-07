@@ -30,12 +30,15 @@ classifiers = [
     "Topic :: Scientific/Engineering :: Physics",
     "Topic :: Software Development :: Libraries :: Python Modules",
 ]
-dependencies = [ "numpy", "h5py" ]
+dependencies = [ "numpy", "h5py", "requests", "flask" ]
 dynamic = ["version"] # Version number read from __init__.py
 requires-python = ">=3.9"
 
 [project.urls]
 homepage = "https://github.com/neuromorphs/nir"
+
+[project.scripts]
+nir-hub = "nir.hub.cli:main"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
