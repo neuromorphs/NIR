@@ -70,7 +70,7 @@ document.addEventListener('aos:in:downloads', ({ detail }) => {
 });
 
 document.addEventListener('aos:in:citations', ({ detail }) => {
-    new CountUp('stat-citations', 30).start();
+    new CountUp('stat-citations', 40).start();
 });
 
 $('#citation').click(function () {
