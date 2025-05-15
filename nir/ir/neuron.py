@@ -78,8 +78,9 @@ class CubaLIF(NIRNode):
     :math:`\tau_{mem}` is the membrane time constant,
     :math:`R` is the resistance,
     :math:`v_{leak}` is the leak voltage,
-    :math:`v_{reset}` is the reset potential,
     :math:`v_{threshold}` is the firing threshold,
+    :math:`v_{reset}` is the reset potential,
+    :math:`v_{reset}` is the reset potential,
     :math:`w_{in}` is the input current weight (elementwise)
     and :math:`S` is the input spike.
     """
@@ -88,14 +89,16 @@ class CubaLIF(NIRNode):
     tau_mem: np.ndarray  # Time constant
     r: np.ndarray  # Resistance
     v_leak: np.ndarray  # Leak voltage
-    v_reset: np.ndarray  # Reset potential
     v_threshold: np.ndarray  # Firing threshold
+    v_reset: np.ndarray = field(default_factory=lambda: np.array([0.0]))  # Reset potential
     w_in: np.ndarray = 1.0  # Input current weight
     input_type: Optional[Dict[str, np.ndarray]] = None
     output_type: Optional[Dict[str, np.ndarray]] = None
     metadata: Dict[str, Any] = field(default_factory=dict)
 
     def __post_init__(self):
+        if np.all(self.v_reset == 0.0):
+            self.v_reset = np.zeros_like(self.v_threshold)
         assert (
             self.tau_syn.shape
             == self.tau_mem.shape
@@ -153,13 +156,15 @@ class IF(NIRNode):
     """
 
     r: np.ndarray  # Resistance
-    v_reset: np.ndarray  # Reset potential
     v_threshold: np.ndarray  # Firing threshold
+    v_reset: np.ndarray = field(default_factory=lambda: np.array([0.0]))  # Reset potential
     input_type: Optional[Dict[str, np.ndarray]] = None
     output_type: Optional[Dict[str, np.ndarray]] = None
     metadata: Dict[str, Any] = field(default_factory=dict)
 
     def __post_init__(self):
+        if np.all(self.v_reset == 0.0):
+            self.v_reset = np.zeros_like(self.v_threshold)
         assert (
             self.r.shape == self.v_threshold.shape == self.v_reset.shape
         ), "All parameters must have the same shape"
@@ -217,22 +222,33 @@ class LIF(NIRNode):
             v & else
         \end{cases}
 
-    Where :math:`\tau` is the time constant, :math:`v` is the membrane potential,
-    :math:`v_{leak}` is the leak voltage, :math:`R` is the resistance,
-    :math:`v_{threshold}` is the firing threshold, :math:`v_{reset}` is the reset potential
+    Where :math:`\tau` is the time constant,
+    :math:`v` is the membrane potential,
+    :math:`v_{leak}` is the leak voltage,
+    :math:`R` is the resistance,
+    :math:`v_{threshold}` is the firing threshold,
+    :math:`v_{reset}` is the reset potential
+    Where :math:`\tau` is the time constant,
+    :math:`v` is the membrane potential,
+    :math:`v_{leak}` is the leak voltage,
+    :math:`R` is the resistance,
+    :math:`v_{threshold}` is the firing threshold,
+    :math:`v_{reset}` is the reset potential
     and :math:`I` is the input current.
     """
 
     tau: np.ndarray  # Time constant
     r: np.ndarray  # Resistance
     v_leak: np.ndarray  # Leak voltage
-    v_reset: np.ndarray  # Reset potential
     v_threshold: np.ndarray  # Firing threshold
+    v_reset: np.ndarray = field(default_factory=lambda: np.array([0.0]))  # Reset potential
     input_type: Optional[Dict[str, np.ndarray]] = None
     output_type: Optional[Dict[str, np.ndarray]] = None
     metadata: Dict[str, Any] = field(default_factory=dict)
 
     def __post_init__(self):
+        if np.all(self.v_reset == 0.0):
+            self.v_reset = np.zeros_like(self.v_threshold)
         assert (
             self.tau.shape
             == self.r.shape

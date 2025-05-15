@@ -78,12 +78,19 @@ def read_node(node: Any) -> nir.NIRNode:
     elif node["type"][()] == b"I":
         return nir.I(r=node["r"][()], **_read_metadata(node))
     elif node["type"][()] == b"IF":
-        return nir.IF(
-            r=node["r"][()],
-            v_reset=node["v_reset"][()],
-            v_threshold=node["v_threshold"][()],
-            **_read_metadata(node)
-        )
+        if "v_reset" in node:
+            return nir.IF(
+                r=node["r"][()],
+                v_reset=node["v_reset"][()],
+                v_threshold=node["v_threshold"][()],
+                **_read_metadata(node)
+            )
+        else:
+            return nir.IF(
+                r=node["r"][()],
+                v_threshold=node["v_threshold"][()],
+                **_read_metadata(node)
+            )
     elif node["type"][()] == b"Input":
         return nir.Input(
             input_type={"input": node["shape"][()]}, **_read_metadata(node)
@@ -98,14 +105,23 @@ def read_node(node: Any) -> nir.NIRNode:
     elif node["type"][()] == b"Linear":
         return nir.Linear(weight=node["weight"][()], **_read_metadata(node))
     elif node["type"][()] == b"LIF":
-        return nir.LIF(
-            tau=node["tau"][()],
-            r=node["r"][()],
-            v_leak=node["v_leak"][()],
-            v_reset=node["v_reset"][()],
-            v_threshold=node["v_threshold"][()],
-            **_read_metadata(node),
-        )
+        if "v_reset" in node:
+            return nir.LIF(
+                tau=node["tau"][()],
+                r=node["r"][()],
+                v_leak=node["v_leak"][()],
+                v_reset=node["v_reset"][()],
+                v_threshold=node["v_threshold"][()],
+                **_read_metadata(node),
+            )
+        else:
+            return nir.LIF(
+                tau=node["tau"][()],
+                r=node["r"][()],
+                v_leak=node["v_leak"][()],
+                v_threshold=node["v_threshold"][()],
+                **_read_metadata(node),
+            )
     elif node["type"][()] == b"CubaLI":
         return nir.CubaLI(
             tau_mem=node["tau_mem"][()],
@@ -116,16 +132,27 @@ def read_node(node: Any) -> nir.NIRNode:
             **_read_metadata(node),
         )
     elif node["type"][()] == b"CubaLIF":
-        return nir.CubaLIF(
-            tau_mem=node["tau_mem"][()],
-            tau_syn=node["tau_syn"][()],
-            r=node["r"][()],
-            v_leak=node["v_leak"][()],
-            v_reset=node["v_reset"][()],
-            v_threshold=node["v_threshold"][()],
-            w_in=node["w_in"][()],
-            **_read_metadata(node),
-        )
+        if "v_reset" in node:
+            return nir.CubaLIF(
+                tau_mem=node["tau_mem"][()],
+                tau_syn=node["tau_syn"][()],
+                r=node["r"][()],
+                v_leak=node["v_leak"][()],
+                v_reset=node["v_reset"][()],
+                v_threshold=node["v_threshold"][()],
+                w_in=node["w_in"][()],
+                **_read_metadata(node),
+            )
+        else:
+            return nir.CubaLIF(
+                tau_mem=node["tau_mem"][()],
+                tau_syn=node["tau_syn"][()],
+                r=node["r"][()],
+                v_leak=node["v_leak"][()],
+                v_threshold=node["v_threshold"][()],
+                w_in=node["w_in"][()],
+                **_read_metadata(node),
+            )
     elif node["type"][()] == b"NIRGraph":
         return nir.NIRGraph(
             nodes={k: read_node(n) for k, n in node["nodes"].items()},
