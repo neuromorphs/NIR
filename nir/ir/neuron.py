@@ -70,7 +70,7 @@ class CubaLIF(NIRNode):
 
     .. math::
         v = \begin{cases}
-            v-v_{threshold} & z=1 \\
+            v_{reset} & z=1 \\
             v & else
         \end{cases}
 
@@ -79,7 +79,8 @@ class CubaLIF(NIRNode):
     :math:`R` is the resistance,
     :math:`v_{leak}` is the leak voltage,
     :math:`v_{threshold}` is the firing threshold,
-    :math:`w_{in}` is the input current weight (elementwise),
+    :math:`v_{reset}` is the reset potential,
+    :math:`w_{in}` is the input current weight (elementwise)
     and :math:`S` is the input spike.
     """
 
@@ -88,6 +89,7 @@ class CubaLIF(NIRNode):
     r: np.ndarray  # Resistance
     v_leak: np.ndarray  # Leak voltage
     v_threshold: np.ndarray  # Firing threshold
+    v_reset: np.ndarray  # Reset potential
     w_in: np.ndarray = 1.0  # Input current weight
     input_type: Optional[Dict[str, np.ndarray]] = None
     output_type: Optional[Dict[str, np.ndarray]] = None
@@ -99,6 +101,7 @@ class CubaLIF(NIRNode):
             == self.tau_mem.shape
             == self.r.shape
             == self.v_leak.shape
+            == self.v_reset.shape
             == self.v_threshold.shape
         ), "All parameters must have the same shape"
         # If w_in is a scalar, make it an array of same shape as v_threshold
@@ -144,20 +147,21 @@ class IF(NIRNode):
 
     .. math::
         v = \begin{cases}
-            v-v_{thr} & z=1 \\
+            v_{reset} & z=1 \\
             v & else
         \end{cases}
     """
 
     r: np.ndarray  # Resistance
     v_threshold: np.ndarray  # Firing threshold
+    v_reset: np.ndarray  # Reset potential
     input_type: Optional[Dict[str, np.ndarray]] = None
     output_type: Optional[Dict[str, np.ndarray]] = None
     metadata: Dict[str, Any] = field(default_factory=dict)
 
     def __post_init__(self):
         assert (
-            self.r.shape == self.v_threshold.shape
+            self.r.shape == self.v_threshold.shape == self.v_reset.shape
         ), "All parameters must have the same shape"
         self.input_type = {"input": np.array(self.r.shape)}
         self.output_type = {"output": np.array(self.r.shape)}
@@ -209,19 +213,24 @@ class LIF(NIRNode):
 
     .. math::
         v = \begin{cases}
-            v-v_{thr} & z=1 \\
+            v_{reset} & z=1 \\
             v & else
         \end{cases}
 
-    Where :math:`\tau` is the time constant, :math:`v` is the membrane potential,
-    :math:`v_{leak}` is the leak voltage, :math:`R` is the resistance,
-    :math:`v_{threshold}` is the firing threshold, and :math:`I` is the input current.
+    Where :math:`\tau` is the time constant,
+    :math:`v` is the membrane potential,
+    :math:`v_{leak}` is the leak voltage,
+    :math:`R` is the resistance,
+    :math:`v_{threshold}` is the firing threshold,
+    :math:`v_{reset}` is the reset potential
+    and :math:`I` is the input current.
     """
 
     tau: np.ndarray  # Time constant
     r: np.ndarray  # Resistance
     v_leak: np.ndarray  # Leak voltage
     v_threshold: np.ndarray  # Firing threshold
+    v_reset: np.ndarray  # Reset potential
     input_type: Optional[Dict[str, np.ndarray]] = None
     output_type: Optional[Dict[str, np.ndarray]] = None
     metadata: Dict[str, Any] = field(default_factory=dict)
@@ -231,6 +240,7 @@ class LIF(NIRNode):
             self.tau.shape
             == self.r.shape
             == self.v_leak.shape
+            == self.v_reset.shape
             == self.v_threshold.shape
         ), "All parameters must have the same shape"
         self.input_type = {"input": np.array(self.r.shape)}

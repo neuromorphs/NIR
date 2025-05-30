@@ -161,13 +161,13 @@ def test_conv2d_same():
 
 def test_cuba_li():
     a = np.random.randn(10, 10)
-    lif = nir.CubaLI(tau_mem=a, tau_syn=a, r=a, v_leak=a)
-    assert np.allclose(lif.tau_mem, a)
+    li = nir.CubaLI(tau_mem=a, tau_syn=a, r=a, v_leak=a)
+    assert np.allclose(li.tau_mem, a)
 
 
 def test_cuba_lif():
     a = np.random.randn(10, 10)
-    lif = nir.CubaLIF(tau_mem=a, tau_syn=a, r=a, v_leak=a, v_threshold=a)
+    lif = nir.CubaLIF(tau_mem=a, tau_syn=a, r=a, v_leak=a, v_reset=a, v_threshold=a)
     assert np.allclose(lif.tau_mem, a)
 
 
