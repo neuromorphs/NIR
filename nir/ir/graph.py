@@ -163,100 +163,6 @@ class NIRGraph(NIRNode):
         kwargs_local["edges"] = [(ensure_str(a), ensure_str(b)) for a, b in kwargs_local["edges"]]
         return super().from_dict(kwargs_local)
 
-    def _forward_type_inference(self, debug=True):
-        """Infer the types of all nodes in this graph. Will modify the input_type and
-        output_type of nodes in the graph as needed. Assumes that the input_type of the
-        graph is set. Moves from the input nodes to the output nodes. Raises ValueError
-        if types are inconsistent.
-
-        Assumes that all input types are of form: {'input': ...} and all output types are of form:
-        {'output': ...}.
-
-        Currently only supports the inference of output types for Conv1d and Conv2d nodes.
-        Does not support nested NIR graphs.
-        """
-        ready = [e for e in self.edges if e[0] in self.inputs.keys()]
-        seen = set([e[0] for e in ready])
-        while len(ready) > 0:
-            pre_key, post_key = ready.pop()
-            pre_node = self.nodes[pre_key]
-            post_node = self.nodes[post_key]
-
-            if isinstance(pre_node, NIRGraph) or isinstance(post_node, NIRGraph):
-                raise NotImplementedError(
-                    "type inference on nested NIR graphs not supported yet"
-                )
-
-            # check if post input_type needs to be defined
-            undef_post_input_type = post_node.input_type is None or any(
-                v is None for v in post_node.input_type.values()
-            )
-            type_mismatch = any(
-                [
-                    len(post_node.input_type) != len(pre_node.output_type),
-                    not np.array_equal(
-                        np.array(list(pre_node.output_type.values())),
-                        np.array(list(post_node.input_type.values())),
-                    ),
-                ]
-            )
-            if undef_post_input_type:
-                # define post input_type to be the same as pre output_type
-                print(
-                    f"[warning] {post_key}.input_type undefined, set to {pre_key}.output_type"
-                )
-                post_node.input_type = {
-                    k.replace("output", "input"): v
-                    for k, v in pre_node.output_type.items()
-                }
-            elif type_mismatch:
-                # set post input_type to be the same as pre output_type
-                pre_repr = (
-                    f"{pre_key}.output: {np.array(list(pre_node.output_type.values()))}"
-                )
-                post_repr = (
-                    f"{post_key}.input: {np.array(list(post_node.input_type.values()))}"
-                )
-                print(f"[warning] overwriting {post_repr} with {pre_repr}")
-                post_node.input_type = {
-                    k.replace("output", "input"): v
-                    for k, v in pre_node.output_type.items()
-                }
-
-            # make sure that output nodes have output_type = input_type
-            if isinstance(post_node, Output):
-                post_node.output_type = {
-                    k.replace("input", "output"): v
-                    for k, v in post_node.input_type.items()
-                }
-
-            # check if post output_type needs to be defined
-            undef_post_output_type = post_node.output_type is None or any(
-                v is None for v in post_node.output_type.values()
-            )
-            if undef_post_output_type:
-                # define post output_type
-                if isinstance(post_node, Conv1d) or isinstance(post_node, Conv2d):
-                    if isinstance(post_node, Conv1d):
-                        post_node.input_shape = post_node.input_type["input"][1]
-                    else:
-                        post_node.input_shape = tuple(post_node.input_type["input"][1:])
-                    output_shape = calculate_conv_output(
-                        post_node.input_shape,
-                        post_node.padding,
-                        post_node.dilation,
-                        post_node.weight.shape[2],
-                        post_node.stride,
-                    )
-                    output_type = np.array([post_node.weight.shape[0], *output_shape])
-                    post_node.output_type = {"output": output_type}
-
-            seen.add(post_key)
-            ready += [e for e in self.edges if e[0] == post_key and e[1] not in seen]
-
-            self.nodes[pre_key] = pre_node
-            self.nodes[post_key] = post_node
-
     def infer_types(self):
         """Infer the shapes of all nodes in this graph. Will modify the input_type and
         output_type of all nodes in the graph.
@@ -381,6 +287,13 @@ class NIRGraph(NIRNode):
                 post_node.input_type = {
                     k.replace("output", "input"): v
                     for k, v in pre_node.output_type.items()
+                }
+
+            # make sure that output nodes have output_type = input_type
+            if isinstance(post_node, Output):
+                post_node.output_type = {
+                    k.replace("input", "output"): v
+                    for k, v in post_node.input_type.items()
                 }
 
             # check if post output_type needs to be defined
