@@ -109,6 +109,12 @@ class CubaLIF(NIRNode):
         self.input_type = {"input": np.array(self.v_threshold.shape)}
         self.output_type = {"output": np.array(self.v_threshold.shape)}
 
+    @classmethod
+    def from_dict(cls, kwargs: Dict[str, Any]) -> "CubaLIF":
+        if "v_reset" not in kwargs:
+            kwargs["v_reset"] = np.zeros_like(kwargs["v_threshold"])
+        return super().from_dict(kwargs)
+
 
 @dataclass(eq=False)
 class I(NIRNode):  # noqa: E742
@@ -165,6 +171,12 @@ class IF(NIRNode):
         ), "All parameters must have the same shape"
         self.input_type = {"input": np.array(self.r.shape)}
         self.output_type = {"output": np.array(self.r.shape)}
+    
+    @classmethod
+    def from_dict(cls, kwargs: Dict[str, Any]) -> "IF":
+        if "v_reset" not in kwargs:
+            kwargs["v_reset"] = np.zeros_like(kwargs["v_threshold"])
+        return super().from_dict(kwargs)
 
 
 @dataclass(eq=False)
@@ -245,3 +257,9 @@ class LIF(NIRNode):
         ), "All parameters must have the same shape"
         self.input_type = {"input": np.array(self.r.shape)}
         self.output_type = {"output": np.array(self.r.shape)}
+
+    @classmethod
+    def from_dict(cls, kwargs: Dict[str, Any]) -> "LIF":
+        if "v_reset" not in kwargs:
+            kwargs["v_reset"] = np.zeros_like(kwargs["v_threshold"])
+        return super().from_dict(kwargs)
