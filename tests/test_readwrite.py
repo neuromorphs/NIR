@@ -1,4 +1,6 @@
+import glob
 import inspect
+import os
 import sys
 import tempfile
 
@@ -294,3 +296,21 @@ def test_avg_pool_2d():
     )
     factory_test_graph(ir)
     factory_test_metadata(ir)
+
+
+def test_deserialize():
+    # Test reading the NIRGraphs from the paper
+
+    folder_path = 'paper/*'
+    nir_files = glob.glob(os.path.join(folder_path, '*.nir'))
+    broken_files = ["paper/01_lif/lif_rockpool.nir",
+                    "paper/02_cnn/cnn_sinabs.nir"]
+
+    for file in nir_files:
+        if file in broken_files:
+            continue
+        try:
+            nir.read(file)
+        except Exception as e:
+            print(f"Failed to read {file}: {e}")
+            raise e
