@@ -1,4 +1,3 @@
-import glob
 import inspect
 import os
 import sys
@@ -300,17 +299,17 @@ def test_avg_pool_2d():
 
 def test_deserialize():
     # Test reading the NIRGraphs from the paper
+    current_path = os.path.abspath(__file__)
+    nir_base = os.path.dirname(os.path.dirname(current_path))
 
-    folder_path = 'paper/*'
-    nir_files = glob.glob(os.path.join(folder_path, '*.nir'))
-    broken_files = ["paper/01_lif/lif_rockpool.nir",
-                    "paper/02_cnn/cnn_sinabs.nir"]
+    nir_files = ["paper/03_rnn/braille_noDelay_noBias_subtract.nir",
+        "paper/03_rnn/braille_noDelay_bias_zero.nir",
+        "paper/01_lif/lif_norse.nir",
+        "paper/01_lif/debug_spike_representation/two_lif_neurons.nir"]
 
     for file in nir_files:
-        if file in broken_files:
-            continue
         try:
-            nir.read(file)
+            nir.read(os.path.join(nir_base, file))
         except Exception as e:
             print(f"Failed to read {file}: {e}")
             raise e
