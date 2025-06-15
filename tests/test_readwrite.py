@@ -1,4 +1,5 @@
 import inspect
+import os
 import sys
 import tempfile
 
@@ -292,3 +293,21 @@ def test_avg_pool_2d():
     )
     factory_test_graph(ir)
     factory_test_metadata(ir)
+
+
+def test_deserialize():
+    # Test reading the NIRGraphs from the paper
+    current_path = os.path.abspath(__file__)
+    nir_base = os.path.dirname(os.path.dirname(current_path))
+
+    nir_files = ["paper/03_rnn/braille_noDelay_noBias_subtract.nir",
+        "paper/03_rnn/braille_noDelay_bias_zero.nir",
+        "paper/01_lif/lif_norse.nir",
+        "paper/01_lif/debug_spike_representation/two_lif_neurons.nir"]
+
+    for file in nir_files:
+        try:
+            nir.read(os.path.join(nir_base, file))
+        except Exception as e:
+            print(f"Failed to read {file}: {e}")
+            raise e
