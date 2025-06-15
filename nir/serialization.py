@@ -80,10 +80,13 @@ def read_node(node: Any) -> nir.NIRNode:
     elif node["type"][()] == b"IF":
         return nir.IF(
             r=node["r"][()],
-            v_reset=node["v_reset"][()] if "v_reset" in node else \
-                np.zeros_like(node["v_threshold"][()]),
+            v_reset=(
+                node["v_reset"][()]
+                if "v_reset" in node
+                else np.zeros_like(node["v_threshold"][()])
+            ),
             v_threshold=node["v_threshold"][()],
-            **_read_metadata(node)
+            **_read_metadata(node),
         )
     elif node["type"][()] == b"Input":
         return nir.Input(
@@ -103,8 +106,11 @@ def read_node(node: Any) -> nir.NIRNode:
             tau=node["tau"][()],
             r=node["r"][()],
             v_leak=node["v_leak"][()],
-            v_reset=node["v_reset"][()] if "v_reset" in node else \
-                np.zeros_like(node["v_threshold"][()]),
+            v_reset=(
+                node["v_reset"][()]
+                if "v_reset" in node
+                else np.zeros_like(node["v_threshold"][()])
+            ),
             v_threshold=node["v_threshold"][()],
             **_read_metadata(node),
         )
@@ -123,8 +129,11 @@ def read_node(node: Any) -> nir.NIRNode:
             tau_syn=node["tau_syn"][()],
             r=node["r"][()],
             v_leak=node["v_leak"][()],
-            v_reset=node["v_reset"][()] if "v_reset" in node else \
-                    np.zeros_like(node["v_threshold"][()]),
+            v_reset=(
+                node["v_reset"][()]
+                if "v_reset" in node
+                else np.zeros_like(node["v_threshold"][()])
+            ),
             v_threshold=node["v_threshold"][()],
             w_in=node["w_in"][()],
             **_read_metadata(node),
@@ -169,7 +178,7 @@ def read(filename: Union[str, pathlib.Path]) -> nir.NIRGraph:
     Attempts to read a NIRGraph from a file and pass in the key-value parameters to the
     corresponding NIR nodes.
     If either the reading or creation of nodes fail, the function will raise an exception.
-    
+
     Arguments:
         filename (Union[str, Path]): The filename as either a string or pathlib Path.
 
@@ -184,7 +193,7 @@ def read(filename: Union[str, pathlib.Path]) -> nir.NIRGraph:
 def read_version(filename: Union[str, pathlib.Path]) -> str:
     """Reads the filename of a given NIR file, and raises an exception if the version
     does not exist in the file.
-    
+
     Arguments:
         filename (Union[str, Path]): The filename as either a string or pathlib Path.
     """
@@ -194,7 +203,7 @@ def read_version(filename: Union[str, pathlib.Path]) -> str:
 
 def write(filename: Union[str, pathlib.Path, io.RawIOBase], graph: nir.NIRNode) -> None:
     """Write a NIR to a HDF5 file.
-    
+
     Arguments:
         filename (Union[str, Path, io.RawIOBase]): The filename as either a string, pathlib Path,
             or io.RawIOBase. In the case of a string or path, the function will attempt to open

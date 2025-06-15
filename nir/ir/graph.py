@@ -145,22 +145,27 @@ class NIRGraph(NIRNode):
     def from_dict(cls, kwargs: Dict[str, Any]) -> "NIRGraph":
         from . import dict2NIRNode
 
-        kwargs_local = kwargs.copy() # Copy the input to avoid overwriting attributes
-        
+        kwargs_local = kwargs.copy()  # Copy the input to avoid overwriting attributes
+
         # Assert that we have nodes and edges
         assert "nodes" in kwargs, "The incoming dictionary must hade a 'nodes' entry"
         assert "edges" in kwargs, "The incoming dictionary must hade a 'edges' entry"
         # Assert that the type is well-formed
         if "type" in kwargs:
-            assert kwargs["type"] == "NIRGraph", "You are calling NIRGraph.from_dict with a different type "
+            assert (
+                kwargs["type"] == "NIRGraph"
+            ), "You are calling NIRGraph.from_dict with a different type "
             f"{type}. Either remove the entry or use <Specific NIRNode>.from_dict, such as Input.from_dict"
         kwargs_local["type"] = "NIRGraph"
 
-
-        kwargs_local["nodes"] = {k: dict2NIRNode(n) for k, n in kwargs_local["nodes"].items()}
+        kwargs_local["nodes"] = {
+            k: dict2NIRNode(n) for k, n in kwargs_local["nodes"].items()
+        }
         # h5py deserializes edges into a numpy array of type bytes and dtype=object,
         # hence using ensure_str here
-        kwargs_local["edges"] = [(ensure_str(a), ensure_str(b)) for a, b in kwargs_local["edges"]]
+        kwargs_local["edges"] = [
+            (ensure_str(a), ensure_str(b)) for a, b in kwargs_local["edges"]
+        ]
         return super().from_dict(kwargs_local)
 
     def infer_types(self):

@@ -195,9 +195,7 @@ def test_current_based_leaky_integrator_and_fire():
     w_in = np.array([2, 2, 2])
     ir = nir.NIRGraph.from_list(
         mock_affine(2, 3),
-        nir.CubaLIF(tau_mem, tau_syn, r,
-                    v_leak, v_reset, v_threshold,
-                    w_in=w_in),
+        nir.CubaLIF(tau_mem, tau_syn, r, v_leak, v_reset, v_threshold, w_in=w_in),
     )
     factory_test_graph(ir)
     factory_test_metadata(ir)
