@@ -171,7 +171,7 @@ class IF(NIRNode):
         ), "All parameters must have the same shape"
         self.input_type = {"input": np.array(self.r.shape)}
         self.output_type = {"output": np.array(self.r.shape)}
-    
+
     @classmethod
     def from_dict(cls, kwargs: Dict[str, Any]) -> "IF":
         if "v_reset" not in kwargs:
