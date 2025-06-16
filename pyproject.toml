@@ -40,7 +40,7 @@ homepage = "https://github.com/neuromorphs/nir"
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 
-[tool.setuptools_scm] 
+[tool.setuptools_scm]
 
 [tool.setuptools.packages]
 find={include = ["nir*"]}
@@ -53,10 +53,9 @@ extend-exclude = ["*.ipynb"]
 
 [dependency-groups]
 dev = [
-    "black>=25.1.0",
+    "black==25.1.0",
     "pre-commit>=4.1.0",
     "pytest>=8.3.5",
     "ruff>=0.9.9",
     "sphinx>=7.4.7",
 ]
-
