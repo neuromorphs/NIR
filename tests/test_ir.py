@@ -621,6 +621,84 @@ def test_conv_type_inference():
         assert graph._check_types(), f"type inference failed for: {name}"
 
 
+def test_graph_input_output_type_inference():
+    graphs = {
+        "unset Output(output_type)": nir.NIRGraph(
+            nodes={
+                "graph_input": nir.Input(input_type=np.array([32, 16])),
+                "transform": nir.Flatten(
+                    start_dim=0, end_dim=1, input_type=np.array([32, 16])
+                ),
+                "graph_output": nir.Output(output_type=None),
+            },
+            edges=[("graph_input", "transform"), ("transform", "graph_output")],
+            type_check=False,
+        ),
+        "incorrect Output(output_type)": nir.NIRGraph(
+            nodes={
+                "graph_input": nir.Input(input_type=np.array([32, 16])),
+                "transform": nir.Flatten(
+                    start_dim=0, end_dim=1, input_type=np.array([32, 16])
+                ),
+                "graph_output": nir.Output(output_type=np.array([32, 16])),
+            },
+            edges=[("graph_input", "transform"), ("transform", "graph_output")],
+            type_check=False,
+        ),
+    }
+
+    for name, graph in graphs.items():
+        graph._forward_type_inference()
+
+        # Graph input should be based on Input node input_type
+        assert (
+            graph.input_type is not None
+            and len(graph.input_type) == 1
+            and "graph_input" in graph.input_type
+            and np.array_equal(graph.input_type["graph_input"], np.array([32, 16]))
+        ), f"unexpected graph input type for {name} after type inference"
+        # Graph output should be set to the output_type of the Output node
+        assert (
+            graph.output_type is not None
+            and len(graph.output_type) == 1
+            and "graph_output" in graph.output_type
+            and np.array_equal(graph.output_type["graph_output"], np.array([512]))
+        ), f"unexpected graph output type for {name} after type inference"
+
+        # Input nodes should have input and output types set to the same values.
+        input_node = graph.nodes["graph_input"]
+        assert (
+            input_node.input_type is not None
+            and len(input_node.input_type) == 1
+            and "input" in input_node.input_type
+            and np.array_equal(input_node.input_type["input"], np.array([32, 16]))
+        ), f"unexpected Input node input_type for {name}"
+        assert (
+            input_node.output_type is not None
+            and len(input_node.output_type) == 1
+            and "output" in input_node.output_type
+            and np.array_equal(input_node.output_type["output"], np.array([32, 16]))
+        ), f"unexpected Input node output_type for {name}"
+
+        # Output nodes should have input and output types set to the same values.
+        output_node = graph.nodes["graph_output"]
+        assert (
+            output_node.input_type is not None
+            and len(output_node.input_type) == 1
+            and "input" in output_node.input_type
+            and np.array_equal(output_node.input_type["input"], np.array([512]))
+        ), f"unexpected Output node input_type for {name}"
+        assert (
+            output_node.output_type is not None
+            and len(output_node.output_type) == 1
+            and "output" in output_node.output_type
+            and np.array_equal(output_node.output_type["output"], np.array([512]))
+        ), f"unexpected Output node output_type for {name}"
+
+        # Type check should pass
+        assert graph._check_types(), "type inference failed"
+
+
 def test_node():
     try:
         node = nir.ir.NIRNode()

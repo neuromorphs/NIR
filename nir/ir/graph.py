@@ -294,12 +294,28 @@ class NIRGraph(NIRNode):
                     for k, v in pre_node.output_type.items()
                 }
 
-            # make sure that output nodes have output_type = input_type
             if isinstance(post_node, Output):
+                # make sure that output nodes have output_type = input_type,
+                # because input_type might have been changed in the code above.
                 post_node.output_type = {
                     k.replace("input", "output"): v
                     for k, v in post_node.input_type.items()
                 }
+
+                # set output_type of the graph to the output_type of the Output node
+                if self.output_type is None:
+                    self.output_type = {}
+                if (
+                    post_key in self.output_type
+                    and self.output_type[post_key] is not None
+                    and not np.array_equal(
+                        self.output_type[post_key], post_node.output_type["output"]
+                    )
+                ):
+                    print(
+                        f"[warning] overwriting graph output type for {post_key} from {self.output_type[post_key]} to {post_node.output_type['output']}"
+                    )
+                self.output_type[post_key] = post_node.output_type["output"]
 
             # check if post output_type needs to be defined
             undef_post_output_type = post_node.output_type is None or any(
