@@ -300,10 +300,12 @@ def test_deserialize():
     current_path = os.path.abspath(__file__)
     nir_base = os.path.dirname(os.path.dirname(current_path))
 
-    nir_files = ["paper/03_rnn/braille_noDelay_noBias_subtract.nir",
+    nir_files = [
+        "paper/03_rnn/braille_noDelay_noBias_subtract.nir",
         "paper/03_rnn/braille_noDelay_bias_zero.nir",
         "paper/01_lif/lif_norse.nir",
-        "paper/01_lif/debug_spike_representation/two_lif_neurons.nir"]
+        "paper/01_lif/debug_spike_representation/two_lif_neurons.nir",
+    ]
 
     for file in nir_files:
         try:
