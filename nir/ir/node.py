@@ -39,6 +39,7 @@ class NIRNode(ABC):
     @classmethod
     def from_dict(cls, kwargs: Dict[str, Any]) -> "NIRNode":
         assert kwargs["type"] == cls.__name__
+        kwargs = kwargs.copy() # Local scope
         del kwargs["type"]
 
         return cls(**kwargs)
