@@ -235,7 +235,7 @@ class NIRGraph(NIRNode):
                 )
         return True
 
-    def _forward_type_inference(self, debug=True):
+    def _forward_type_inference(self):
         """Infer the types of all nodes in this graph. Will modify the input_type and
         output_type of nodes in the graph as needed. Assumes that the input_type of the
         graph is set. Moves from the input nodes to the output nodes. Raises ValueError
@@ -274,9 +274,6 @@ class NIRGraph(NIRNode):
             )
             if undef_post_input_type:
                 # define post input_type to be the same as pre output_type
-                print(
-                    f"[warning] {post_key}.input_type undefined, set to {pre_key}.output_type"
-                )
                 post_node.input_type = {
                     k.replace("output", "input"): v
                     for k, v in pre_node.output_type.items()
@@ -289,11 +286,9 @@ class NIRGraph(NIRNode):
                 post_repr = (
                     f"{post_key}.input: {np.array(list(post_node.input_type.values()))}"
                 )
-                print(f"[warning] overwriting {post_repr} with {pre_repr}")
-                post_node.input_type = {
-                    k.replace("output", "input"): v
-                    for k, v in pre_node.output_type.items()
-                }
+                raise ValueError(
+                    f"Type inference error: type mismatch: {pre_repr} -> {post_repr}"
+                )
 
             # make sure that output nodes have output_type = input_type
             if isinstance(post_node, Output):
@@ -350,7 +345,6 @@ class NIRGraph(NIRNode):
                     post_node.output_type = {"output": output_type}
 
                 elif isinstance(post_node, Flatten):
-                    print("updateing flatten output")
                     post_node.output_type = {
                         "output": calc_flatten_output(
                             post_node.input_type["input"],
