@@ -71,7 +71,14 @@ def factory_test_metadata(ir: nir.NIRGraph):
 
 
 def test_simple():
-    ir = nir.NIRGraph(nodes={"a": mock_affine(2, 2)}, edges=[("a", "a")])
+    ir = nir.NIRGraph(
+        nodes={
+            "input": nir.Input(input_type=np.array([2])),
+            "a": mock_affine(2, 2),
+            "output": nir.Output(output_type=None),
+        },
+        edges=[("input", "a"), ("a", "a"), ("a", "output")],
+    )
     factory_test_graph(ir)
     factory_test_metadata(ir)
 
