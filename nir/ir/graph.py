@@ -55,6 +55,7 @@ class NIRGraph(NIRNode):
 
         # Check that all nodes have input and output types, if requested (default)
         if type_check:
+            self._forward_type_inference()
             self.check_types()
 
         # Call post init to set input_type and output_type

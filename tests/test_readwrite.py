@@ -258,37 +258,31 @@ def test_flatten():
     factory_test_metadata(ir)
 
 
-@pytest.mark.skip(
-    "Not implemented"
-)  # TODO: Implement type checking for nodes without i/o types (e. g. SumPool2d)
 def test_sum_pool_2d():
     ir = nir.NIRGraph.from_list(
         [
-            nir.Input(input_type=np.array([2, 2, 10, 10])),
+            nir.Input(input_type=np.array([2, 10, 10])),
             nir.SumPool2d(
                 kernel_size=np.array([2, 2]),
-                stride=np.array([1, 1]),
-                padding=np.ndarray([0, 0]),
+                stride=np.array([2, 2]),
+                padding=np.array([0, 0]),
             ),
-            nir.Output(output_type=np.array([2, 2, 5, 5])),
+            nir.Output(output_type=np.array([2, 5, 5])),
         ]
     )
     factory_test_graph(ir)
 
 
-@pytest.mark.skip(
-    "Not implemented"
-)  # TODO: Implement type checking for nodes without i/o types (e. g. AvgPool2d)
 def test_avg_pool_2d():
     ir = nir.NIRGraph.from_list(
         [
-            nir.Input(input_type=np.array([2, 2, 10, 10])),
+            nir.Input(input_type=np.array([2, 10, 10])),
             nir.AvgPool2d(
                 kernel_size=np.array([2, 2]),
-                stride=np.array([1, 1]),
-                padding=np.ndarray([0, 0]),
+                stride=np.array([2, 2]),
+                padding=np.array([0, 0]),
             ),
-            nir.Output(output_type=np.array([2, 2, 5, 5])),
+            nir.Output(output_type=np.array([2, 5, 5])),
         ]
     )
     factory_test_graph(ir)
