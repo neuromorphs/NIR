@@ -247,7 +247,54 @@ class NIRGraph(NIRNode):
         Currently only supports the inference of output types for Conv1d and Conv2d nodes.
         Does not support nested NIR graphs.
         """
+        # Ensure all graph inputs flow through an Input node
+        all_node_keys = set(self.nodes.keys())
+        destination_nodes = {edge[1] for edge in self.edges}
+        root_nodes = all_node_keys - destination_nodes
+
+        new_nodes: Dict[str, NIRNode] = {}
+        new_edges: Edges = []
+
+        for node_key in root_nodes:
+            node = self.nodes[node_key]
+            if not isinstance(node, Input):
+                # This is a root node that is not an Input node.
+                # It must have its input_type defined to create a preceding Input node.
+                undef_input_type = node.input_type is None or any(
+                    v is None for v in node.input_type.values()
+                )
+                if undef_input_type:
+                    raise ValueError(
+                        f"Root node '{node_key}' of type {type(node).__name__} is not an "
+                        f"Input node and has no defined input_type. Cannot infer graph input."
+                    )
+
+                # Prepend an Input node
+                input_node_name = f"input_{node_key}"
+                i = 0
+                original_name = input_node_name
+                while input_node_name in self.nodes or input_node_name in new_nodes:
+                    input_node_name = f"{original_name}_{i}"
+                    i += 1
+
+                new_input_node = Input(input_type=node.input_type)
+                new_nodes[input_node_name] = new_input_node
+                new_edges.append((input_node_name, node_key))
+
+        if new_nodes:
+            self.nodes.update(new_nodes)
+            self.edges.extend(new_edges)
+
+        # Start type inference from input nodes
         ready = [e for e in self.edges if e[0] in self.inputs.keys()]
+        if len(ready) == 0:
+            raise ValueError(
+                "Failed to start type inference: No input nodes found. "
+                "This may be due to a cyclic dependency at the graph's input. "
+                "Please add an `Input` node manually to define an entry point, "
+                "or disable type checking (`type_check=False`)."
+            )
+
         seen = set([e[0] for e in ready])
         while len(ready) > 0:
             pre_key, post_key = ready.pop()

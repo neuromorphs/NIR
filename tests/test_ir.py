@@ -43,10 +43,19 @@ def test_eq():
 
 def test_simple():
     a = mock_affine(3, 3)
-    ir = nir.NIRGraph(nodes={"a": a}, edges=[("a", "a")])
+    b = mock_affine(3, 3)
+    ir = nir.NIRGraph(
+        nodes={
+            "a": a,
+            "b": b,
+        },
+        edges=[("a", "b")],
+    )
     assert np.allclose(ir.nodes["a"].weight, a.weight)
     assert np.allclose(ir.nodes["a"].bias, a.bias)
-    assert ir.edges == [("a", "a")]
+    assert np.allclose(ir.nodes["b"].weight, b.weight)
+    assert np.allclose(ir.nodes["b"].bias, b.bias)
+    assert ("a", "b") in ir.edges
 
 
 def test_nested():
@@ -56,10 +65,15 @@ def test_nested():
 
     nested = nir.NIRGraph(
         nodes={
+            "input": nir.Input(input_type=np.array([3])),
             "integrator": i,
             "delay": d,
         },
-        edges=[("integrator", "delay"), ("delay", "integrator")],
+        edges=[
+            ("input", "integrator"),
+            ("integrator", "delay"),
+            ("delay", "integrator"),
+        ],
     )
     ir = nir.NIRGraph(
         nodes={"affine": a, "inner": nested},
@@ -70,7 +84,11 @@ def test_nested():
     assert np.allclose(ir.nodes["affine"].bias, a.bias)
     assert np.allclose(ir.nodes["inner"].nodes["integrator"].r, i.r)
     assert np.allclose(ir.nodes["inner"].nodes["delay"].delay, d.delay)
-    assert ir.nodes["inner"].edges == [("integrator", "delay"), ("delay", "integrator")]
+    assert ir.nodes["inner"].edges == [
+        ("input", "integrator"),
+        ("integrator", "delay"),
+        ("delay", "integrator"),
+    ]
 
 
 def test_simple_with_input_output():
@@ -188,9 +206,11 @@ def test_threshold():
 
 def test_linear():
     a = mock_linear(3, 3)
-    ir = nir.NIRGraph(nodes={"a": a}, edges=[("a", "a")])
+    b = mock_linear(3, 3)
+    ir = nir.NIRGraph(nodes={"a": a, "b": b}, edges=[("a", "b")])
     assert np.allclose(ir.nodes["a"].weight, a.weight)
-    assert ir.edges == [("a", "a")]
+    assert np.allclose(ir.nodes["b"].weight, b.weight)
+    assert ("a", "b") in ir.edges
 
 
 def test_flatten():
