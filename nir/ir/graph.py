@@ -55,7 +55,7 @@ class NIRGraph(NIRNode):
 
         # Check that all nodes have input and output types, if requested (default)
         if type_check:
-            self._check_types()
+            self.check_types()
 
         # Call post init to set input_type and output_type
         self.__post_init__()
@@ -192,7 +192,7 @@ class NIRGraph(NIRNode):
         else:
             raise ValueError("Either input_type or output_type must be set")
 
-    def _check_types(self):
+    def check_types(self):
         """Check that all nodes in the graph have input and output types.
 
         Will raise ValueError if any node has no input or output type, or if the types

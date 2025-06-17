@@ -406,13 +406,13 @@ def test_sumpool_type_inference():
     }
     for name, graph in graphs.items():
         try:
-            graph._check_types()
+            graph.check_types()
         except Exception:
             pass
         else:
             raise AssertionError(f"type check failed for: {name}")
         graph.infer_types()
-        assert graph._check_types(), f"type inference failed for: {name}"
+        assert graph.check_types(), f"type inference failed for: {name}"
 
 
 @pytest.mark.skip("Not implemented")  # TODO: Fix subgraph nodes for type checking
@@ -433,13 +433,13 @@ def test_avgpool_type_inference():
     }
     for name, graph in graphs.items():
         try:
-            graph._check_types()
+            graph.check_types()
         except Exception:
             pass
         else:
             raise AssertionError(f"type check failed for: {name}")
         graph.infer_types()
-        assert graph._check_types(), f"type inference failed for: {name}"
+        assert graph.check_types(), f"type inference failed for: {name}"
 
 
 @pytest.mark.skip("Not implemented")  # TODO: Fix subgraph nodes for type checking
@@ -484,13 +484,13 @@ def test_flatten_type_inference():
     }
     for name, graph in graphs.items():
         try:
-            graph._check_types()
+            graph.check_types()
         except Exception:
             pass
         else:
             raise AssertionError(f"type check failed for: {name}")
         graph.infer_types()
-        assert graph._check_types(), f"type inference failed for: {name}"
+        assert graph.check_types(), f"type inference failed for: {name}"
 
 
 @pytest.mark.skip("Not implemented")  # TODO: Fix subgraph nodes for type checking
@@ -612,13 +612,13 @@ def test_conv_type_inference():
     for name, graph in graphs.items():
         try:
             # this should raise an exception
-            graph._check_types()
+            graph.check_types()
         except Exception:
             pass
         else:
             raise AssertionError(f"type check failed for: {name}")
         graph.infer_types()
-        assert graph._check_types(), f"type inference failed for: {name}"
+        assert graph.check_types(), f"type inference failed for: {name}"
 
 
 def test_node():
