@@ -55,7 +55,8 @@ class NIRGraph(NIRNode):
 
         # Check that all nodes have input and output types, if requested (default)
         if type_check:
-            self._check_types()
+            self._forward_type_inference()
+            self.check_types()
 
         # Call post init to set input_type and output_type
         self.__post_init__()
@@ -192,7 +193,7 @@ class NIRGraph(NIRNode):
         else:
             raise ValueError("Either input_type or output_type must be set")
 
-    def _check_types(self):
+    def check_types(self):
         """Check that all nodes in the graph have input and output types.
 
         Will raise ValueError if any node has no input or output type, or if the types
@@ -234,7 +235,7 @@ class NIRGraph(NIRNode):
                 )
         return True
 
-    def _forward_type_inference(self, debug=True):
+    def _forward_type_inference(self):
         """Infer the types of all nodes in this graph. Will modify the input_type and
         output_type of nodes in the graph as needed. Assumes that the input_type of the
         graph is set. Moves from the input nodes to the output nodes. Raises ValueError
@@ -246,7 +247,57 @@ class NIRGraph(NIRNode):
         Currently only supports the inference of output types for Conv1d and Conv2d nodes.
         Does not support nested NIR graphs.
         """
+        if not self.nodes or not self.edges:
+            return
+
+        # Ensure all graph inputs flow through an Input node
+        all_node_keys = set(self.nodes.keys())
+        destination_nodes = {edge[1] for edge in self.edges}
+        root_nodes = all_node_keys - destination_nodes
+
+        new_nodes: Dict[str, NIRNode] = {}
+        new_edges: Edges = []
+
+        for node_key in root_nodes:
+            node = self.nodes[node_key]
+            if not isinstance(node, Input):
+                # This is a root node that is not an Input node.
+                # It must have its input_type defined to create a preceding Input node.
+                undef_input_type = node.input_type is None or any(
+                    v is None for v in node.input_type.values()
+                )
+                if undef_input_type:
+                    raise ValueError(
+                        f"Root node '{node_key}' of type {type(node).__name__} is not an "
+                        f"Input node and has no defined input_type. Cannot infer graph input."
+                    )
+
+                # Prepend an Input node
+                input_node_name = f"input_{node_key}"
+                i = 0
+                original_name = input_node_name
+                while input_node_name in self.nodes or input_node_name in new_nodes:
+                    input_node_name = f"{original_name}_{i}"
+                    i += 1
+
+                new_input_node = Input(input_type=node.input_type)
+                new_nodes[input_node_name] = new_input_node
+                new_edges.append((input_node_name, node_key))
+
+        if new_nodes:
+            self.nodes.update(new_nodes)
+            self.edges.extend(new_edges)
+
+        # Start type inference from input nodes
         ready = [e for e in self.edges if e[0] in self.inputs.keys()]
+        if len(ready) == 0:
+            raise ValueError(
+                "Failed to start type inference: No input nodes found. "
+                "This may be due to a cyclic dependency at the graph's input. "
+                "Please add an `Input` node manually to define an entry point, "
+                "or disable type checking (`type_check=False`)."
+            )
+
         seen = set([e[0] for e in ready])
         while len(ready) > 0:
             pre_key, post_key = ready.pop()
@@ -273,9 +324,6 @@ class NIRGraph(NIRNode):
             )
             if undef_post_input_type:
                 # define post input_type to be the same as pre output_type
-                print(
-                    f"[warning] {post_key}.input_type undefined, set to {pre_key}.output_type"
-                )
                 post_node.input_type = {
                     k.replace("output", "input"): v
                     for k, v in pre_node.output_type.items()
@@ -288,11 +336,9 @@ class NIRGraph(NIRNode):
                 post_repr = (
                     f"{post_key}.input: {np.array(list(post_node.input_type.values()))}"
                 )
-                print(f"[warning] overwriting {post_repr} with {pre_repr}")
-                post_node.input_type = {
-                    k.replace("output", "input"): v
-                    for k, v in pre_node.output_type.items()
-                }
+                raise ValueError(
+                    f"Type inference error: type mismatch: {pre_repr} -> {post_repr}"
+                )
 
             # make sure that output nodes have output_type = input_type
             if isinstance(post_node, Output):
@@ -349,7 +395,6 @@ class NIRGraph(NIRNode):
                     post_node.output_type = {"output": output_type}
 
                 elif isinstance(post_node, Flatten):
-                    print("updateing flatten output")
                     post_node.output_type = {
                         "output": calc_flatten_output(
                             post_node.input_type["input"],
@@ -365,6 +410,55 @@ class NIRGraph(NIRNode):
 
             seen.add(post_key)
             ready += [e for e in self.edges if e[0] == post_key and e[1] not in seen]
+
+        # Ensure all graph outputs flow through an Output node
+        all_node_keys = set(self.nodes.keys())
+        source_nodes = {edge[0] for edge in self.edges}
+        leaf_nodes = all_node_keys - source_nodes
+
+        if not leaf_nodes:
+            raise ValueError(
+                "Type inference failed: No output nodes found. "
+                "This may be due to a cyclic dependency at the graph's output. "
+                "Please add an `Output` node manually to define an exit point, "
+                "or disable type checking (`type_check=False`)."
+            )
+
+        new_nodes: Dict[str, NIRNode] = {}
+        new_edges: Edges = []
+
+        for node_key in leaf_nodes:
+            node = self.nodes[node_key]
+            if not isinstance(node, Output):
+                # This is a leaf node that is not an Output node.
+                # It must have its output_type defined to create a succeeding Output
+                # node.
+                undef_output_type = node.output_type is None or any(
+                    v is None for v in node.output_type.values()
+                )
+                if undef_output_type:
+                    # This should not happen if type inference was successful
+                    raise ValueError(
+                        f"Leaf node '{node_key}' of type {type(node).__name__} "
+                        "is not an Output node and has no defined output_type. "
+                        "Cannot infer graph output."
+                    )
+
+                # Append an Output node
+                output_node_name = f"output_{node_key}"
+                i = 0
+                original_name = output_node_name
+                while output_node_name in self.nodes or output_node_name in new_nodes:
+                    output_node_name = f"{original_name}_{i}"
+                    i += 1
+
+                new_output_node = Output(output_type=node.output_type)
+                new_nodes[output_node_name] = new_output_node
+                new_edges.append((node_key, output_node_name))
+
+        if new_nodes:
+            self.nodes.update(new_nodes)
+            self.edges.extend(new_edges)
 
 
 @dataclass(eq=False)
