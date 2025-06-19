@@ -68,11 +68,13 @@ def test_nested():
             "input": nir.Input(input_type=np.array([3])),
             "integrator": i,
             "delay": d,
+            "output": nir.Output(output_type=None),
         },
         edges=[
             ("input", "integrator"),
             ("integrator", "delay"),
             ("delay", "integrator"),
+            ("integrator", "output"),
         ],
     )
     ir = nir.NIRGraph(
@@ -88,6 +90,7 @@ def test_nested():
         ("input", "integrator"),
         ("integrator", "delay"),
         ("delay", "integrator"),
+        ("integrator", "output"),
     ]
 
 
