@@ -247,6 +247,9 @@ class NIRGraph(NIRNode):
         Currently only supports the inference of output types for Conv1d and Conv2d nodes.
         Does not support nested NIR graphs.
         """
+        if not self.nodes:
+            return
+
         # Ensure all graph inputs flow through an Input node
         all_node_keys = set(self.nodes.keys())
         destination_nodes = {edge[1] for edge in self.edges}
