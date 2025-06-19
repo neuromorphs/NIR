@@ -411,6 +411,47 @@ class NIRGraph(NIRNode):
             seen.add(post_key)
             ready += [e for e in self.edges if e[0] == post_key and e[1] not in seen]
 
+        # Ensure all graph outputs flow through an Output node
+        all_node_keys = set(self.nodes.keys())
+        source_nodes = {edge[0] for edge in self.edges}
+        leaf_nodes = all_node_keys - source_nodes
+
+        new_nodes: Dict[str, NIRNode] = {}
+        new_edges: Edges = []
+
+        for node_key in leaf_nodes:
+            node = self.nodes[node_key]
+            if not isinstance(node, Output):
+                # This is a leaf node that is not an Output node.
+                # It must have its output_type defined to create a succeeding Output
+                # node.
+                undef_output_type = node.output_type is None or any(
+                    v is None for v in node.output_type.values()
+                )
+                if undef_output_type:
+                    # This should not happen if type inference was successful
+                    raise ValueError(
+                        f"Leaf node '{node_key}' of type {type(node).__name__} "
+                        "is not an Output node and has no defined output_type. "
+                        "Cannot infer graph output."
+                    )
+
+                # Append an Output node
+                output_node_name = f"output_{node_key}"
+                i = 0
+                original_name = output_node_name
+                while output_node_name in self.nodes or output_node_name in new_nodes:
+                    output_node_name = f"{original_name}_{i}"
+                    i += 1
+
+                new_output_node = Output(output_type=node.output_type)
+                new_nodes[output_node_name] = new_output_node
+                new_edges.append((node_key, output_node_name))
+
+        if new_nodes:
+            self.nodes.update(new_nodes)
+            self.edges.extend(new_edges)
+
 
 @dataclass(eq=False)
 class Input(NIRNode):

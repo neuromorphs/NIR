@@ -55,7 +55,7 @@ def test_simple():
     assert np.allclose(ir.nodes["a"].bias, a.bias)
     assert np.allclose(ir.nodes["b"].weight, b.weight)
     assert np.allclose(ir.nodes["b"].bias, b.bias)
-    assert ("a", "b") in ir.edges
+    assert sorted([("input_a", "a"), ("a", "b"), ("b", "output_b")]) == sorted(ir.edges)
 
 
 def test_nested():
