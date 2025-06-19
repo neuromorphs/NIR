@@ -416,6 +416,14 @@ class NIRGraph(NIRNode):
         source_nodes = {edge[0] for edge in self.edges}
         leaf_nodes = all_node_keys - source_nodes
 
+        if not leaf_nodes:
+            raise ValueError(
+                "Type inference failed: No output nodes found. "
+                "This may be due to a cyclic dependency at the graph's output. "
+                "Please add an `Output` node manually to define an exit point, "
+                "or disable type checking (`type_check=False`)."
+            )
+
         new_nodes: Dict[str, NIRNode] = {}
         new_edges: Edges = []
 
