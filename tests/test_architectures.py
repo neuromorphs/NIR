@@ -88,7 +88,6 @@ def test_recurrent_on_second_node():
     factory_test_graph(ir)
 
 
-@pytest.mark.skip("Nested type inference not implemented")
 def test_two_independent_branches():
     """
     ```mermaid
@@ -134,7 +133,6 @@ def test_two_independent_branches():
     factory_test_graph(ir)
 
 
-@pytest.mark.skip("Nested type inference not implemented")
 def test_two_independent_branches_merging():
     """
     ```mermaid
@@ -192,7 +190,6 @@ def test_two_independent_branches_merging():
     factory_test_graph(ir)
 
 
-@pytest.mark.skip("Nested type inference not implemented")
 def test_merge_and_split_single_output():
     """
     ```mermaid
@@ -259,7 +256,6 @@ def test_merge_and_split_single_output():
     factory_test_graph(ir)
 
 
-@pytest.mark.skip("Nested type inference not implemented")
 def test_merge_and_split_different_output_type():
     # Part before split
     a = mock_affine(3, 3)

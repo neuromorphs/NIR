@@ -83,7 +83,6 @@ def test_simple():
     factory_test_metadata(ir)
 
 
-@pytest.mark.skip("Not implemented")  # TODO: Implement subgraph type checking
 def test_nested():
     i = np.array([2])
     nested = nir.NIRGraph(
@@ -92,8 +91,8 @@ def test_nested():
             "b": nir.NIRGraph(
                 nodes={
                     "a": nir.Input(i),
-                    "b": nir.Delay(i),
-                    "c": nir.Output(np.array([1, 1])),
+                    "b": nir.Delay(np.array([1, 1])),
+                    "c": nir.Output(i),
                 },
                 edges=[("a", "b"), ("b", "c")],
             ),

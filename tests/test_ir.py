@@ -77,11 +77,7 @@ def test_nested():
             ("integrator", "output"),
         ],
     )
-    ir = nir.NIRGraph(
-        nodes={"affine": a, "inner": nested},
-        edges=[("affine", "inner")],
-        type_check=False,  # TODO: Add type check
-    )
+    ir = nir.NIRGraph(nodes={"affine": a, "inner": nested}, edges=[("affine", "inner")])
     assert np.allclose(ir.nodes["affine"].weight, a.weight)
     assert np.allclose(ir.nodes["affine"].bias, a.bias)
     assert np.allclose(ir.nodes["inner"].nodes["integrator"].r, i.r)

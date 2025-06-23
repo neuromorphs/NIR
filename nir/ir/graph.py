@@ -207,6 +207,9 @@ class NIRGraph(NIRNode):
             pre_node = self.nodes[edge[0]]
             post_node = self.nodes[edge[1]]
 
+            if isinstance(post_node, NIRGraph):
+                post_node.check_types()
+
             # make sure all types are defined
             undef_out_type = pre_node.output_type is None or any(
                 v is None for v in pre_node.output_type.values()
@@ -308,10 +311,8 @@ class NIRGraph(NIRNode):
             pre_node = self.nodes[pre_key]
             post_node = self.nodes[post_key]
 
-            if isinstance(pre_node, NIRGraph) or isinstance(post_node, NIRGraph):
-                raise NotImplementedError(
-                    "type inference on nested NIR graphs not supported yet"
-                )
+            if isinstance(post_node, NIRGraph):
+                post_node.infer_types()
 
             # check if post input_type needs to be defined
             undef_post_input_type = post_node.input_type is None or any(
