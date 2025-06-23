@@ -586,7 +586,8 @@ def test_conv2d_type_inference():
         assert np.array_equal(
             graph.nodes["conv"].output_type["output"], np.array([1, 61, 61])
         ), name
-        # TODO: Check for graph input and output types
+        assert np.array_equal(graph.input_type["input"], np.array([1, 64, 64])), name
+        assert np.array_equal(graph.output_type["output"], np.array([1, 61, 61])), name
 
 
 def test_conv1d_type_inference():
@@ -645,7 +646,80 @@ def test_conv1d_type_inference():
         assert np.array_equal(
             graph.nodes["conv"].output_type["output"], np.array([1, 61])
         ), name
-        # TODO: Check for graph input and output types
+        assert np.array_equal(graph.input_type["input"], np.array([1, 64])), name
+        assert np.array_equal(graph.output_type["output"], np.array([1, 61])), name
+
+
+def test_graph_input_output_type_inference():
+    graphs = {
+        "inferred Input and Output nodes": nir.NIRGraph(
+            nodes={
+                "transform": nir.Linear(weight=np.random.random((4, 6))),
+            },
+            edges=[],
+        ),
+        "inferred Output node": nir.NIRGraph(
+            nodes={
+                "graph_input": nir.Input(input_type=np.array([6])),
+                "transform": nir.Linear(weight=np.random.random((4, 6))),
+            },
+            edges=[("graph_input", "transform")],
+        ),
+        "unset Output(output_type)": nir.NIRGraph(
+            nodes={
+                "graph_input": nir.Input(input_type=np.array([6])),
+                "transform": nir.Linear(weight=np.random.random((4, 6))),
+                "graph_output": nir.Output(output_type=None),
+            },
+            edges=[("graph_input", "transform"), ("transform", "graph_output")],
+        ),
+    }
+
+    for name, graph in graphs.items():
+        # Graph input should be based on Input node input_type
+        assert (
+            graph.input_type is not None
+            and len(graph.input_type) == 1
+            and np.array_equal(list(graph.input_type.values())[0], np.array([6]))
+        ), f"unexpected graph input type for {name} after type inference"
+        # Graph output should be set to the output_type of the Output node
+        assert (
+            graph.output_type is not None
+            and len(graph.output_type) == 1
+            and np.array_equal(list(graph.output_type.values())[0], np.array([4]))
+        ), f"unexpected graph output type for {name} after type inference"
+
+        # Input nodes should have input and output types set to the same values.
+        assert len(graph.inputs) == 1, f"unexpected number of input nodes for {name}"
+        input_node = list(graph.inputs.values())[0]
+        assert (
+            input_node.input_type is not None
+            and len(input_node.input_type) == 1
+            and "input" in input_node.input_type
+            and np.array_equal(input_node.input_type["input"], np.array([6]))
+        ), f"unexpected Input node input_type for {name}"
+        assert (
+            input_node.output_type is not None
+            and len(input_node.output_type) == 1
+            and "output" in input_node.output_type
+            and np.array_equal(input_node.output_type["output"], np.array([6]))
+        ), f"unexpected Input node output_type for {name}"
+
+        # Output nodes should have input and output types set to the same values.
+        assert len(graph.outputs) == 1, f"unexpected number of output nodes for {name}"
+        output_node = list(graph.outputs.values())[0]
+        assert (
+            output_node.input_type is not None
+            and len(output_node.input_type) == 1
+            and "input" in output_node.input_type
+            and np.array_equal(output_node.input_type["input"], np.array([4]))
+        ), f"unexpected Output node input_type for {name}"
+        assert (
+            output_node.output_type is not None
+            and len(output_node.output_type) == 1
+            and "output" in output_node.output_type
+            and np.array_equal(output_node.output_type["output"], np.array([4]))
+        ), f"unexpected Output node output_type for {name}"
 
 
 def test_node():

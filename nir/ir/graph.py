@@ -115,6 +115,13 @@ class NIRGraph(NIRNode):
         )
 
     def __post_init__(self):
+        self._update_input_output_types()
+
+        # Assign the metadata attribute if left unset to avoid issues with serialization
+        if not isinstance(self.metadata, dict):
+            self.metadata = {}
+
+    def _update_input_output_types(self):
         input_node_keys = [
             k for k, node in self.nodes.items() if isinstance(node, Input)
         ]
@@ -133,9 +140,6 @@ class NIRGraph(NIRNode):
             node_key: self.nodes[node_key].output_type["output"]
             for node_key in output_node_keys
         }
-        # Assign the metadata attribute if left unset to avoid issues with serialization
-        if not isinstance(self.metadata, dict):
-            self.metadata = {}
 
     def to_dict(self) -> Dict[str, Any]:
         ret = super().to_dict()
@@ -459,6 +463,8 @@ class NIRGraph(NIRNode):
         if new_nodes:
             self.nodes.update(new_nodes)
             self.edges.extend(new_edges)
+
+        self._update_input_output_types()
 
 
 @dataclass(eq=False)
