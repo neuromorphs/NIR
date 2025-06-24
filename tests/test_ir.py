@@ -718,6 +718,43 @@ def test_graph_input_output_type_inference():
         ), f"unexpected Output node output_type for {name}"
 
 
+def test_type_check_recurrent():
+    # Valid recurrent graph
+    nir.NIRGraph(
+        nodes={
+            "a": nir.Input(np.array([2])),
+            "b": nir.Linear(np.random.rand(2, 2)),
+            "c": nir.IF(
+                r=np.random.rand(2), v_threshold=np.random.rand(2), v_reset=np.zeros(2)
+            ),
+            "d": nir.Output(np.array([2])),
+        },
+        edges=[("a", "b"), ("b", "c"), ("c", "b"), ("c", "d")],
+    )
+
+    # Invalid recurrent graph: c output goes back to b, but shapes do not match
+    with pytest.raises(
+        ValueError, match="type mismatch: c.output: \\[16\\] -> b.input: \\[1 5 5\\]"
+    ):
+        nir.NIRGraph(
+            nodes={
+                "a": nir.Input(input_type=np.array([1, 5, 5])),
+                "b": nir.Conv2d(
+                    input_shape=None,
+                    weight=np.random.rand(1, 1, 2, 2),
+                    stride=1,
+                    padding=0,
+                    dilation=1,
+                    groups=1,
+                    bias=np.zeros(1),
+                ),
+                "c": nir.Flatten(input_type=None, start_dim=0, end_dim=2),
+                "d": nir.Output(output_type=np.array([16])),
+            },
+            edges=[("a", "b"), ("b", "c"), ("c", "b"), ("c", "d")],
+        )
+
+
 def test_node():
     try:
         node = nir.ir.NIRNode()
