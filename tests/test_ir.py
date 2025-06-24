@@ -43,10 +43,19 @@ def test_eq():
 
 def test_simple():
     a = mock_affine(3, 3)
-    ir = nir.NIRGraph(nodes={"a": a}, edges=[("a", "a")])
+    b = mock_affine(3, 3)
+    ir = nir.NIRGraph(
+        nodes={
+            "a": a,
+            "b": b,
+        },
+        edges=[("a", "b")],
+    )
     assert np.allclose(ir.nodes["a"].weight, a.weight)
     assert np.allclose(ir.nodes["a"].bias, a.bias)
-    assert ir.edges == [("a", "a")]
+    assert np.allclose(ir.nodes["b"].weight, b.weight)
+    assert np.allclose(ir.nodes["b"].bias, b.bias)
+    assert sorted([("input_a", "a"), ("a", "b"), ("b", "output_b")]) == sorted(ir.edges)
 
 
 def test_nested():
@@ -56,21 +65,29 @@ def test_nested():
 
     nested = nir.NIRGraph(
         nodes={
+            "input": nir.Input(input_type=np.array([3])),
             "integrator": i,
             "delay": d,
+            "output": nir.Output(output_type=None),
         },
-        edges=[("integrator", "delay"), ("delay", "integrator")],
+        edges=[
+            ("input", "integrator"),
+            ("integrator", "delay"),
+            ("delay", "integrator"),
+            ("integrator", "output"),
+        ],
     )
-    ir = nir.NIRGraph(
-        nodes={"affine": a, "inner": nested},
-        edges=[("affine", "inner")],
-        type_check=False,  # TODO: Add type check
-    )
+    ir = nir.NIRGraph(nodes={"affine": a, "inner": nested}, edges=[("affine", "inner")])
     assert np.allclose(ir.nodes["affine"].weight, a.weight)
     assert np.allclose(ir.nodes["affine"].bias, a.bias)
     assert np.allclose(ir.nodes["inner"].nodes["integrator"].r, i.r)
     assert np.allclose(ir.nodes["inner"].nodes["delay"].delay, d.delay)
-    assert ir.nodes["inner"].edges == [("integrator", "delay"), ("delay", "integrator")]
+    assert ir.nodes["inner"].edges == [
+        ("input", "integrator"),
+        ("integrator", "delay"),
+        ("delay", "integrator"),
+        ("integrator", "output"),
+    ]
 
 
 def test_simple_with_input_output():
@@ -188,9 +205,11 @@ def test_threshold():
 
 def test_linear():
     a = mock_linear(3, 3)
-    ir = nir.NIRGraph(nodes={"a": a}, edges=[("a", "a")])
+    b = mock_linear(3, 3)
+    ir = nir.NIRGraph(nodes={"a": a, "b": b}, edges=[("a", "b")])
     assert np.allclose(ir.nodes["a"].weight, a.weight)
-    assert ir.edges == [("a", "a")]
+    assert np.allclose(ir.nodes["b"].weight, b.weight)
+    assert ("a", "b") in ir.edges
 
 
 def test_flatten():
@@ -297,7 +316,7 @@ def test_graph_from_dict_type_checked():
 
     with pytest.raises(ValueError):
         nodes = {
-            "input": {"type": "Input", "shape": np.array([2])},
+            "input": {"type": "Input", "shape": np.array([3])},
             "module": {"type": "Linear", "weight": np.random.random((2, 2))},
             "output": {"type": "Output", "shape": np.array([3])},
         }
@@ -388,113 +407,109 @@ def test_inputs_outputs_properties():
     assert ir.nodes["out2"] in ir2.nodes["inner"].outputs.values()
 
 
-@pytest.mark.skip("Not implemented")  # TODO: Fix subgraph nodes for type checking
 def test_sumpool_type_inference():
-    graphs = {
-        "undef graph output": nir.NIRGraph(
-            nodes={
-                "input": nir.Input(input_type=np.array([1, 64, 64])),
-                "sumpool": nir.SumPool2d(
-                    kernel_size=np.array([2, 2]),
-                    stride=np.array([2, 2]),
-                    padding=np.array([0, 0]),
-                ),
-                "output": nir.Output(output_type=None),
-            },
-            edges=[("input", "sumpool"), ("sumpool", "output")],
-        ),
-    }
-    for name, graph in graphs.items():
-        try:
-            graph._check_types()
-        except Exception:
-            pass
-        else:
-            raise AssertionError(f"type check failed for: {name}")
-        graph.infer_types()
-        assert graph._check_types(), f"type inference failed for: {name}"
+    graph = nir.NIRGraph(
+        nodes={
+            "input": nir.Input(input_type=np.array([1, 64, 64])),
+            "sumpool": nir.SumPool2d(
+                kernel_size=np.array([2, 2]),
+                stride=np.array([2, 2]),
+                padding=np.array([0, 0]),
+            ),
+            "output": nir.Output(output_type=None),
+        },
+        edges=[("input", "sumpool"), ("sumpool", "output")],
+    )
+    assert np.array_equal(graph.output_type["output"], np.array([1, 32, 32]))
+    assert np.array_equal(
+        graph.nodes["output"].input_type["input"], np.array([1, 32, 32])
+    )
+    assert np.array_equal(
+        graph.nodes["output"].output_type["output"], np.array([1, 32, 32])
+    )
 
 
-@pytest.mark.skip("Not implemented")  # TODO: Fix subgraph nodes for type checking
 def test_avgpool_type_inference():
-    graphs = {
-        "undef graph output": nir.NIRGraph(
-            nodes={
-                "input": nir.Input(input_type=np.array([1, 64, 64])),
-                "avgpool": nir.AvgPool2d(
-                    kernel_size=np.array([2, 2]),
-                    stride=np.array([2, 2]),
-                    padding=np.array([0, 0]),
-                ),
-                "output": nir.Output(output_type=None),
-            },
-            edges=[("input", "avgpool"), ("avgpool", "output")],
-        ),
-    }
-    for name, graph in graphs.items():
-        try:
-            graph._check_types()
-        except Exception:
-            pass
-        else:
-            raise AssertionError(f"type check failed for: {name}")
-        graph.infer_types()
-        assert graph._check_types(), f"type inference failed for: {name}"
+    graph = nir.NIRGraph(
+        nodes={
+            "input": nir.Input(input_type=np.array([1, 64, 64])),
+            "avgpool": nir.AvgPool2d(
+                kernel_size=np.array([2, 2]),
+                stride=np.array([2, 2]),
+                padding=np.array([0, 0]),
+            ),
+            "output": nir.Output(output_type=None),
+        },
+        edges=[("input", "avgpool"), ("avgpool", "output")],
+    )
+    assert np.array_equal(graph.output_type["output"], np.array([1, 32, 32]))
+    assert np.array_equal(
+        graph.nodes["output"].input_type["input"], np.array([1, 32, 32])
+    )
+    assert np.array_equal(
+        graph.nodes["output"].output_type["output"], np.array([1, 32, 32])
+    )
 
 
-@pytest.mark.skip("Not implemented")  # TODO: Fix subgraph nodes for type checking
 def test_flatten_type_inference():
-    graphs = {
-        "undef graph output": nir.NIRGraph(
-            nodes={
-                "input": nir.Input(input_type=np.array([1, 64, 64])),
-                "flatten": nir.Flatten(
-                    start_dim=0, end_dim=0, input_type=np.array([1, 64, 64])
-                ),
-                "output": nir.Output(output_type=None),
-            },
-            edges=[("input", "flatten"), ("flatten", "output")],
-        ),
-        "incorrect graph output": nir.NIRGraph(
-            nodes={
-                "input": nir.Input(input_type=np.array([1, 64, 64])),
-                "flatten": nir.Flatten(
-                    start_dim=0, end_dim=0, input_type=np.array([1, 64, 64])
-                ),
-                "output": nir.Output(output_type=np.array([1, 61, 1])),
-            },
-            edges=[("input", "flatten"), ("flatten", "output")],
-        ),
-        "undef flatten.input": nir.NIRGraph(
-            nodes={
-                "input": nir.Input(input_type=np.array([1, 64, 64])),
-                "flatten": nir.Flatten(start_dim=0, end_dim=0, input_type=None),
-                "output": nir.Output(output_type=np.array([1, 61, 61])),
-            },
-            edges=[("input", "flatten"), ("flatten", "output")],
-        ),
-        "undef flatten.input and graph output": nir.NIRGraph(
-            nodes={
-                "input": nir.Input(input_type=np.array([1, 64, 64])),
-                "flatten": nir.Flatten(start_dim=0, end_dim=0, input_type=None),
-                "output": nir.Output(output_type=None),
-            },
-            edges=[("input", "flatten"), ("flatten", "output")],
-        ),
-    }
-    for name, graph in graphs.items():
-        try:
-            graph._check_types()
-        except Exception:
-            pass
-        else:
-            raise AssertionError(f"type check failed for: {name}")
-        graph.infer_types()
-        assert graph._check_types(), f"type inference failed for: {name}"
+    tests = [
+        {
+            "start_dim": 0,
+            "end_dim": 0,
+            "input": np.array([1, 64, 64]),
+            "output": np.array([1, 64, 64]),
+        },
+        {
+            "start_dim": 0,
+            "end_dim": 1,
+            "input": np.array([1, 64, 64]),
+            "output": np.array([64, 64]),
+        },
+        {
+            "start_dim": 0,
+            "end_dim": 2,
+            "input": np.array([1, 64, 64]),
+            "output": np.array([4096]),
+        },
+        {
+            "start_dim": 1,
+            "end_dim": 2,
+            "input": np.array([1, 64, 64]),
+            "output": np.array([1, 4096]),
+        },
+    ]
+
+    for test in tests:
+        for flatten_input_type in [test["input"], None]:
+            graph = nir.NIRGraph(
+                nodes={
+                    "input": nir.Input(input_type=test["input"]),
+                    "flatten": nir.Flatten(
+                        start_dim=test["start_dim"],
+                        end_dim=test["end_dim"],
+                        input_type=flatten_input_type,
+                    ),
+                    "output": nir.Output(output_type=None),
+                },
+                edges=[("input", "flatten"), ("flatten", "output")],
+            )
+            assert np.array_equal(
+                graph.nodes["flatten"].input_type["input"], test["input"]
+            )
+            assert np.array_equal(
+                graph.nodes["flatten"].output_type["output"], test["output"]
+            )
+            assert np.array_equal(
+                graph.nodes["output"].input_type["input"], test["output"]
+            )
+            assert np.array_equal(
+                graph.nodes["output"].output_type["output"], test["output"]
+            )
+            assert np.array_equal(graph.input_type["input"], test["input"])
+            assert np.array_equal(graph.output_type["output"], test["output"])
 
 
-@pytest.mark.skip("Not implemented")  # TODO: Fix subgraph nodes for type checking
-def test_conv_type_inference():
+def test_conv2d_type_inference():
     graphs = {
         "undef graph output": nir.NIRGraph(
             nodes={
@@ -511,22 +526,7 @@ def test_conv_type_inference():
                 "output": nir.Output(output_type=None),
             },
             edges=[("input", "conv"), ("conv", "output")],
-        ),
-        "incorrect graph output": nir.NIRGraph(
-            nodes={
-                "input": nir.Input(input_type=np.array([1, 64, 64])),
-                "conv": nir.Conv2d(
-                    input_shape=(64, 64),
-                    weight=np.zeros((1, 1, 4, 4)),
-                    stride=1,
-                    padding=0,
-                    dilation=1,
-                    groups=1,
-                    bias=None,
-                ),
-                "output": nir.Output(output_type=np.array([1, 61, 1])),
-            },
-            edges=[("input", "conv"), ("conv", "output")],
+            type_check=False,
         ),
         "undef conv.input": nir.NIRGraph(
             nodes={
@@ -543,6 +543,7 @@ def test_conv_type_inference():
                 "output": nir.Output(output_type=np.array([1, 61, 61])),
             },
             edges=[("input", "conv"), ("conv", "output")],
+            type_check=False,
         ),
         "undef conv.input and graph output": nir.NIRGraph(
             nodes={
@@ -559,7 +560,34 @@ def test_conv_type_inference():
                 "output": nir.Output(output_type=None),
             },
             edges=[("input", "conv"), ("conv", "output")],
+            type_check=False,
         ),
+    }
+    for name, graph in graphs.items():
+        try:
+            graph.infer_types()
+        except Exception as ex:
+            raise AssertionError(f"type inference failed for: {name}: {ex}") from ex
+        try:
+            graph.check_types()
+        except Exception as ex:
+            raise AssertionError(f"type check failed for: {name}: {ex}") from ex
+
+        assert np.array_equal(
+            graph.nodes["output"].input_type["input"], np.array([1, 61, 61])
+        ), name
+        assert np.array_equal(
+            graph.nodes["output"].output_type["output"], np.array([1, 61, 61])
+        ), name
+        assert np.array_equal(
+            graph.nodes["conv"].output_type["output"], np.array([1, 61, 61])
+        ), name
+        assert np.array_equal(graph.input_type["input"], np.array([1, 64, 64])), name
+        assert np.array_equal(graph.output_type["output"], np.array([1, 61, 61])), name
+
+
+def test_conv1d_type_inference():
+    graphs = {
         "Conv1d undef graph output": nir.NIRGraph(
             nodes={
                 "input": nir.Input(input_type=np.array([1, 64])),
@@ -575,22 +603,7 @@ def test_conv_type_inference():
                 "output": nir.Output(output_type=None),
             },
             edges=[("input", "conv"), ("conv", "output")],
-        ),
-        "Conv1d incorrect graph output": nir.NIRGraph(
-            nodes={
-                "input": nir.Input(input_type=np.array([1, 64])),
-                "conv": nir.Conv1d(
-                    input_shape=64,
-                    weight=np.zeros((1, 1, 4)),
-                    stride=1,
-                    padding=0,
-                    dilation=1,
-                    groups=1,
-                    bias=None,
-                ),
-                "output": nir.Output(output_type=np.array([1, 3])),
-            },
-            edges=[("input", "conv"), ("conv", "output")],
+            type_check=False,
         ),
         "Conv1d undef conv.input and graph output": nir.NIRGraph(
             nodes={
@@ -607,18 +620,139 @@ def test_conv_type_inference():
                 "output": nir.Output(output_type=None),
             },
             edges=[("input", "conv"), ("conv", "output")],
+            type_check=False,
         ),
     }
     for name, graph in graphs.items():
         try:
-            # this should raise an exception
-            graph._check_types()
-        except Exception:
-            pass
-        else:
-            raise AssertionError(f"type check failed for: {name}")
-        graph.infer_types()
-        assert graph._check_types(), f"type inference failed for: {name}"
+            graph.infer_types()
+        except Exception as ex:
+            raise AssertionError(f"type inference failed for: {name}: {ex}") from ex
+        try:
+            graph.check_types()
+        except Exception as ex:
+            raise AssertionError(f"type check failed for: {name}: {ex}") from ex
+
+        assert np.array_equal(
+            graph.nodes["output"].input_type["input"], np.array([1, 61])
+        ), name
+        assert np.array_equal(
+            graph.nodes["output"].output_type["output"], np.array([1, 61])
+        ), name
+        assert np.array_equal(
+            graph.nodes["conv"].output_type["output"], np.array([1, 61])
+        ), name
+        assert np.array_equal(graph.input_type["input"], np.array([1, 64])), name
+        assert np.array_equal(graph.output_type["output"], np.array([1, 61])), name
+
+
+def test_graph_input_output_type_inference():
+    graphs = {
+        "inferred Input and Output nodes": nir.NIRGraph(
+            nodes={
+                "transform": nir.Linear(weight=np.random.random((4, 6))),
+            },
+            edges=[],
+        ),
+        "inferred Output node": nir.NIRGraph(
+            nodes={
+                "graph_input": nir.Input(input_type=np.array([6])),
+                "transform": nir.Linear(weight=np.random.random((4, 6))),
+            },
+            edges=[("graph_input", "transform")],
+        ),
+        "unset Output(output_type)": nir.NIRGraph(
+            nodes={
+                "graph_input": nir.Input(input_type=np.array([6])),
+                "transform": nir.Linear(weight=np.random.random((4, 6))),
+                "graph_output": nir.Output(output_type=None),
+            },
+            edges=[("graph_input", "transform"), ("transform", "graph_output")],
+        ),
+    }
+
+    for name, graph in graphs.items():
+        # Graph input should be based on Input node input_type
+        assert (
+            graph.input_type is not None
+            and len(graph.input_type) == 1
+            and np.array_equal(list(graph.input_type.values())[0], np.array([6]))
+        ), f"unexpected graph input type for {name} after type inference"
+        # Graph output should be set to the output_type of the Output node
+        assert (
+            graph.output_type is not None
+            and len(graph.output_type) == 1
+            and np.array_equal(list(graph.output_type.values())[0], np.array([4]))
+        ), f"unexpected graph output type for {name} after type inference"
+
+        # Input nodes should have input and output types set to the same values.
+        assert len(graph.inputs) == 1, f"unexpected number of input nodes for {name}"
+        input_node = list(graph.inputs.values())[0]
+        assert (
+            input_node.input_type is not None
+            and len(input_node.input_type) == 1
+            and "input" in input_node.input_type
+            and np.array_equal(input_node.input_type["input"], np.array([6]))
+        ), f"unexpected Input node input_type for {name}"
+        assert (
+            input_node.output_type is not None
+            and len(input_node.output_type) == 1
+            and "output" in input_node.output_type
+            and np.array_equal(input_node.output_type["output"], np.array([6]))
+        ), f"unexpected Input node output_type for {name}"
+
+        # Output nodes should have input and output types set to the same values.
+        assert len(graph.outputs) == 1, f"unexpected number of output nodes for {name}"
+        output_node = list(graph.outputs.values())[0]
+        assert (
+            output_node.input_type is not None
+            and len(output_node.input_type) == 1
+            and "input" in output_node.input_type
+            and np.array_equal(output_node.input_type["input"], np.array([4]))
+        ), f"unexpected Output node input_type for {name}"
+        assert (
+            output_node.output_type is not None
+            and len(output_node.output_type) == 1
+            and "output" in output_node.output_type
+            and np.array_equal(output_node.output_type["output"], np.array([4]))
+        ), f"unexpected Output node output_type for {name}"
+
+
+def test_type_check_recurrent():
+    # Valid recurrent graph
+    nir.NIRGraph(
+        nodes={
+            "a": nir.Input(np.array([2])),
+            "b": nir.Linear(np.random.rand(2, 2)),
+            "c": nir.IF(
+                r=np.random.rand(2), v_threshold=np.random.rand(2), v_reset=np.zeros(2)
+            ),
+            "d": nir.Output(np.array([2])),
+        },
+        edges=[("a", "b"), ("b", "c"), ("c", "b"), ("c", "d")],
+    )
+
+    # Invalid recurrent graph: c output goes back to b, but shapes do not match
+    with pytest.raises(
+        ValueError, match="type mismatch: c.output: \\[16\\] -> b.input: \\[1 5 5\\]"
+    ):
+        nir.NIRGraph(
+            nodes={
+                "a": nir.Input(input_type=np.array([1, 5, 5])),
+                "b": nir.Conv2d(
+                    input_shape=None,
+                    weight=np.random.rand(1, 1, 2, 2),
+                    stride=1,
+                    padding=0,
+                    dilation=1,
+                    groups=1,
+                    bias=np.zeros(1),
+                ),
+                "c": nir.Flatten(input_type=None, start_dim=0, end_dim=2),
+                "d": nir.Output(output_type=np.array([16])),
+            },
+            edges=[("a", "b"), ("b", "c"), ("c", "b"), ("c", "d")],
+        )
 
 
 def test_node():
