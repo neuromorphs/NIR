@@ -55,7 +55,7 @@ class NIRGraph(NIRNode):
 
         # Check that all nodes have input and output types, if requested (default)
         if type_check:
-            self._forward_type_inference()
+            self.infer_types()
             self.check_types()
 
         # Call post init to set input_type and output_type
@@ -173,30 +173,6 @@ class NIRGraph(NIRNode):
         ]
         return super().from_dict(kwargs_local)
 
-    def infer_types(self):
-        """Infer the shapes of all nodes in this graph. Will modify the input_type and
-        output_type of all nodes in the graph.
-
-        Assumes that either the input type or the output type of the graph is set.
-        Assumes that if A->B, then A.output_type.values() = B.input_type.values()
-        """
-        undef_input_type = self.input_type is None or any(
-            v is None for v in self.input_type.values()
-        )
-        undef_output_type = self.output_type is None or any(
-            v is None for v in self.output_type.values()
-        )
-        if not undef_input_type:
-            # forward-mode type inferring
-            self._forward_type_inference()
-        elif not undef_output_type:
-            # backward-mode type inferring
-            raise NotImplementedError(
-                "backward-mode type inference not implemented yet"
-            )
-        else:
-            raise ValueError("Either input_type or output_type must be set")
-
     def check_types(self):
         """Check that all nodes in the graph have input and output types.
 
@@ -242,7 +218,7 @@ class NIRGraph(NIRNode):
                 )
         return True
 
-    def _forward_type_inference(self):
+    def infer_types(self):
         """Infer the types of all nodes in this graph. Will modify the input_type and
         output_type of nodes in the graph as needed. Assumes that the input_type of the
         graph is set. Moves from the input nodes to the output nodes. Raises ValueError
@@ -251,8 +227,8 @@ class NIRGraph(NIRNode):
         Assumes that all input types are of form: {'input': ...} and all output types are of form:
         {'output': ...}.
 
-        Currently only supports the inference of output types for Conv1d and Conv2d nodes.
-        Does not support nested NIR graphs.
+        Currently supports the inference of output types for Conv1d, Conv2d, SumPool2d,
+        AvgPool2d, and Flatten nodes.
         """
         if not self.nodes:
             return
