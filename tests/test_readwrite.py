@@ -71,12 +71,18 @@ def factory_test_metadata(ir: nir.NIRGraph):
 
 
 def test_simple():
-    ir = nir.NIRGraph(nodes={"a": mock_affine(2, 2)}, edges=[("a", "a")])
+    ir = nir.NIRGraph(
+        nodes={
+            "input": nir.Input(input_type=np.array([2])),
+            "a": mock_affine(2, 2),
+            "output": nir.Output(output_type=None),
+        },
+        edges=[("input", "a"), ("a", "a"), ("a", "output")],
+    )
     factory_test_graph(ir)
     factory_test_metadata(ir)
 
 
-@pytest.mark.skip("Not implemented")  # TODO: Implement subgraph type checking
 def test_nested():
     i = np.array([2])
     nested = nir.NIRGraph(
@@ -85,8 +91,8 @@ def test_nested():
             "b": nir.NIRGraph(
                 nodes={
                     "a": nir.Input(i),
-                    "b": nir.Delay(i),
-                    "c": nir.Output(np.array([1, 1])),
+                    "b": nir.Delay(np.array([1, 1])),
+                    "c": nir.Output(i),
                 },
                 edges=[("a", "b"), ("b", "c")],
             ),
@@ -258,37 +264,31 @@ def test_flatten():
     factory_test_metadata(ir)
 
 
-@pytest.mark.skip(
-    "Not implemented"
-)  # TODO: Implement type checking for nodes without i/o types (e. g. SumPool2d)
 def test_sum_pool_2d():
     ir = nir.NIRGraph.from_list(
         [
-            nir.Input(input_type=np.array([2, 2, 10, 10])),
+            nir.Input(input_type=np.array([2, 10, 10])),
             nir.SumPool2d(
                 kernel_size=np.array([2, 2]),
-                stride=np.array([1, 1]),
-                padding=np.ndarray([0, 0]),
+                stride=np.array([2, 2]),
+                padding=np.array([0, 0]),
             ),
-            nir.Output(output_type=np.array([2, 2, 5, 5])),
+            nir.Output(output_type=np.array([2, 5, 5])),
         ]
     )
     factory_test_graph(ir)
 
 
-@pytest.mark.skip(
-    "Not implemented"
-)  # TODO: Implement type checking for nodes without i/o types (e. g. AvgPool2d)
 def test_avg_pool_2d():
     ir = nir.NIRGraph.from_list(
         [
-            nir.Input(input_type=np.array([2, 2, 10, 10])),
+            nir.Input(input_type=np.array([2, 10, 10])),
             nir.AvgPool2d(
                 kernel_size=np.array([2, 2]),
-                stride=np.array([1, 1]),
-                padding=np.ndarray([0, 0]),
+                stride=np.array([2, 2]),
+                padding=np.array([0, 0]),
             ),
-            nir.Output(output_type=np.array([2, 2, 5, 5])),
+            nir.Output(output_type=np.array([2, 5, 5])),
         ]
     )
     factory_test_graph(ir)

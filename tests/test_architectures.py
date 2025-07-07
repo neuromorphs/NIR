@@ -2,8 +2,9 @@ import numpy as np
 import pytest
 
 import nir
+from tests import mock_affine, mock_input, mock_integrator, mock_output
+
 from .test_readwrite import factory_test_graph
-from tests import mock_affine
 
 
 def test_sequential():
@@ -20,6 +21,70 @@ def test_sequential():
 
     ir = nir.NIRGraph.from_list(a, b, c, d)
     assert ir.output_type["output"] == [2]
+    factory_test_graph(ir)
+
+
+def test_recurrent_on_first_node():
+    """Recurrent node is the first node. Because there is no unambiguous input node,
+    Input nodes need to be added manually.
+
+    ```mermaid
+    graph TD;
+    I --> A;
+    A --> I;
+    A --> O;
+    ```
+    """
+    affine = mock_affine(2, 2)
+    integrator = mock_integrator(2)
+    ir = nir.NIRGraph(
+        nodes={
+            "input": mock_input(2),
+            "affine": affine,
+            "integrator": integrator,
+            "output": mock_output(2),
+        },
+        edges=[
+            ("input", "affine"),
+            ("affine", "integrator"),
+            ("integrator", "affine"),
+            ("integrator", "output"),
+        ],
+    )
+    factory_test_graph(ir)
+
+
+def test_recurrent_on_second_node():
+    """Recurrent node is the second node. There is one node before and after the
+    recurrent block, which means the type inference can automatically create the Input
+    and Output nodes.
+
+    ```mermaid
+    graph TD;
+    A1 --> A2;
+    A2 --> I;
+    I --> A2;
+    I --> A3;
+    ```
+    """
+    affine1 = mock_affine(2, 2)
+    affine2 = mock_affine(2, 2)
+    integrator = mock_integrator(2)
+    affine3 = mock_affine(2, 2)
+    ir = nir.NIRGraph(
+        nodes={
+            "affine1": affine1,
+            "affine2": affine2,
+            "integrator": integrator,
+            "affine3": affine3,
+        },
+        edges=[
+            ("affine1", "affine2"),
+            ("affine2", "integrator"),
+            ("integrator", "affine2"),
+            ("integrator", "affine3"),
+        ],
+    )
     factory_test_graph(ir)
 
 
