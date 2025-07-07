@@ -266,6 +266,14 @@ class NIRGraph(NIRNode):
                 new_input_node = Input(input_type=node.input_type)
                 new_nodes[input_node_name] = new_input_node
                 new_edges.append((input_node_name, node_key))
+            else:
+                undef_input_type = node.input_type is None or any(
+                    v is None for v in node.input_type.values()
+                )
+                if undef_input_type:
+                    raise ValueError(
+                        f"Input node '{node_key}' has no defined input_type. Cannot infer graph without input types."
+                    )
 
         if new_nodes:
             self.nodes.update(new_nodes)
