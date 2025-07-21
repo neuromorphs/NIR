@@ -6,6 +6,7 @@ import numpy as np
 
 from .conv import Conv1d, Conv2d
 from .flatten import Flatten
+from .neuron import IF, LI, LIF, I
 from .node import NIRNode
 from .pooling import AvgPool2d, SumPool2d
 from .typing import Edges, Nodes, Types
@@ -300,7 +301,7 @@ class NIRGraph(NIRNode):
 
             # check if post input_type needs to be defined
             undef_post_input_type = post_node.input_type is None or any(
-                v is None for v in post_node.input_type.values()
+                v is None or len(v) == 0 for v in post_node.input_type.values()
             )
             type_mismatch = any(
                 [
@@ -338,7 +339,7 @@ class NIRGraph(NIRNode):
 
             # check if post output_type needs to be defined
             undef_post_output_type = post_node.output_type is None or any(
-                v is None for v in post_node.output_type.values()
+                v is None or len(v) == 0 for v in post_node.output_type.values()
             )
             if undef_post_output_type:
                 # define post output_type
@@ -396,6 +397,13 @@ class NIRGraph(NIRNode):
                     assert (
                         n_inputs == n_outputs
                     ), "Flatten must not change the number of elements"
+                elif (
+                    isinstance(post_node, LIF)
+                    or isinstance(post_node, IF)
+                    or isinstance(post_node, LI)
+                    or isinstance(post_node, I)
+                ):
+                    post_node.output_type = {"output": post_node.input_type["input"]}
 
             seen.add(post_key)
             ready += [e for e in self.edges if e[0] == post_key and e[1] not in seen]
