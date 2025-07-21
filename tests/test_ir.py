@@ -755,6 +755,25 @@ def test_type_check_recurrent():
         )
 
 
+def test_type_check_scalar_parameters():
+    graph = nir.NIRGraph.from_list(
+        nir.Linear(weight=np.random.randn(10, 20)),
+        nir.LIF(
+            tau=np.float32(4.0),
+            r=np.float32(1.0),
+            v_threshold=np.float32(1.0),
+            v_reset=np.float32(0.0),
+            v_leak=np.float32(0.0),
+        ),
+    )
+    assert graph.input_type["input"] == (20,)
+    assert graph.nodes["linear"].input_type["input"] == (20,)
+    assert graph.nodes["linear"].output_type["output"] == (10,)
+    assert graph.nodes["lif"].input_type["input"] == (10,)
+    assert graph.nodes["lif"].output_type["output"] == (10,)
+    assert graph.output_type["output"] == (10,)
+
+
 def test_node():
     try:
         node = nir.ir.NIRNode()
