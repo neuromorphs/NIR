@@ -16,6 +16,7 @@ parts:
     title: Platform support
   - file: examples/index
     sections:
+    - file: examples/jaxsnn/nir-conversion
     - file: examples/lava/nir-conversion
     - file: examples/nengo/nir-conversion
     - file: examples/norse/nir-conversion
