@@ -9,6 +9,7 @@
 [![PyPI - Downloads](https://img.shields.io/pypi/dm/nir?logo=pypi)](https://pypi.org/project/nir/)
 [![GitHub Tag](https://img.shields.io/github/v/tag/neuromorphs/nir?logo=github)](https://github.com/neuromorphs/NIR/releases)
 [![Discord](https://img.shields.io/discord/1209533869733453844?logo=discord)](https://discord.gg/JRMRGP9h3c)
+[![Neuromorphic Computing](https://img.shields.io/badge/Collaboration_Network-Open_Neuromorphic-blue)](https://open-neuromorphic.org/neuromorphic-computing/)
 
 NIR is a set of computational primitives, shared across different neuromorphic frameworks and technology stacks.
 **NIR is currently supported by 8 simulators and 5 hardware platforms**, allowing users to seamlessly move between any of these platforms.
