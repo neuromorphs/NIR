@@ -15,6 +15,7 @@ except PackageNotFoundError:
 from . import ir
 from .ir import *  # noqa: F403
 from .ir import typing  # noqa: F401
+from .data_ir import *  # noqa: F403
 from .serialization import read, write
 
 __all__ = ir.__all__ + ["read", "write"]
