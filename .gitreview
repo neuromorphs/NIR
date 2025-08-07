@@ -1,0 +1,7 @@
+[gerrit]
+host=gerrit.bioai.eu
+port=29418
+project=nir
+defaultbranch=main
+defaultremote=review
+defaultrebase=0
