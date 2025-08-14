@@ -1,3 +1,5 @@
+# Document from the official NIR repository: https://github.com/neuromorphs/NIR/blob/main/paper/nir_to_lava.py#L67
+# Modifications made by Alex G. Gener for dynamic neuron allocation. See line 408
 """
 Sharp edges:
 - in lava-dl, the current and voltage state is not automatically reset. must do this manually after every forward pass.
@@ -8,12 +10,6 @@ import numpy as np
 from dataclasses import dataclass
 from functools import partial
 from enum import Enum
-
-# from lava.proc.embedded_io.spike import PyToNxAdapter, NxToPyAdapter
-# from lava.proc.monitor.process import Monitor
-# from lava.magma.core.run_conditions import RunSteps
-# from lava.proc.io.source import RingBuffer
-# from lava.proc.io.sink import RingBuffer as Sink
 from lava.proc.lif.process import LIF
 from lava.proc.dense.process import Dense
 import lava.lib.dl.slayer as slayer
@@ -399,17 +395,16 @@ def _nir_node_to_lava_dl(node: nir.NIRNode, import_config: ImportConfig):
         )
         dense.weight = torch.nn.Parameter(
             data=torch.from_numpy(node.weight.reshape(dense.weight.shape)), 
-            requires_grad=True
         )
         dense.bias = torch.nn.Parameter(
-            data=torch.zeros_like((node.weight.shape[0],)),
+            data=torch.zeros((node.weight.shape[0],)),
             requires_grad=False
         )
         return dense
 
     elif isinstance(node, nir.CubaLIF):
         # TODO: figure out how to make the n_neurons dynamic
-        n_neurons = 7
+        n_neurons = int(node.input_type['input'][0])
 
         # bias = node.v_leak * dt / node.tau_mem
 
