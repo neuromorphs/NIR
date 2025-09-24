@@ -88,13 +88,13 @@ This document lists which primitives are supported by the software frameworks fo
 
 full_md = static_md + "\n\n" + dynamic_md
 
-with open("supported_nodes.md", "w", encoding="utf-8") as f:
+with open("docs/source/supported_nodes.md", "w", encoding="utf-8") as f:
     f.write(full_md)
 
 # Generate enumeration of supported primitives for each library
 
 for lib in libs:
-    with open(f"supported_primitives_{lib}.md", "w", encoding="utf-8") as f:
+    with open(f"docs/source/supported_primitives_{lib}.md", "w", encoding="utf-8") as f:
         support_to_nir = any(supported[p][lib] in ["←", "⟷"] for p in primitives)
         support_from_nir = any(supported[p][lib] in ["→", "⟷"] for p in primitives)
         lib_md = f"# Supported Primitives in {lib}\n\n"
