@@ -10,7 +10,7 @@ primitives = [p for p in primitives if p not in ["Input", "Output", "NIRGraph"]]
 GITHUB_RAW_URLS = [
     # (LibraryName, Direction, URL, function)
     ("jaxsnn", "from_nir", "https://raw.githubusercontent.com/electronicvisions/jaxsnn/refs/heads/main/src/pyjaxsnn/jaxsnn/event/from_nir.py", None),
-    ("Lava", "from_nir", "https://raw.githubusercontent.com/neuromorphs/NIR/refs/heads/main/paper/nir_to_lava.py", "_nir_to_lava"),
+    ("Lava", "from_nir", "https://raw.githubusercontent.com/neuromorphs/NIR/refs/heads/main/paper/nir_to_lava.py", None),
     ("Nengo", "from_nir", "https://raw.githubusercontent.com/neuromorphs/NIR/refs/heads/main/docs/source/examples/nengo/nir-lorentz.py", "nir_to_nengo"),
     ("Nengo", "to_nir", "https://raw.githubusercontent.com/neuromorphs/NIR/refs/heads/main/docs/source/examples/nengo/nir-lorentz.py", "nengo_to_nir"),
     ("Norse", "from_nir", "https://raw.githubusercontent.com/norse/norse/main/norse/torch/utils/import_nir.py", None),
@@ -72,8 +72,8 @@ for lib, _, _, _ in GITHUB_RAW_URLS:
 header = "| Primitive | " + " | ".join(libs) + " |"
 separator = "|-----------|" + "|".join([":-----:" for _ in libs]) + "|"
 rows = []
-for name in primitives:
-    row = f"| {name} | " + " | ".join([supported[name][lib] for lib in libs]) + " |"
+for primitive in primitives:
+    row = f"| {primitive} | " + " | ".join([supported[primitive][lib] for lib in libs]) + " |"
     rows.append(row)
 dynamic_md = "\n".join([header, separator] + rows)
 
@@ -91,4 +91,27 @@ full_md = static_md + "\n\n" + dynamic_md
 with open("supported_nodes.md", "w", encoding="utf-8") as f:
     f.write(full_md)
 
-# TODO Generate dedicated table of supported nodes for each framework
+# Generate enumeration of supported primitives for each library
+
+for lib in libs:
+    with open(f"supported_primitives_{lib}.md", "w", encoding="utf-8") as f:
+        support_to_nir = any(supported[p][lib] in ["←", "⟷"] for p in primitives)
+        support_from_nir = any(supported[p][lib] in ["→", "⟷"] for p in primitives)
+        lib_md = f"# Supported Primitives in {lib}\n\n"
+
+        if support_to_nir:
+            lib_md += "This library supports conversion of the following nodes to NIR:" 
+        else:
+            lib_md += "This library does not support conversion of any nodes to NIR."
+        for primitive in primitives:
+            if supported[primitive][lib] in ["←", "⟷"]:
+                lib_md += f"\n- {primitive}"
+
+        if support_from_nir:
+            lib_md += "\n\nThis library supports conversion of the following nodes from NIR:" 
+        else:
+            lib_md += "This library does not support conversion of any nodes from NIR."
+        for primitive in primitives:
+            if supported[primitive][lib] in ["→", "⟷"]:
+                lib_md += f"\n- {primitive}"
+        f.write(lib_md)
