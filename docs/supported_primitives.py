@@ -64,7 +64,7 @@ for name in primitives:
         else:
             supported[name][lib_name] = ""
 
-# Generate supported_nodes.md content
+# Generate supported_primiteves.md content
 libs = []
 for lib, _, _, _ in GITHUB_RAW_URLS:
     if lib not in libs:
@@ -77,8 +77,7 @@ for primitive in primitives:
     rows.append(row)
 dynamic_md = "\n".join([header, separator] + rows)
 
-static_md = """
-# Supported Primitives in NIR
+static_md = """# Supported Primitives in NIR
 This document lists which primitives are supported by the software frameworks for conversion to and from NIR:
 - `→`: Supported for conversion from NIR
 - `←`: Supported for conversion to NIR
@@ -88,16 +87,16 @@ This document lists which primitives are supported by the software frameworks fo
 
 full_md = static_md + "\n\n" + dynamic_md
 
-with open("docs/source/supported_nodes.md", "w", encoding="utf-8") as f:
+with open("docs/source/supported_primitives.md", "w", encoding="utf-8") as f:
     f.write(full_md)
 
 # Generate enumeration of supported primitives for each library
 
 for lib in libs:
-    with open(f"docs/source/supported_primitives_{lib}.md", "w", encoding="utf-8") as f:
+    with open(f"docs/source/examples/{lib.lower()}/supported_primitives.md", "w", encoding="utf-8") as f:
         support_to_nir = any(supported[p][lib] in ["←", "⟷"] for p in primitives)
         support_from_nir = any(supported[p][lib] in ["→", "⟷"] for p in primitives)
-        lib_md = f"# Supported Primitives in {lib}\n\n"
+        lib_md = f"### Supported Primitives in {lib}\n\n"
 
         if support_to_nir:
             lib_md += "This library supports conversion of the following nodes to NIR:" 
