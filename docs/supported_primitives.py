@@ -94,7 +94,7 @@ with open("docs/source/supported_primitives.md", "w", encoding="utf-8") as f:
 # Generate enumeration of supported primitives for each library
 
 for lib in libs:
-    with open(f"docs/source/examples/{lib.lower()}/supported_primitives.md", "w", encoding="utf-8") as f:
+    with open(f"docs/tmp/examples/{lib.lower()}/supported_primitives.md", "w", encoding="utf-8") as f:
         support_to_nir = any(supported[p][lib] in ["←", "⟷"] for p in primitives)
         support_from_nir = any(supported[p][lib] in ["→", "⟷"] for p in primitives)
         lib_md = f"### Supported Primitives in {lib}\n\n"

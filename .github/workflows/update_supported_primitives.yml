@@ -29,6 +29,6 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add docs/source/**/supported_primitives.md
+          git add docs/**/supported_primitives.md
           git commit -m "chore: weekly supported primitives update" || echo "No changes to commit"
           git push
