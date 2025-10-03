@@ -1,0 +1,34 @@
+name: Update Supported Primitives Matrix
+
+on:
+  schedule:
+    # Every Monday at 00:00 UTC
+    - cron: "0 0 * * 1"
+  workflow_dispatch:
+
+jobs:
+  update-md:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.9"
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+
+      - name: Run update script
+        run: python docs/supported_primitives.py
+
+      - name: Commit and push changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/**/supported_primitives.md
+          git commit -m "chore: weekly supported primitives update" || echo "No changes to commit"
+          git push
