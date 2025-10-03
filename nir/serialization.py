@@ -190,7 +190,9 @@ def read(filename: Union[str, pathlib.Path], type_check: bool = True) -> nir.NIR
     with h5py.File(filename, "r") as f:
         data_dict = hdf2dict(f["node"])
         if hasattr(data_dict, "type_check"):
-            raise ValueError("The 'type_check' key was found in the read NIR graph, but is unsupported and clashes with the type checking parameter in the read function")
+            raise ValueError(
+                "The 'type_check' key was found in the read NIR graph, but is unsupported and clashes with the type checking parameter in the read function"
+            )
         else:
             data_dict["type_check"] = type_check
         return nir.dict2NIRNode(data_dict)

@@ -314,9 +314,18 @@ def test_deserialize():
             print(f"Failed to read {file}: {e}")
             raise e
 
+
 def test_read_without_type_check():
     # Fails due to type mismatches
     with pytest.raises(ValueError):
-        nir.NIRGraph.from_list(nir.Linear(weight=np.zeros((2, 2))), nir.Linear(weight=np.zeros((1, 1))), type_check=True)
+        nir.NIRGraph.from_list(
+            nir.Linear(weight=np.zeros((2, 2))),
+            nir.Linear(weight=np.zeros((1, 1))),
+            type_check=True,
+        )
     # Works
-    nir.NIRGraph.from_list(nir.Linear(weight=np.zeros((2, 2))), nir.Linear(weight=np.zeros((1, 1))), type_check=False)
+    nir.NIRGraph.from_list(
+        nir.Linear(weight=np.zeros((2, 2))),
+        nir.Linear(weight=np.zeros((1, 1))),
+        type_check=False,
+    )
