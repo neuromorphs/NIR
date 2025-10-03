@@ -173,7 +173,7 @@ def hdf2dict(node: Any) -> Dict[str, Any]:
     return ret
 
 
-def read(filename: Union[str, pathlib.Path]) -> nir.NIRGraph:
+def read(filename: Union[str, pathlib.Path], type_check: bool = True) -> nir.NIRGraph:
     """Load a NIR from a HDF/conn5 file.
     Attempts to read a NIRGraph from a file and pass in the key-value parameters to the
     corresponding NIR nodes.
@@ -181,12 +181,20 @@ def read(filename: Union[str, pathlib.Path]) -> nir.NIRGraph:
 
     Arguments:
         filename (Union[str, Path]): The filename as either a string or pathlib Path.
+        type_check (bool): Whether to type check the graph and verify that all input types align with output types
+                for every node in the graph. May break the loading for older graphs. Defaults to True.
 
     Returns:
         A NIRGraph read from the file.
     """
     with h5py.File(filename, "r") as f:
         data_dict = hdf2dict(f["node"])
+        if hasattr(data_dict, "type_check"):
+            raise ValueError(
+                "The 'type_check' key was found in the read NIR graph, but is unsupported and clashes with the type checking parameter in the read function"
+            )
+        else:
+            data_dict["type_check"] = type_check
         return nir.dict2NIRNode(data_dict)
 
 
