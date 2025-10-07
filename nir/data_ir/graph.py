@@ -1,15 +1,21 @@
 from __future__ import annotations
 from dataclasses import dataclass
+from enum import Enum
 from typing import Dict, Union
 import numpy as np
 from nir import NIRGraph
 
 
+class Interpolation(Enum):
+    NONE = "None"
+
+
 @dataclass
 class TimeGriddedData:
     """
-    Boolean entries indicate whether a binary event is present at a particular
-    time step.
+    Either boolean entries indicate whether a binary event is present at a
+    particular time step, or a real-valued signal provides the measurement
+    of a quantity (e.g. the membrane potential).
 
     Arguments
     ---------
@@ -49,7 +55,7 @@ class TimeGriddedData:
     def t_max(self):
         return self.n_time_steps * self.dt
 
-    def to_event(self, n_spikes: int, time_shift: float = 0.0) -> EventData:
+    def to_event(self, n_events: int, time_shift: float = 0.0) -> EventData:
         """
         Arguments
         ---------
@@ -62,8 +68,8 @@ class TimeGriddedData:
 
         if not self.data.dtype == bool:
             raise ValueError("Data must be boolean to convert to EventData.")
-        idx = np.full((self.n_samples, n_spikes), -1)
-        time = np.full((self.n_samples, n_spikes), np.inf)
+        idx = np.full((self.n_samples, n_events), -1)
+        time = np.full((self.n_samples, n_events), np.inf)
 
         if time_shift < 0 or time_shift >= self.dt:
             raise ValueError("time_shift must be in interval [0, dt)")
@@ -74,7 +80,7 @@ class TimeGriddedData:
             time_step = time_step[order]
             neuron = neuron[order]
 
-            num_events = min(len(time_step), n_spikes)
+            num_events = min(len(time_step), n_events)
             idx[sample, :num_events] = neuron[:num_events]
             time[sample, :num_events] = time_step[:num_events] * self.dt + time_shift
 
@@ -90,9 +96,9 @@ class EventData:
 
     Arguments
     ---------
-    idx : np.ndarray[int], shape (n_samples, n_spikes)
+    idx : np.ndarray[int], shape (n_samples, n_events)
         Event indices. If there is no event, the index is `-1`.
-    time : np.ndarray[float], shape (n_samples, n_spikes)
+    time : np.ndarray[float], shape (n_samples, n_events)
         Event times. If there is no event, the time is `np.inf`.
     n_neurons : int
         Total number of neurons in the layer.
@@ -137,6 +143,68 @@ class EventData:
             steps = np.floor((valid_times / dt)).astype(int)
             neurons = self.idx[sample][valid_spikes]
             discrete_data[sample, steps, neurons] = True
+        return TimeGriddedData(discrete_data, dt)
+
+
+@dataclass
+class ValuedEventData(EventData):
+    """
+    Valued event-based data as a list of event indices, event times and event
+    values.
+
+    Parameters
+    ----------
+    idx : np.ndarray[int], shape (n_samples, n_events)
+        Event indices. If there is no event, the index is `-1`.
+    time : np.ndarray[float], shape (n_samples, n_events)
+        Event times. If there is no event, the time is `np.inf`.
+    values : np.ndarray[float], shape (n_samples, n_events)
+        Event values.
+    n_neurons : int
+        Total number of neurons in the layer.
+    t_max : float
+        Maximum time of the recording.
+    """
+
+    values: np.ndarray
+
+    def __post_init__(self):
+        if self.idx.shape != self.time.shape or self.idx.shape != self.values.shape:
+            raise ValueError("idx, time and values must have the same shape")
+
+    def to_time_gridded(
+        self,
+        dt: float,  # pylint: disable=invalid-name
+        interpolation: Interpolation = Interpolation.NONE,
+    ) -> TimeGriddedData:
+        """
+        Parameters
+        ----------
+        dt : float
+            Time step size.
+        interpolation : str, optional
+            Interpolation method to use when converting to time-gridded data.
+            Currently, only "None" is supported, which means that the values are
+            assigned directly to the corresponding time steps without any
+            interpolation.
+        """
+        n_samples = self.n_samples
+        n_time_steps = int(self.t_max / dt)
+        discrete_data = np.zeros((n_samples, n_time_steps, self.n_neurons), dtype=float)
+
+        if interpolation is not Interpolation.NONE:
+            raise NotImplementedError(
+                "Other Interpolation method than 'None' are not implemented."
+            )
+
+        for sample in range(n_samples):
+            valid_spikes = self.idx[sample] != -1
+            valid_times = self.time[sample][valid_spikes]
+            steps = np.floor((valid_times / dt)).astype(int)
+            neurons = self.idx[sample][valid_spikes]
+            values = self.values[sample][valid_spikes]
+            discrete_data[sample, steps, neurons] = values
+
         return TimeGriddedData(discrete_data, dt)
 
 
