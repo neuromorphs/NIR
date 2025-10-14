@@ -33,9 +33,8 @@ class TimeGriddedData:
         :params time_shift: Shift the spike times by this value.
                            Must be in interval [0, dt].
         """
-        t_max = self.dt * self.data.shape[1]
-        idx = -1 * np.ones((self.data.shape[0], n_spikes))
-        time = 2 * t_max * np.ones((self.data.shape[0], n_spikes))
+        idx = np.full((self.data.shape[0], n_spikes), -1)
+        time = np.full((self.data.shape[0], n_spikes), np.inf)
 
         if time_shift < 0 or time_shift > self.dt:
             raise ValueError("time_shift must be in interval [0, dt]")
@@ -58,10 +57,12 @@ class EventData:
     """
     Event-based data represented as a list of spike indices and spike times.
 
-    :param idx: Array of shape (n_samples, n_spikes) with neuron indices. An index of
-    `-1` indicates that there is no spike.
-    :param time: Array of shape (n_samples, n_spikes) with spike times.
+    :param idx: Array of shape (n_samples, n_events) with neuron indices. If
+        there is no event, the index is `-1`.
+    :param time: Array of shape (n_samples, n_events) with event times. If
+        there is no event, the time is `np.inf`.
     :param n_neurons: Total number of neurons in the layer.
+    :param t_max: Maximum time of the recording.
     """
 
     @property
