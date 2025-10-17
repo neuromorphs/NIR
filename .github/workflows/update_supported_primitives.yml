@@ -5,6 +5,7 @@ on:
     # Every Monday at 00:00 UTC
     - cron: "0 0 * * 1"
   workflow_dispatch:
+  pull_request:
 
 jobs:
   update-md:
@@ -20,7 +21,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install -r requirements.txt
+          pip install -r docs/requirements.txt
 
       - name: Run update script
         run: python docs/supported_primitives.py
