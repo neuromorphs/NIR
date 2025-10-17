@@ -32,4 +32,6 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add docs/**/supported_primitives.md
           git commit -m "chore: weekly supported primitives update" || echo "No changes to commit"
-          git push
+          if [ "$GITHUB_EVENT_NAME" != "pull_request" ]; then
+            git push origin HEAD:main
+          fi
