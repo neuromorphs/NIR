@@ -9,6 +9,8 @@ primitives = [p for p in primitives if p not in ["Input", "Output", "NIRGraph"]]
 # Fetch raw converter file from GitHub
 GITHUB_RAW_URLS = [
     # (LibraryName, Direction, URL, function)
+    ("hxtorch", "from_nir", "https://raw.githubusercontent.com/electronicvisions/hxtorch/refs/heads/master/src/pyhxtorch/hxtorch/spiking/utils/from_nir.py", None),
+    ("hxtorch", "to_nir", "https://raw.githubusercontent.com/electronicvisions/hxtorch/refs/heads/master/src/pyhxtorch/hxtorch/spiking/utils/to_nir.py", None),
     ("jaxsnn", "from_nir", "https://raw.githubusercontent.com/electronicvisions/jaxsnn/refs/heads/main/src/pyjaxsnn/jaxsnn/event/from_nir.py", None),
     ("Lava", "from_nir", "https://raw.githubusercontent.com/neuromorphs/NIR/refs/heads/main/paper/nir_to_lava.py", None),
     ("Nengo", "from_nir", "https://raw.githubusercontent.com/neuromorphs/NIR/refs/heads/main/docs/source/examples/nengo/nir-lorentz.py", "nir_to_nengo"),
