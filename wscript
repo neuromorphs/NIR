@@ -20,7 +20,7 @@ def build(bld):
         features="py",
         relative_trick=True,
         source=bld.path.ant_glob("nir/**/*.py"),
-        install_from="nir",
+        install_from=".",
     )
 
     # Create test summary (to stdout and XML file)
