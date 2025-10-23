@@ -12,7 +12,7 @@
 [![Neuromorphic Computing](https://img.shields.io/badge/Collaboration_Network-Open_Neuromorphic-blue)](https://open-neuromorphic.org/neuromorphic-computing/)
 
 NIR is a set of computational primitives, shared across different neuromorphic frameworks and technology stacks.
-**NIR is currently supported by 8 simulators and 5 hardware platforms**, allowing users to seamlessly move between any of these platforms.
+**NIR is currently supported by 9 simulators and 5 hardware platforms**, allowing users to seamlessly move between any of these platforms.
 
 NIR is useful when you want to move a model from one platform to another, for instance from a simulator to a hardware platform.
 
@@ -42,6 +42,7 @@ See our [example section](https://neuroir.org/docs/examples) for how to use NIR 
 
 | **Framework** | **Write to NIR** | **Read from NIR** | **Examples** |
 | --------------- | :--: | :--: | :------: |
+| [hxtorch](https://github.com/electronicvisions/hxtorch) ([BrainScaleS-2](https://wiki.ebrains.eu/bin/view/Collabs/neuromorphic/BrainScaleS/)) | ✓ | ✓ | [hxtorch examples](https://neuroir.org/docs/examples/hxtorch/nir-conversion.html) |
 | [jaxsnn](https://github.com/electronicvisions/jaxsnn) ([BrainScaleS-2](https://wiki.ebrains.eu/bin/view/Collabs/neuromorphic/BrainScaleS/)) | ⬚ | ✓ | [jaxsnn examples](https://neuroir.org/docs/examples/jaxsnn/nir-conversion.html) |
 | [Lava-DL](https://github.com/lava-nc/lava-dl) | ⬚ | ✓ | [Lava/Loihi examples](https://neuroir.org/docs/examples/lava/nir-conversion.html) |
 | [Nengo](https://nengo.ai) | ✓ | ✓ | [Nengo examples](https://neuroir.org/docs/examples/nengo/nir-conversion.html) |

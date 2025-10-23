@@ -7,21 +7,21 @@ Please note that this list is generated automatically and may not be entirely ac
 <br />
 
 
-| Primitive | jaxsnn | Lava | Nengo | Norse | rockpool | sinabs | snntorch | SpiNNaker2 | Spyx |
-|-----------|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|
-| Conv1d |  |  |  |  |  | ⟷ |  | → | → |
-| Conv2d |  | → |  | ⟷ |  | ⟷ | ⟷ | → | ⟷ |
-| Delay |  |  |  |  |  |  |  |  | → |
-| Flatten |  | → |  | → |  | ⟷ | ⟷ | → | → |
-| Affine | → | → | ⟷ | ⟷ | ⟷ | ⟷ | ⟷ | → | ⟷ |
-| Linear | → | → |  | ← | ⟷ |  | ⟷ | → | ⟷ |
-| Scale |  |  |  |  |  |  |  |  | → |
-| CubaLI |  |  |  |  |  |  |  |  |  |
-| CubaLIF | → | → |  | ⟷ | ⟷ |  | ⟷ | → | ⟷ |
-| I |  |  |  |  |  |  |  |  | → |
-| IF |  | → |  | ⟷ |  | ⟷ | → | → | ⟷ |
-| LI |  |  | ⟷ | ⟷ | ⟷ | ⟷ |  |  | ← |
-| LIF |  | → | ⟷ | ⟷ | ⟷ | ⟷ | ⟷ | → | ⟷ |
-| AvgPool2d |  |  |  |  |  |  | ⟷ |  |  |
-| SumPool2d |  | → |  | → |  | ⟷ |  | → | → |
-| Threshold |  |  |  |  |  |  |  |  | → |
+| Primitive | hxtorch | jaxsnn | Lava | Nengo | Norse | rockpool | sinabs | snntorch | SpiNNaker2 | Spyx |
+|-----------|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|
+| Conv1d |  |  |  |  |  |  | ⟷ |  | → | → |
+| Conv2d |  |  | → |  | ⟷ |  | ⟷ | ⟷ | → | ⟷ |
+| Delay |  |  |  |  |  |  |  |  |  | → |
+| Flatten |  |  | → |  | → |  | ⟷ | ⟷ | → | → |
+| Affine |  | → | → | ⟷ | ⟷ | ⟷ | ⟷ | ⟷ | → | ⟷ |
+| Linear | ⟷ | → | → |  | ← | ⟷ |  | ⟷ | → | ⟷ |
+| Scale |  |  |  |  |  |  |  |  |  | → |
+| CubaLI | ⟷ |  |  |  |  |  |  |  |  |  |
+| CubaLIF | ⟷ | → | → |  | ⟷ | ⟷ |  | ⟷ | → | ⟷ |
+| I |  |  |  |  |  |  |  |  |  | → |
+| IF |  |  | → |  | ⟷ |  | ⟷ | → | → | ⟷ |
+| LI |  |  |  | ⟷ | ⟷ | ⟷ | ⟷ |  |  | ← |
+| LIF |  |  | → | ⟷ | ⟷ | ⟷ | ⟷ | ⟷ | → | ⟷ |
+| AvgPool2d |  |  |  |  |  |  |  | ⟷ |  |  |
+| SumPool2d |  |  | → |  | → |  | ⟷ |  | → | → |
+| Threshold |  |  |  |  |  |  |  |  |  | → |

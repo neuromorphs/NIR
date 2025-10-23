@@ -18,6 +18,7 @@ parts:
     title: Supported primitives
   - file: examples/index
     sections:
+    - file: examples/hxtorch/nir-conversion
     - file: examples/jaxsnn/nir-conversion
     - file: examples/lava/nir-conversion
     - file: examples/nengo/nir-conversion
