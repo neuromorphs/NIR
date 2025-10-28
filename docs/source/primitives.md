@@ -28,7 +28,7 @@ NIR defines 17 fundamental primitives listed in the table below, which backends 
 | **Scale**                          | $s$                                                                       | $s I$                                                    | -                                                                                      |
 | **SumPooling**                     | $p$                                                                       | $\sum_{j} x_j$                                           | -                                                                                      |
 | **AvgPooling**                     | $p$                                                                       | **SumPooling**; **Scale**                                | -                                                                                      |
-| **Spike**                          | $\theta_\text{thr}$                                                       | $\delta(I - \theta_\text{thr})$                               | -                                                                                      |
+| **Threshold**                          | $\theta_\text{thr}$                                                       | $\delta(I - \theta_\text{thr})$                               | -                                                                                      |
 
 More details about the equations the computational primitives are implementing are available in the [paper on Neuromorphic Intermediate Representation](https://www.nature.com/articles/s41467-024-52259-9).
 
