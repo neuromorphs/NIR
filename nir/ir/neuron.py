@@ -89,13 +89,15 @@ class CubaLIF(NIRNode):
     r: np.ndarray  # Resistance
     v_leak: np.ndarray  # Leak voltage
     v_threshold: np.ndarray  # Firing threshold
-    v_reset: np.ndarray  # Reset potential
+    v_reset: Optional[np.ndarray] = None  # Reset potential
     w_in: np.ndarray = 1.0  # Input current weight
     input_type: Optional[Dict[str, np.ndarray]] = None
     output_type: Optional[Dict[str, np.ndarray]] = None
     metadata: Dict[str, Any] = field(default_factory=dict)
 
     def __post_init__(self):
+        if self.v_reset is None:
+            self.v_reset = np.zeros_like(self.v_threshold)
         assert (
             self.tau_syn.shape
             == self.tau_mem.shape
@@ -160,12 +162,14 @@ class IF(NIRNode):
 
     r: np.ndarray  # Resistance
     v_threshold: np.ndarray  # Firing threshold
-    v_reset: np.ndarray  # Reset potential
+    v_reset: Optional[np.ndarray] = None  # Reset potential
     input_type: Optional[Dict[str, np.ndarray]] = None
     output_type: Optional[Dict[str, np.ndarray]] = None
     metadata: Dict[str, Any] = field(default_factory=dict)
 
     def __post_init__(self):
+        if self.v_reset is None:
+            self.v_reset = np.zeros_like(self.v_threshold)
         assert (
             self.r.shape == self.v_threshold.shape == self.v_reset.shape
         ), "All parameters must have the same shape"
@@ -242,12 +246,14 @@ class LIF(NIRNode):
     r: np.ndarray  # Resistance
     v_leak: np.ndarray  # Leak voltage
     v_threshold: np.ndarray  # Firing threshold
-    v_reset: np.ndarray  # Reset potential
+    v_reset: Optional[np.ndarray] = None  # Reset potential
     input_type: Optional[Dict[str, np.ndarray]] = None
     output_type: Optional[Dict[str, np.ndarray]] = None
     metadata: Dict[str, Any] = field(default_factory=dict)
 
     def __post_init__(self):
+        if self.v_reset is None:
+            self.v_reset = np.zeros_like(self.v_threshold)
         assert (
             self.tau.shape
             == self.r.shape
