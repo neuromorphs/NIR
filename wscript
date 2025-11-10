@@ -3,13 +3,13 @@ from waflib.extras.test_base import summary
 
 def options(opt):
     opt.load("compiler_cxx")
-    opt.load("test_base")
+    opt.load("pytest")
     opt.load("python")
 
 
 def configure(cfg):
     cfg.load("compiler_cxx")
-    cfg.load("test_base")
+    cfg.load("pytest")
     cfg.load("python")
     cfg.check_python_version()
 
@@ -20,7 +20,15 @@ def build(bld):
         features="py",
         relative_trick=True,
         source=bld.path.ant_glob("nir/**/*.py"),
-        install_from=".",
+        install_from="."
+    )
+
+    bld(
+        target='nir_tests',
+        tests=bld.path.ant_glob('tests/**/*.py'),
+        features='use pytest',
+        use=['nir'],
+        install_path='${PREFIX}/bin/tests',
     )
 
     # Create test summary (to stdout and XML file)
