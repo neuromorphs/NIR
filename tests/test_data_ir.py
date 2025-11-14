@@ -3,7 +3,7 @@ import nir
 
 
 def test_generate_time_gridded_data():
-    spikes = np.random.randint(0, 2, size=(10, 10, 10))
+    spikes = np.random.randint(0, 2, size=(10, 10, 10)).astype(bool)
     dt = 0.1
     gridded = nir.TimeGriddedData(spikes, dt)
     node = nir.NIRNodeData({"spikes": gridded})
@@ -21,10 +21,20 @@ def test_generate_event_data():
 
 
 def test_conversion():
-    spikes = np.random.randint(0, 2, size=(10, 10, 10))
+    # time_shift = 0.0 * dt
+    spikes = np.random.randint(0, 2, size=(10, 10, 10)).astype(bool)
     dt = 0.1
     gridded_1 = nir.TimeGriddedData(spikes, dt)
     event = gridded_1.to_event(n_spikes=100)
+    gridded_2 = event.to_time_gridded(dt=dt)
+    assert np.array_equal(gridded_1.data, gridded_2.data)
+    assert gridded_1.dt == gridded_2.dt
+
+    # time_shift = 0.5 * dt
+    spikes = np.random.randint(0, 2, size=(10, 10, 10)).astype(bool)
+    dt = 0.1
+    gridded_1 = nir.TimeGriddedData(spikes, dt)
+    event = gridded_1.to_event(n_spikes=100, time_shift=0.5 * dt)
     gridded_2 = event.to_time_gridded(dt=dt)
     assert np.array_equal(gridded_1.data, gridded_2.data)
     assert gridded_1.dt == gridded_2.dt

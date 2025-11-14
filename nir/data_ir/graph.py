@@ -1,133 +1,186 @@
+from __future__ import annotations
+from dataclasses import dataclass
 from typing import Dict, Union
 import numpy as np
 from nir import NIRGraph
 
 
+@dataclass
 class TimeGriddedData:
     """
-    Time gridded data of shape (n_samples, n_time_steps, n_neurons)
-    with binary entries (0 or 1) indicating whether a neuron spiked at a
-    particular time step dt.
+    Boolean entries indicate whether a binary event is present at a particular
+    time step.
 
-    :param data: Array of shape (n_samples, n_time_steps, n_neurons) with binary entries
-    :param dt: Time step size
+    Arguments
+    ---------
+    data : np.ndarray, shape (n_samples, n_time_steps, n_neurons)
+        Input data. For binary data the dtype should be bool.
+    dt: float
+        Time step size.
     """
 
-    @property
-    def shape(self):
-        return self.data.shape  # pylint: disable=no-member
+    data: np.ndarray
+    dt: float  # pylint: disable=invalid-name
 
-    def __init__(self, data: np.ndarray, dt: float):  # pylint: disable=invalid-name
-        if not isinstance(data, np.ndarray) or data.ndim != 3:
+    def __post_init__(self):
+        if not isinstance(self.data, np.ndarray) or self.data.ndim != 3:
             raise ValueError(
                 "Data must be of shape (n_samples, n_time_steps, n_neurons)"
+                "and of type np.ndarray"
             )
-        self.data = data
-        self.dt = dt
-        self.n_neurons = data.shape[2]
-        self.t_max = dt * data.shape[1]
-
-    def to_event(self, n_spikes: int, time_shift: float = 0.0):
-        """
-        :params n_spikes: Maximum number of spikes stored for each neuron.
-        :params time_shift: Shift the spike times by this value.
-                           Must be in interval [0, dt].
-        """
-        idx = np.full((self.data.shape[0], n_spikes), -1)
-        time = np.full((self.data.shape[0], n_spikes), np.inf)
-
-        if time_shift < 0 or time_shift > self.dt:
-            raise ValueError("time_shift must be in interval [0, dt]")
-
-        for sample in range(self.data.shape[0]):  # n_samples
-            step, neuron = np.where(self.data[sample] == 1)
-
-            sorted_indices = np.argsort(step)
-            step = step[sorted_indices]
-            neuron = neuron[sorted_indices]
-
-            num_spikes = min(len(step), n_spikes)
-            idx[sample, :num_spikes] = neuron[:num_spikes]
-            time[sample, :num_spikes] = (step[:num_spikes] + time_shift) * self.dt
-
-        return EventData(idx, time, self.data.shape[2], self.t_max)
-
-
-class EventData:
-    """
-    Event-based data represented as a list of spike indices and spike times.
-
-    :param idx: Array of shape (n_samples, n_events) with neuron indices. If
-        there is no event, the index is `-1`.
-    :param time: Array of shape (n_samples, n_events) with event times. If
-        there is no event, the time is `np.inf`.
-    :param n_neurons: Total number of neurons in the layer.
-    :param t_max: Maximum time of the recording.
-    """
 
     @property
     def shape(self):
-        return self.idx.shape  # pylint: disable=no-member
+        return self.data.shape
 
-    def __init__(self, idx: np.ndarray, time: np.ndarray, n_neurons: int, t_max: float):
-        if idx.shape != time.shape:
+    @property
+    def n_samples(self):
+        return self.data.shape[0]
+
+    @property
+    def n_time_steps(self):
+        return self.data.shape[1]
+
+    @property
+    def n_neurons(self):
+        return self.data.shape[2]
+
+    @property
+    def t_max(self):
+        return self.n_time_steps * self.dt
+
+    def to_event(self, n_spikes: int, time_shift: float = 0.0) -> EventData:
+        """
+        Arguments
+        ---------
+        n_spikes : int
+            Maximum number of events stored for each neuron.
+        time_shift : float, optional
+            Shift the event times by this value from the beginning of each time
+            step. Must be in interval [0, dt). Default is 0.0.
+        """
+
+        if not self.data.dtype == bool:
+            raise ValueError("Data must be boolean to convert to EventData.")
+        idx = np.full((self.n_samples, n_spikes), -1)
+        time = np.full((self.n_samples, n_spikes), np.inf)
+
+        if time_shift < 0 or time_shift >= self.dt:
+            raise ValueError("time_shift must be in interval [0, dt)")
+        for sample in range(self.n_samples):
+            time_step, neuron = np.where(self.data[sample])
+
+            order = np.argsort(time_step)  # sort events by time
+            time_step = time_step[order]
+            neuron = neuron[order]
+
+            num_events = min(len(time_step), n_spikes)
+            idx[sample, :num_events] = neuron[:num_events]
+            time[sample, :num_events] = time_step[:num_events] * self.dt + time_shift
+
+        return EventData(idx, time, self.n_neurons, self.t_max)
+
+
+@dataclass
+class EventData:
+    """
+    Event-based data represented as a list of event indices and their
+    corresponding timestamps. Each event is discrete and carries no magnitude;
+    it is defined solely by its occurrence at a certain time.
+
+    Arguments
+    ---------
+    idx : np.ndarray[int], shape (n_samples, n_spikes)
+        Event indices. If there is no event, the index is `-1`.
+    time : np.ndarray[float], shape (n_samples, n_spikes)
+        Event times. If there is no event, the time is `np.inf`.
+    n_neurons : int
+        Total number of neurons in the layer.
+    t_max : float
+        Maximum time of the recording.
+    """
+
+    idx: np.ndarray
+    time: np.ndarray
+    n_neurons: int
+    t_max: float
+
+    def __post_init__(self):
+        if self.idx.shape != self.time.shape:
             raise ValueError("idx and time must have the same shape")
-        self.idx = np.array(idx, dtype=int)
-        self.time = np.array(time, dtype=float)
-        self.n_neurons = n_neurons
-        self.t_max = t_max
 
-    def to_time_gridded(self, dt):  # pylint: disable=invalid-name
-        n_samples = self.idx.shape[0]
+    @property
+    def shape(self):
+        return self.idx.shape
+
+    @property
+    def n_samples(self):
+        return self.idx.shape[0]
+
+    def to_time_gridded(
+        self, dt: float  # pylint: disable=invalid-name
+    ) -> TimeGriddedData:
+        """
+        Arguments
+        ---------
+        dt : float
+            Time step size.
+        """
         n_time_steps = int(self.t_max / dt)
-        discrete_data = np.zeros((n_samples, n_time_steps, self.n_neurons), dtype=int)
+        discrete_data = np.zeros(
+            (self.n_samples, n_time_steps, self.n_neurons), dtype=bool
+        )
 
-        for sample in range(n_samples):
+        for sample in range(self.n_samples):
             valid_spikes = self.idx[sample] != -1
-            steps = (self.time[sample][valid_spikes] / dt).astype(int)
+            valid_times = self.time[sample][valid_spikes]
+            steps = np.floor((valid_times / dt)).astype(int)
             neurons = self.idx[sample][valid_spikes]
-            discrete_data[sample, steps, neurons] = 1
+            discrete_data[sample, steps, neurons] = True
         return TimeGriddedData(discrete_data, dt)
 
 
+@dataclass
 class NIRNodeData:
     """
     Dictionary of EventData or TimeGriddedData where each entry represents an
     observable (e.g., spikes, voltages) of a corresponding NIRNode
+
+    Arguments
+    ---------
+    observables : Dict[str, Union[EventData, TimeGriddedData]]
+        Dictionary of observables for a NIRNode.
     """
 
     observables: Dict[str, Union[EventData, TimeGriddedData]]
 
-    def __init__(self, observables):
-        if not isinstance(observables, dict):
+    def __post_init__(self):
+        if not isinstance(self.observables, dict):
             raise TypeError(
                 "observables must be a dictionary of EventData or TimeGriddedData"
             )
-
-        self.observables = observables
 
     def check_observables():  # TODO: should be called by check nodes
         return True
 
 
+@dataclass
 class NIRGraphData:
     """
     Dictionary of NIRNodeData where each entry represents a NIRNode of a
     corresponding NIRGraph with its observables.
+
+    Arguments
+    ---------
+    nodes : Dict[str, Union[NIRGraphData, NIRNodeData]]
+        Dictionary of NIRNodeData or NIRGraphData for a NIRGraph.
     """
 
     nodes: Dict[str, Union["NIRGraphData", NIRNodeData]]
 
-    def __init__(self, nodes: Dict[str, Union["NIRGraphData", NIRNodeData]]):
-        """
-        :param nodes: Dictionary of NIRNodeData or NIRGraphData
-        """
-        if not isinstance(nodes, dict):
-            raise TypeError(
-                "nodes must be a dictionary of NIRNodeData or " "NIRGraphData"
-            )
-
-        self.nodes = nodes
+    def __post_init__(self):
+        if not isinstance(self.nodes, dict):
+            raise TypeError("nodes must be a dictionary of NIRNodeData or NIRGraphData")
 
     def check_nodes(self, graph: NIRGraph):
         """
@@ -137,5 +190,4 @@ class NIRGraphData:
         for key in self.nodes.keys():
             if key not in graph.nodes:
                 return False
-
         return True
