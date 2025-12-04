@@ -3,11 +3,7 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import Dict, Union
 import numpy as np
-from nir import NIRGraph
-
-
-class Interpolation(Enum):
-    NONE = "None"
+from nir import NIRGraph, NIRNode
 
 
 @dataclass
@@ -158,7 +154,7 @@ class ValuedEventData(EventData):
         Event indices. If there is no event, the index is `-1`.
     time : np.ndarray[float], shape (n_samples, n_events)
         Event times. If there is no event, the time is `np.inf`.
-    values : np.ndarray[float], shape (n_samples, n_events)
+    value : np.ndarray[float], shape (n_samples, n_events)
         Event values.
     n_neurons : int
         Total number of neurons in the layer.
@@ -166,44 +162,36 @@ class ValuedEventData(EventData):
         Maximum time of the recording.
     """
 
-    values: np.ndarray
+    value: np.ndarray
 
     def __post_init__(self):
-        if self.idx.shape != self.time.shape or self.idx.shape != self.values.shape:
-            raise ValueError("idx, time and values must have the same shape")
+        if self.idx.shape != self.time.shape or self.idx.shape != self.value.shape:
+            raise ValueError("idx, time and value must have the same shape")
 
     def to_time_gridded(
         self,
         dt: float,  # pylint: disable=invalid-name
-        interpolation: Interpolation = Interpolation.NONE,
     ) -> TimeGriddedData:
         """
+        Currently, the values are assigned directly to the corresponding time
+        steps without any interpolation.
+
         Parameters
         ----------
         dt : float
             Time step size.
-        interpolation : str, optional
-            Interpolation method to use when converting to time-gridded data.
-            Currently, only "None" is supported, which means that the values are
-            assigned directly to the corresponding time steps without any
-            interpolation.
         """
         n_samples = self.n_samples
         n_time_steps = int(self.t_max / dt)
         discrete_data = np.zeros((n_samples, n_time_steps, self.n_neurons), dtype=float)
-
-        if interpolation is not Interpolation.NONE:
-            raise NotImplementedError(
-                "Other Interpolation method than 'None' are not implemented."
-            )
 
         for sample in range(n_samples):
             valid_spikes = self.idx[sample] != -1
             valid_times = self.time[sample][valid_spikes]
             steps = np.floor((valid_times / dt)).astype(int)
             neurons = self.idx[sample][valid_spikes]
-            values = self.values[sample][valid_spikes]
-            discrete_data[sample, steps, neurons] = values
+            value = self.value[sample][valid_spikes]
+            discrete_data[sample, steps, neurons] = value
 
         return TimeGriddedData(discrete_data, dt)
 
@@ -228,7 +216,15 @@ class NIRNodeData:
                 "observables must be a dictionary of EventData or TimeGriddedData"
             )
 
-    def check_observables():  # TODO: should be called by check nodes
+    def check_observables(self, node: NIRNode):
+        """
+        Check that the shapes of the observables match the node's output shapes
+        """
+        output_shape = node.output_type["output"]
+        if not all(
+            obs.n_neurons == output_shape for obs in self.observables.values()
+        ):
+            return False
         return True
 
 
@@ -255,7 +251,16 @@ class NIRGraphData:
         Check if the nodes in NIRData are a subset of the nodes in the NIRGraph
         """
 
-        for key in self.nodes.keys():
+        for key, node in self.nodes.items():
             if key not in graph.nodes:
-                return False
-        return True
+                raise KeyError(f"Node {key} not found in the NIRGraph")
+            graph_node = graph.nodes[key]
+            if isinstance(node, NIRGraphData):
+                if not isinstance(graph_node, NIRGraph):
+                    raise TypeError(f"Node {key} is not a NIRGraph in the NIRGraph")
+                node.check_nodes(graph_node)
+            elif isinstance(node, NIRNodeData):
+                if not isinstance(graph_node, NIRNode):
+                    raise TypeError(f"Node {key} is not a NIRNode in the NIRGraph")
+                if not node.check_observables(graph_node):
+                    raise ValueError(f"Observables for node {key} do not match the NIRNode")

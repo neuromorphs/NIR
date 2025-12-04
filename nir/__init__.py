@@ -18,4 +18,4 @@ from .ir import typing  # noqa: F401
 from .data_ir import *  # noqa: F403
 from .serialization import read, write
 
-__all__ = ir.__all__ + ["read", "write"]
+__all__ = ir.__all__ + data_ir.__all__ + ["read", "write"]
