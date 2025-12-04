@@ -12,7 +12,7 @@ except PackageNotFoundError:
     # package is not installed
     pass
 
-from . import ir
+from . import ir, data_ir
 from .ir import *  # noqa: F403
 from .ir import typing  # noqa: F401
 from .data_ir import *  # noqa: F403

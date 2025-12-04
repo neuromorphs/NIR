@@ -1,9 +1,8 @@
 from __future__ import annotations
 from dataclasses import dataclass
-from enum import Enum
 from typing import Dict, Union
 import numpy as np
-from nir import NIRGraph, NIRNode
+from nir.ir import NIRGraph, NIRNode
 
 
 @dataclass
@@ -221,9 +220,7 @@ class NIRNodeData:
         Check that the shapes of the observables match the node's output shapes
         """
         output_shape = node.output_type["output"]
-        if not all(
-            obs.n_neurons == output_shape for obs in self.observables.values()
-        ):
+        if not all(obs.n_neurons == output_shape for obs in self.observables.values()):
             return False
         return True
 
@@ -263,4 +260,6 @@ class NIRGraphData:
                 if not isinstance(graph_node, NIRNode):
                     raise TypeError(f"Node {key} is not a NIRNode in the NIRGraph")
                 if not node.check_observables(graph_node):
-                    raise ValueError(f"Observables for node {key} do not match the NIRNode")
+                    raise ValueError(
+                        f"Observables for node {key} do not match the NIRNode"
+                    )

@@ -41,6 +41,7 @@ def test_generate_valued_event_data():
     assert graph.nodes["node"].observables["current"].n_neurons == n_neurons
     assert graph.nodes["node"].observables["current"].t_max == t_max
 
+
 def test_binary_conversion():
     # time_shift = 0.0 * dt
     spikes = np.random.randint(0, 2, size=(10, 10, 10)).astype(bool)
@@ -89,7 +90,7 @@ def test_check_nodes():
                 r=np.array([1.0] * 10),
                 v_leak=np.array([0.1] * 10),
                 v_reset=np.array([0.0] * 10),
-                v_threshold=np.array([1.0] * 10)
+                v_threshold=np.array([1.0] * 10),
             ),
             "linear2": nir.Linear(weight=np.random.rand(5, 10)),
             "lif2": nir.CubaLIF(
@@ -98,25 +99,24 @@ def test_check_nodes():
                 r=np.array([1.0] * 5),
                 v_leak=np.array([0.1] * 5),
                 v_reset=np.array([0.0] * 5),
-                v_threshold=np.array([1.0] * 5)
+                v_threshold=np.array([1.0] * 5),
             ),
-            "output": nir.Output(output_type=np.array([5]))
+            "output": nir.Output(output_type=np.array([5])),
         },
         edges=[
             ("input", "linear1"),
             ("linear1", "lif1"),
             ("lif1", "linear2"),
             ("linear2", "lif2"),
-            ("lif2", "output")
-        ]
+            ("lif2", "output"),
+        ],
     )
     graph_data = nir.NIRGraphData(
         nodes={
             "lif1": nir.NIRNodeData(
                 observables={
                     "spikes": nir.TimeGriddedData(
-                        data=np.random.randint(0, 2, (4, 20, 10)).astype(bool),
-                        dt=0.001
+                        data=np.random.randint(0, 2, (4, 20, 10)).astype(bool), dt=0.001
                     )
                 }
             ),
@@ -126,9 +126,10 @@ def test_check_nodes():
                         idx=np.random.randint(0, 5, (3, 5)),
                         time=np.random.rand(3, 5) * 0.1,
                         n_neurons=5,
-                        t_max=0.1)
+                        t_max=0.1,
+                    )
                 }
-            )
+            ),
         }
     )
     graph_data.check_nodes(graph)
