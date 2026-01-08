@@ -209,7 +209,12 @@ def read_version(filename: Union[str, pathlib.Path]) -> str:
         return f["version"][()].decode("utf8")
 
 
-def write(filename: Union[str, pathlib.Path, io.RawIOBase], graph: nir.NIRNode) -> None:
+def write(
+    filename: Union[str, pathlib.Path, io.RawIOBase],
+    graph: nir.NIRNode,
+    compression: str = "gzip",
+    compression_opts: Any = None,
+) -> None:
     """Write a NIR to a HDF5 file.
 
     Arguments:
@@ -218,6 +223,15 @@ def write(filename: Union[str, pathlib.Path, io.RawIOBase], graph: nir.NIRNode) 
             the file and write the bytes to it. In the case of an IOBase, the bytes will be
             written directly to the IOBase.
         graph (nir.NIRNode): The NIR Graph to serialize.
+        compression (str or int): The compression strategy to use when writing the HDF5 file. Defaults to "gzip".
+            Legal values are 'gzip', 'szip', 'lzf'.  If an integer in range(10), this indicates gzip
+            compression level.
+            See the [h5py documentation](https://docs.h5py.org/en/stable/high/dataset.html#lossless-compression-filters) for more details.
+        compression_opts
+            Compression settings.  This is an integer for gzip, 2-tuple for
+            szip, etc. If specifying a dynamically loaded compression filter
+            number, this must be a tuple of values.
+            See the [h5py documentation](https://docs.h5py.org/en/stable/high/dataset.html#lossless-compression-filters) for more details.
     """
 
     def write_recursive(group: h5py.Group, node: dict) -> None:
@@ -228,13 +242,19 @@ def write(filename: Union[str, pathlib.Path, io.RawIOBase], graph: nir.NIRNode) 
             elif isinstance(v, str):
                 group.create_dataset(k, data=v, dtype=h5py.string_dtype())
             elif isinstance(v, np.ndarray):
-                group.create_dataset(k, data=v, dtype=v.dtype)
+                group.create_dataset(
+                    k,
+                    data=v,
+                    dtype=v.dtype,
+                    compression=compression,
+                    compression_opts=compression_opts,
+                )
             elif isinstance(v, dict):
                 write_recursive(group.create_group(str(k)), v)
             else:
                 group.create_dataset(k, data=v)
 
     with h5py.File(filename, "w") as f:
-        f.create_dataset("version", data=nir.version)
+        f.create_dataset("version", data=nir.version, dtype=h5py.string_dtype())
         node_group = f.create_group("node")
         write_recursive(node_group, graph.to_dict())
