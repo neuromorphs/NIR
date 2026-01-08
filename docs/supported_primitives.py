@@ -24,8 +24,8 @@ GITHUB_RAW_URLS = [
     ("snntorch", "from_nir", "https://raw.githubusercontent.com/jeshraghian/snntorch/refs/heads/master/snntorch/import_nir.py", None),
     ("snntorch", "to_nir", "https://raw.githubusercontent.com/jeshraghian/snntorch/refs/heads/master/snntorch/export_nir.py", None),
     ("SpiNNaker2", "from_nir", "https://gitlab.com/spinnaker2/py-spinnaker2/-/raw/main/src/spinnaker2/s2_nir.py?ref_type=heads", None),
-    ("Spyx", "from_nir", "https://raw.githubusercontent.com/kmheckel/spyx/refs/heads/main/spyx/nir.py", "_nir_node_to_spyx_node"),
-    ("Spyx", "to_nir", "https://raw.githubusercontent.com/kmheckel/spyx/refs/heads/main/spyx/nir.py", "to_nir"),
+    ("Spyx", "from_nir", "https://raw.githubusercontent.com/kmheckel/spyx/refs/heads/main/src/spyx/nir.py", "_nir_node_to_spyx_node"),
+    ("Spyx", "to_nir", "https://raw.githubusercontent.com/kmheckel/spyx/refs/heads/main/src/spyx/nir.py", "to_nir"),
 ]
 
 converter_contents = {}
