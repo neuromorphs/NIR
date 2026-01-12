@@ -37,6 +37,8 @@ imported_graph = nir.read("my_graph.nir")
 
 See our [example section](https://neuroir.org/docs/examples) for how to use NIR with your favorite framework.
 
+Recently, NIR has been extended by an intermediate representation for data exchange in spiking neural networks: [NIRData](https://neuroir.org/docs/nirdata).
+
 ## Frameworks that currently support NIR
 > Read more in our [documentation about NIR support](https://neuroir.org/docs/support.html)
 

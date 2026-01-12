@@ -16,6 +16,7 @@ parts:
     title: Platform support
   - file: supported_primitives
     title: Supported primitives
+  - file: nirdata
   - file: examples/index
     sections:
     - file: examples/hxtorch/nir-conversion
