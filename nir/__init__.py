@@ -16,6 +16,6 @@ from . import ir, data_ir
 from .ir import *  # noqa: F403
 from .ir import typing  # noqa: F401
 from .data_ir import *  # noqa: F403
-from .serialization import read, write
+from .serialization import read, write, read_data, write_data
 
-__all__ = ir.__all__ + data_ir.__all__ + ["read", "write"]
+__all__ = ir.__all__ + data_ir.__all__ + ["read", "write", "read_data", "write_data"]
