@@ -1,3 +1,4 @@
+(nirtorch_state)=
 # State management in NIRTorch
 
 Managing state is crucial when dealing with (real) neurons because we have to maintain a state, such as a membrane potential, leak, or otherwise.

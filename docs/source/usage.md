@@ -1,3 +1,4 @@
+(usage)=
 # How to use NIR
 
 NIR itself is a standard: a way to formalize physical neural networks so they are completely unambiguous.
@@ -12,15 +13,15 @@ Therefore, for this guide, we focus on how to use NIR graphs as objects, without
 ## Reading and writing Python graphs
 ```{admonition} See also
 :class: info
-Read more on [Working with NIR graphs](#working_with_nir) and our [Code Examples](#examples/index).
+Read more on [Working with NIR graphs](#working_with_nir) and our [Code Examples](#examples).
 ```
 
 NIR is excellent as an exchange format, and many frameworks provide functions that lets you do this without having to modify or work with NIR yourself.
-We present an example from two platforms (Norse and Sinabs) below, but we have many more examples from other tools [in Code Examples](#examples/index) and
+We present an example from two platforms (Norse and Sinabs) below, but we have many more examples from other tools [in Code Examples](#examples) and
 you can see more code [in the repository for our paper](https://github.com/neuromorphs/NIR/tree/main/paper/).
 
 Note that Norse is based on PyTorch and uses [NIRTorch](#dev_pytorch) to convert PyTorch models to NIR.
-You can also do this manually, by constructing your own NIR graphs as shown in our [API design documentation](#api_desige).
+You can also do this manually, by constructing your own NIR graphs as shown in our [API design documentation](#api_design).
 
 ### Part 1: Convert Norse model to NIR
 ```python

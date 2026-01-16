@@ -1,3 +1,4 @@
+(working_with_nir)=
 # Working with NIR graphs
 
 ## The NIR format

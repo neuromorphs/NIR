@@ -1,11 +1,7 @@
-sphinx
-sphinx-book-theme
-myst_nb
+jupyter-book>=2.0.2
+sphinx-autodoc2
+sphinxcontrib-mermaid
 numpy
 h5py
-jupyter-book
-sphinx_external_toc
-sphinxcontrib-mermaid
 astroid
-sphinx-autoapi
 nirtorch

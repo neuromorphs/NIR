@@ -1,3 +1,6 @@
+---
+title: What is NIR?
+---
 # What is the Neuromorphic Intermediate Representation (NIR)?
 
 NIR is two things: a specification and a community.

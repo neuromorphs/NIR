@@ -1,3 +1,4 @@
+(primitives)=
 # Primitives
 
 At its core, NIR is simply a [directed graph](https://en.wikipedia.org/wiki/Directed_graph) (using the [`NIRGraph` primitive](https://github.com/neuromorphs/NIR/blob/main/nir/ir/graph.py)).
@@ -97,7 +98,7 @@ NIR graphs should be self-contained and unambiguous, such that the graph itself 
 
 ```{admonition} See also
 :class: info
-See [the usage page](usage) for more information on how to use NIR in practice.
+See [the usage page](./usage.md) for more information on how to use NIR in practice.
 ```
 
 Programming with primitives involves creating a graph of nodes whose (directional) connections indicate where signals travel.
