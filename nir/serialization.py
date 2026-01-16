@@ -258,3 +258,170 @@ def write(
         f.create_dataset("version", data=nir.version, dtype=h5py.string_dtype())
         node_group = f.create_group("node")
         write_recursive(node_group, graph.to_dict())
+
+
+def read_data(path: str) -> nir.NIRGraphData:
+    """Load NIRGraphData from a HDF/conn5 file.
+
+    Arguments:
+        filename (Union[str, Path]): The filename as either a string or pathlib Path.
+
+    Returns:
+        NIRGraphData read from the file.
+    """
+
+    def _read_time_gridded(group: h5py.Group) -> nir.TimeGriddedData:
+        data = group["data"][()]
+        dt = float(group.attrs["dt"])
+        return nir.TimeGriddedData(data=data, dt=dt)
+
+    def _read_event_data(group: h5py.Group) -> nir.EventData:
+        idx = group["idx"][()]
+        time = group["time"][()]
+        n_neurons = int(group.attrs["n_neurons"])
+        t_max = float(group.attrs["t_max"])
+
+        if "__type__" in group.attrs and group.attrs["__type__"] == "ValuedEventData":
+            value = group["value"][()]
+            return nir.ValuedEventData(
+                idx=idx,
+                time=time,
+                value=value,
+                n_neurons=n_neurons,
+                t_max=t_max,
+            )
+
+        return nir.EventData(
+            idx=idx,
+            time=time,
+            n_neurons=n_neurons,
+            t_max=t_max,
+        )
+
+    def _read_node_data(group: h5py.Group) -> nir.NIRNodeData:
+        observables = {}
+        obs_group = group["observables"]
+
+        for name, g in obs_group.items():
+            typ = g.attrs["__type__"]
+            if typ == "TimeGriddedData":
+                observables[name] = _read_time_gridded(g)
+            elif typ in ("EventData", "ValuedEventData"):
+                observables[name] = _read_event_data(g)
+            else:
+                raise ValueError(f"Unknown observable type: {typ}")
+        return nir.NIRNodeData(observables=observables)
+
+    def _read_graph_data(group: h5py.Group) -> nir.NIRGraphData:
+        nodes = {}
+        nodes_group = group["nodes"]
+
+        for name, g in nodes_group.items():
+            typ = g.attrs["__type__"]
+            if typ == "NIRNodeData":
+                nodes[name] = _read_node_data(g)
+            elif typ == "NIRGraphData":
+                nodes[name] = _read_graph_data(g)
+            else:
+                raise ValueError(f"Unknown node type: {typ}")
+
+        return nir.NIRGraphData(nodes=nodes)
+
+    with h5py.File(path, "r") as f:
+        if f.attrs.get("__type__") != "NIRGraphData":
+            raise ValueError("Root object is not NIRGraphData")
+        return _read_graph_data(f)
+
+
+def write_data(
+    filename: Union[str, pathlib.Path, io.RawIOBase],
+    graph_data: nir.NIRGraphData,
+    compression: str = "gzip",
+    compression_opts: Any = None,
+) -> None:
+    """Write a NIRDataGraph to a HDF5 file.
+
+    Arguments:
+        filename (Union[str, Path, io.RawIOBase]): The filename as either a string, pathlib Path,
+            or io.RawIOBase. In the case of a string or path, the function will attempt to open
+            the file and write the bytes to it. In the case of an IOBase, the bytes will be
+            written directly to the IOBase.
+        graph_data (nir.NIRGraphData): The data of a NIR graph to serialize.
+        compression (str or int): The compression strategy to use when writing the HDF5 file. Defaults to "gzip".
+            Legal values are 'gzip', 'szip', 'lzf'.  If an integer in range(10), this indicates gzip
+            compression level.
+            See the [h5py documentation](https://docs.h5py.org/en/stable/high/dataset.html#lossless-compression-filters) for more details.
+        compression_opts
+            Compression settings.  This is an integer for gzip, 2-tuple for
+            szip, etc. If specifying a dynamically loaded compression filter
+            number, this must be a tuple of values.
+            See the [h5py documentation](https://docs.h5py.org/en/stable/high/dataset.html#lossless-compression-filters) for more details.
+    """
+
+    def _write_time_gridded(group: h5py.Group, data: nir.TimeGriddedData):
+        group.attrs["__type__"] = "TimeGriddedData"
+        group.create_dataset(
+            "data",
+            data=data.data,
+            dtype=data.data.dtype,
+            compression=compression,
+            compression_opts=compression_opts,
+        )
+        group.attrs["dt"] = data.dt
+
+    def _write_event_data(group: h5py.Group, data: nir.EventData):
+        group.attrs["__type__"] = type(data).__name__
+        group.create_dataset(
+            "idx",
+            data=data.idx,
+            dtype=data.idx.dtype,
+            compression=compression,
+            compression_opts=compression_opts,
+        )
+        group.create_dataset(
+            "time",
+            data=data.time,
+            dtype=data.time.dtype,
+            compression=compression,
+            compression_opts=compression_opts,
+        )
+        group.attrs["n_neurons"] = data.n_neurons
+        group.attrs["t_max"] = data.t_max
+
+        if isinstance(data, nir.ValuedEventData):
+            group.create_dataset(
+                "value",
+                data=data.value,
+                dtype=data.value.dtype,
+                compression=compression,
+                compression_opts=compression_opts,
+            )
+
+    def _write_node_data(group: h5py.Group, node_data: nir.NIRNodeData):
+        group.attrs["__type__"] = "NIRNodeData"
+        obs_group = group.create_group("observables")
+
+        for name, obs in node_data.observables.items():
+            g = obs_group.create_group(name)
+            if isinstance(obs, nir.TimeGriddedData):
+                _write_time_gridded(g, obs)
+            elif isinstance(obs, nir.EventData):
+                _write_event_data(g, obs)
+            else:
+                raise TypeError(f"Unsupported observable type: {type(obs)}")
+
+    def _write_graph_data(group: h5py.Group, node: dict) -> None:
+        group.attrs["__type__"] = "NIRGraphData"
+        nodes_group = group.create_group("nodes")
+
+        for name, node in graph_data.nodes.items():
+            g = nodes_group.create_group(name)
+            if isinstance(node, nir.NIRNodeData):
+                _write_node_data(g, node)
+            elif isinstance(node, nir.NIRGraphData):
+                _write_graph_data(g, node)
+            else:
+                raise TypeError(f"Unsupported node type: {type(node)}")
+
+    with h5py.File(filename, "w") as f:
+        _write_graph_data(f, graph_data)

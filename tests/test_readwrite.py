@@ -329,3 +329,50 @@ def test_read_without_type_check():
         nir.Linear(weight=np.zeros((1, 1))),
         type_check=False,
     )
+
+
+def test_serialize_deserialize_data():
+    graph_data = nir.NIRGraphData(
+        nodes={
+            "node1": nir.NIRNodeData(
+                observables={
+                    "time-gridded": nir.TimeGriddedData(
+                        data=np.array([[[0.1, 0.2], [0.3, 0.4]]]),
+                        dt=0.1,
+                    ),
+                    "event": nir.EventData(
+                        idx=np.array([0, 1, 0]),
+                        time=np.array([0.1, 0.2, 0.3]),
+                        n_neurons=2,
+                        t_max=1.0,
+                    ),
+                    "valued-event": nir.ValuedEventData(
+                        idx=np.array([0, 1]),
+                        time=np.array([0.15, 0.25]),
+                        value=np.array([0.5, 0.8]),
+                        n_neurons=2,
+                        t_max=1.0,
+                    ),
+                }
+            )
+        }
+    )
+
+    with tempfile.NamedTemporaryFile() as f:
+        nir.write_data(f.name, graph_data)
+        graph_data2 = nir.read_data(f.name)
+
+    for node_key in graph_data.nodes:
+        node_data = graph_data.nodes[node_key]
+        node_data2 = graph_data2.nodes[node_key]
+        for obs_key in node_data.observables:
+            obs = node_data.observables[obs_key]
+            obs2 = node_data2.observables[obs_key]
+            assert obs.__class__ == obs2.__class__
+            for attr in obs.__dict__:
+                v1 = getattr(obs, attr)
+                v2 = getattr(obs2, attr)
+                if isinstance(v1, np.ndarray):
+                    assert np.array_equal(v1, v2)
+                else:
+                    assert v1 == v2
