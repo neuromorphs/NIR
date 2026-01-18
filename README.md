@@ -1,11 +1,11 @@
 <picture>
 <source media="(prefers-color-scheme: dark)" srcset="https://github.com/neuromorphs/NIR/raw/main/docs/logo_dark.png">
-<img alt="NIR Logo" src="https://github.com/neuromorphs/NIR/raw/main/docs/logo_light.png">
+<img alt="NIR Logo" style="width: 80%;" class="logo_front" src="https://github.com/neuromorphs/NIR/raw/main/docs/logo_light.png">
 </picture>
 
 # NIR - Neuromorphic Intermediate Representation
 
-[![Nature Communications Paper](https://zenodo.org/badge/DOI/10.1038/s41467-024-52259-9.svg)](https://doi.org/10.1038/s41467-024-52259-9)
+![Static Badge](https://img.shields.io/badge/Read_the_paper-10.1038%2Fs41467--024--52259--9-blue?link=https%253A%252F%252Fdoi.org%252F10.1038%252Fs41467-024-52259-9)
 [![PyPI - Downloads](https://img.shields.io/pypi/dm/nir?logo=pypi)](https://pypi.org/project/nir/)
 [![GitHub Tag](https://img.shields.io/github/v/tag/neuromorphs/nir?logo=github)](https://github.com/neuromorphs/NIR/releases)
 [![Discord](https://img.shields.io/discord/1209533869733453844?logo=discord)](https://discord.gg/JRMRGP9h3c)
@@ -21,7 +21,7 @@ NIR is useful when you want to move a model from one platform to another, for in
 > See [which frameworks are currently supported by NIR](https://neuroir.org/docs/support.html).
 
 ## Usage
-> Read more in our [documentation about NIR usage](https://neuroir.org/docs) and see more examples in our [examples section](https://neuroir.org/docs/examples)
+> Read more in our [documentation about NIR usage](https://neuroir.org/docs/usage) and see more examples in our [examples section](https://neuroir.org/docs/examples)
 
 NIR serves as a format between neuromorphic platforms and will be installed alongside your framework of choice.
 Using NIR is typically a part of your favorite framework's workflow, but follows the same pattern when you want to move from a *source* to a *target* platform:

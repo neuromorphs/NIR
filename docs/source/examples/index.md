@@ -1,3 +1,4 @@
+(examples)=
 # Code examples
 
 NIR can be used to *export* or *import* models.

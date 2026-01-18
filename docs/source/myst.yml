@@ -1,0 +1,70 @@
+version: 1
+
+project:
+  title: NIR
+  description: Neuromorphic Intermediate Representation
+  github: https://github.com/neuromorphs/nir
+  license: BSD-3-Clause
+
+  # Table of Contents (from _toc.yml)
+  toc:
+    - file: index.md
+    - title: Introduction
+      children:
+        - file: what.md
+          title: What is it?
+        - file: about.md
+        - file: roadmap.md
+        - file: events.md
+    - title: User guide
+      
+      children:
+        - file: usage.md
+        - file: primitives.md
+        - file: support.md
+          title: Platform support
+        - file: supported_primitives.md
+          title: Supported primitives
+        - file: nirdata.md
+        - file: examples/index.md
+          title: Examples
+          children:
+            - file: examples/hxtorch/nir-conversion.ipynb
+            - file: examples/jaxsnn/nir-conversion.ipynb
+            - file: examples/lava/nir-conversion.ipynb
+            - file: examples/nengo/nir-conversion.ipynb
+            - file: examples/norse/nir-conversion.ipynb
+            - file: examples/rockpool/nir-conversion.ipynb
+            - file: examples/sinabs/nir-conversion.ipynb
+            - file: examples/snntorch/nir-conversion.ipynb
+            - file: examples/spinnaker2/import.ipynb
+            - file: examples/spyx/conversion.ipynb
+            - file: examples/snntorch_to_norse.ipynb
+    - title: Developer guide
+      children:
+        - file: working_with_nir.md
+        - file: porting_nir.md
+        - file: dev_pytorch.ipynb
+          children:
+            - file: nirtorch/tracing.ipynb
+            - file: nirtorch/interpreting.ipynb
+            - file: nirtorch/state.md
+        - file: dev_jax.md
+        - file: contributing.md
+    - title: API documentation
+      children:
+        - file: api_design.md
+        - file: api_nir.md
+          title: NIR API
+        - file: api_nirtorch.md
+          title: NIRTorch API
+
+
+site:
+  template: book-theme
+  title: NIR documentation
+
+  options:
+    logo: ../logo_light.png
+    logo_text: Neuromorphic Intermediate Representation (NIR)
+    style: ./style.css
