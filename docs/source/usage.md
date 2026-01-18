@@ -1,4 +1,4 @@
-(usage)=
+(using_nir)=
 # How to use NIR
 
 NIR itself is a standard: a way to formalize physical neural networks so they are completely unambiguous.

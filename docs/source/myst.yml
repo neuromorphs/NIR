@@ -66,4 +66,5 @@ site:
 
   options:
     logo: ../logo_light.png
-    logo_text: NIR
+    logo_text: Neuromorphic Intermediate Representation (NIR)
+    style: ./style.css

@@ -20,12 +20,12 @@ Instantiating the class is simply `MyNIRNode(np.array([...]))`.
 ```{figure} nir_graph_example.svg
 ---
 height: 200px
-name: nir-graph-example
+name: nir-graph-example-api
 ---
 An example of a NIR graph with four nodes: Input, Leaky-Integrator, Affine map, and Output.
 ```
 
-A collection of nodes is a `NIRGraph`, which is, you guessed it, a `NIRNode`.
+A collection of nodes is a `NIRGraph`, which also happens to be a `NIRNode`.
 But the graph node is special in that it contains a number of named nodes (`.nodes`) and connections between them (`.edges`).
 The nodes are named because we need to uniquely distinguish them from each other, so `.nodes` is actually a dictionary (`Dict[str, NIRNode]`).
 With our node above, we can define `nodes = {"my_node": MyNIRNode(np.array([...]))}`.

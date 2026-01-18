@@ -15,7 +15,7 @@ The top-most node is typically a single [`NIRGraph` object](api_design.md#nir-gr
 ```{figure} nir_graph_example.svg
 ---
 height: 200px
-name: nir-graph-example
+label: nir-graph-example
 ---
 An example of a NIR graph with four nodes: Input, Leaky-Integrator, Affine map, and Output.
 ```

@@ -9,10 +9,10 @@ This page lists functions and classes exposed by the `nirtorch` package for conv
 
 For detailed usage examples and API documentation, see:
 - [PyTorch developer guide](dev_pytorch.ipynb)
-- [nirtorch source code](https://github.com/neuromorphs/nir/tree/main/nirtorch)
+- [nirtorch source code](https://github.com/neuromorphs/nirtorch/tree/main/nirtorch)
 
 ## Key Modules
 
-- **Tracing**: Extract computational graphs from PyTorch models - see [tracing guide](nirtorch/tracing.ipynb)
+- **Tracing**: Extract computational graphs from PyTorch models - see [tracing guide](#nirtorch_tracing)
 - **Interpreting**: Load NIR graphs as PyTorch modules - see [interpreting guide](nirtorch/interpreting.ipynb)
 - **State management**: Handle stateful operations - see [state guide](nirtorch/state.md)

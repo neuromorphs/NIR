@@ -98,7 +98,7 @@ NIR graphs should be self-contained and unambiguous, such that the graph itself 
 
 ```{admonition} See also
 :class: info
-See [the usage page](./usage.md) for more information on how to use NIR in practice.
+See @using_nir for more information on how to use NIR in practice.
 ```
 
 Programming with primitives involves creating a graph of nodes whose (directional) connections indicate where signals travel.
