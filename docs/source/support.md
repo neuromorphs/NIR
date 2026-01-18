@@ -10,16 +10,16 @@ By "reading" a NIR graph, we mean converting it into a platform-specific represe
 
 | **Framework** | **Write to NIR** | **Read from NIR** | **Examples** |
 | --------------- | :--: | :--: | :------: |
-| [hxtorch](https://github.com/electronicvisions/hxtorch) ([BrainScaleS-2](https://wiki.ebrains.eu/bin/view/Collabs/neuromorphic/BrainScaleS/)) | ✓ | ✓ | [hxtorch examples](https://neuroir.org/docs/examples/hxtorch/nir-conversion.html) |
-| [jaxsnn](https://github.com/electronicvisions/jaxsnn) ([BrainScaleS-2](https://wiki.ebrains.eu/bin/view/Collabs/neuromorphic/BrainScaleS/)) | ⬚ | ✓ | [jaxsnn examples](https://neuroir.org/docs/examples/jaxsnn/nir-conversion.html) |
-| [Lava-DL](https://github.com/lava-nc/lava-dl) | ⬚ | ✓ | [Lava/Loihi examples](https://neuroir.org/docs/examples/lava/nir-conversion.html) |
-| [Nengo](https://nengo.ai) | ✓ | ✓ | [Nengo examples](https://neuroir.org/docs/examples/nengo/nir-conversion.html) |
-| [Norse](https://github.com/norse/norse) | ✓ | ✓ | [Norse examples](https://neuroir.org/docs/examples/norse/nir-conversion.html) |
-| [Rockpool](https://rockpool.ai) ([SynSense Xylo chip](https://www.synsense.ai/products/xylo/)) | ✓ | ✓ | [Rockpool/Xylo examples](https://neuroir.org/docs/examples/rockpool/nir-conversion.html)
-| [Sinabs](https://sinabs.readthedocs.io) ([SynSense Speck chip](https://www.synsense.ai/products/speck-2/)) | ✓ | ✓ | [Sinabs/Speck examples](https://neuroir.org/docs/examples/sinabs/nir-conversion.html) |
-| [snnTorch](https://github.com/jeshraghian/snntorch/) | ✓ | ✓ | [snnTorch examples](https://neuroir.org/docs/examples/snntorch/nir-conversion.html) |
-| [SpiNNaker2](https://spinncloud.com/portfolio/spinnaker2/) | ⬚ | ✓ | [SpiNNaker2 examples](https://neuroir.org/docs/examples/spinnaker2/import.html) |
-| [Spyx](https://github.com/kmheckel/spyx) | ✓ | ✓ | [Spyx examples](https://neuroir.org/docs/examples/spyx/conversion.html)
+| [hxtorch](https://github.com/electronicvisions/hxtorch) ([BrainScaleS-2](https://wiki.ebrains.eu/bin/view/Collabs/neuromorphic/BrainScaleS/)) | ✓ | ✓ | [hxtorch examples](https://neuroir.org/docs/examples/hxtorch/nir-conversion/) |
+| [jaxsnn](https://github.com/electronicvisions/jaxsnn) ([BrainScaleS-2](https://wiki.ebrains.eu/bin/view/Collabs/neuromorphic/BrainScaleS/)) | ⬚ | ✓ | [jaxsnn examples](https://neuroir.org/docs/examples/jaxsnn/nir-conversion/) |
+| [Lava-DL](https://github.com/lava-nc/lava-dl) | ⬚ | ✓ | [Lava/Loihi examples](https://neuroir.org/docs/examples/lava/nir-conversion/) |
+| [Nengo](https://nengo.ai) | ✓ | ✓ | [Nengo examples](https://neuroir.org/docs/examples/nengo/nir-conversion/) |
+| [Norse](https://github.com/norse/norse) | ✓ | ✓ | [Norse examples](https://neuroir.org/docs/examples/norse/nir-conversion/) |
+| [Rockpool](https://rockpool.ai) ([SynSense Xylo chip](https://www.synsense.ai/products/xylo/)) | ✓ | ✓ | [Rockpool/Xylo examples](https://neuroir.org/docs/examples/rockpool/nir-conversion/)
+| [Sinabs](https://sinabs.readthedocs.io) ([SynSense Speck chip](https://www.synsense.ai/products/speck-2/)) | ✓ | ✓ | [Sinabs/Speck examples](https://neuroir.org/docs/examples/sinabs/nir-conversion/) |
+| [snnTorch](https://github.com/jeshraghian/snntorch/) | ✓ | ✓ | [snnTorch examples](https://neuroir.org/docs/examples/snntorch/nir-conversion/) |
+| [SpiNNaker2](https://spinncloud.com/portfolio/spinnaker2/) | ⬚ | ✓ | [SpiNNaker2 examples](https://neuroir.org/docs/examples/spinnaker2/import/) |
+| [Spyx](https://github.com/kmheckel/spyx) | ✓ | ✓ | [Spyx examples](https://neuroir.org/docs/examples/spyx/conversion/)
 
 ## Why are some platforms only reading or writing but not both?
 Some platforms support both reading and writing, but in other cases it does not make sense to both read *and* write NIR graphs.
