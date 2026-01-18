@@ -65,6 +65,8 @@ site:
   title: NIR documentation
 
   options:
+    favicon: ../neuroir.org/favicon.png
+    folders: true
     logo: ../logo_light.png
     logo_text: Neuromorphic Intermediate Representation (NIR)
     style: ./style.css
