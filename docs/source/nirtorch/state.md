@@ -120,7 +120,7 @@ def stateful_function(data, state):
     return output, new_state 
 ```
 
-Once NIRTorch has parsed a NIR module into Torch modules (read more about that in the page about [To PyTorch: Interpreting NIR](/nirtorch/interpreting.md)),
+Once NIRTorch has parsed a NIR module into Torch modules (read more about that in the page about [To PyTorch: Interpreting NIR](#nirtorch_interpreting)),
 the resulting module expects a second `state` parameter, like the function above.
 Similarly, it will return a tuple of `(data, state)`.
 Here is a full example where we first initialize a Torch module from NIRTorch, and then applies it several times with the correct state
