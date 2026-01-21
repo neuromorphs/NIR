@@ -43,6 +43,9 @@ class CubaLI(NIRNode):
             == self.r.shape
             == self.v_leak.shape
         ), "All parameters must have the same shape"
+        assert (
+            len(self.tau_syn.shape) != 0
+        ), "Neuron parameters cannot be scalar, only numpy arrays"
         # If w_in is a scalar, make it an array of same shape as v_leak
         self.w_in = np.ones_like(self.v_leak) * self.w_in
         self.input_type = {"input": np.array(self.v_leak.shape)}
@@ -106,6 +109,9 @@ class CubaLIF(NIRNode):
             == self.v_reset.shape
             == self.v_threshold.shape
         ), "All parameters must have the same shape"
+        assert (
+            len(self.tau_syn.shape) != 0
+        ), "Neuron parameters cannot be scalar, only numpy arrays"
         # If w_in is a scalar, make it an array of same shape as v_threshold
         self.w_in = np.ones_like(self.v_threshold) * self.w_in
         self.input_type = {"input": np.array(self.v_threshold.shape)}
@@ -134,6 +140,9 @@ class I(NIRNode):  # noqa: E742
     metadata: Dict[str, Any] = field(default_factory=dict)
 
     def __post_init__(self):
+        assert (
+            len(self.r.shape) != 0
+        ), "Neuron parameters cannot be scalar, only numpy arrays"
         self.input_type = {"input": np.array(self.r.shape)}
         self.output_type = {"output": np.array(self.r.shape)}
 
@@ -173,6 +182,9 @@ class IF(NIRNode):
         assert (
             self.r.shape == self.v_threshold.shape == self.v_reset.shape
         ), "All parameters must have the same shape"
+        assert (
+            len(self.r.shape) != 0
+        ), "Neuron parameters cannot be scalar, only numpy arrays"
         self.input_type = {"input": np.array(self.r.shape)}
         self.output_type = {"output": np.array(self.r.shape)}
 
@@ -208,6 +220,9 @@ class LI(NIRNode):
         assert (
             self.tau.shape == self.r.shape == self.v_leak.shape
         ), "All parameters must have the same shape"
+        assert (
+            len(self.tau.shape) != 0
+        ), "Neuron parameters cannot be scalar, only numpy arrays"
         self.input_type = {"input": np.array(self.r.shape)}
         self.output_type = {"output": np.array(self.r.shape)}
 
@@ -261,6 +276,9 @@ class LIF(NIRNode):
             == self.v_reset.shape
             == self.v_threshold.shape
         ), "All parameters must have the same shape"
+        assert (
+            len(self.tau.shape) != 0
+        ), "Neuron parameters cannot be scalar, only numpy arrays"
         self.input_type = {"input": np.array(self.r.shape)}
         self.output_type = {"output": np.array(self.r.shape)}
 
