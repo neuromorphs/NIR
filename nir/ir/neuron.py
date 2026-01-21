@@ -108,8 +108,8 @@ class CubaLIF(NIRNode):
         ), "All parameters must have the same shape"
         # If w_in is a scalar, make it an array of same shape as v_threshold
         self.w_in = np.ones_like(self.v_threshold) * self.w_in
-        self.input_type = {"input": np.array(self.v_threshold.shape)}
-        self.output_type = {"output": np.array(self.v_threshold.shape)}
+        self.input_type = {"input": np.array([np.size(self.v_threshold)])}
+        self.output_type = {"output": np.array([np.size(self.v_threshold)])}
 
     @classmethod
     def from_dict(cls, kwargs: Dict[str, Any]) -> "CubaLIF":
