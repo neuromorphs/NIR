@@ -3,7 +3,6 @@ This document lists which primitives are supported by the software frameworks fo
 - `→`: Supported for conversion from NIR
 - `←`: Supported for conversion to NIR
 - `⟷`: Supported for both conversion directions (to and from NIR)
-
 Please note that this list is generated automatically and may not be entirely accurate.
 <br />
 
