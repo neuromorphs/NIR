@@ -5,7 +5,7 @@ NIR is simple: it consists of a series of objects that *represent* [NIR structur
 In other words, they do not implement the functionality of the nodes, but simply represent the necessary parameters required to *eventually* evaluate the node.
 
 We chose Python because the language is straight-forward, known by most, and has excellent [dataclasses](https://docs.python.org/3/library/dataclasses.html) exactly for our purpose.
-This permits an incredibly simple structure, where we have encoded all the NIR primitives into a single [`ir.py` file](https://github.com/neuromorphs/NIR/blob/main/nir/ir.py), with a simple structure:
+This permits an incredibly simple structure, where we have encoded all the NIR primitives in the [`ir` module](https://github.com/neuromorphs/NIR/tree/main/nir/ir), with a simple structure:
 
 ```python
 @dataclass
@@ -13,7 +13,7 @@ class MyNIRNode(NIRNode):
     some_parameter: np.ndarray
 ```
 
-In this example, we create a class that inherits from the parent [`NIRNode`](https://github.com/neuromorphs/NIR/blob/main/nir/ir.py#L160) with a single parameter, `some_parameter`.
+In this example, we create a class that inherits from the parent [`NIRNode`](https://github.com/neuromorphs/NIR/blob/main/nir/ir/node.py#L7) with a single parameter, `some_parameter`.
 Instantiating the class is simply `MyNIRNode(np.array([...]))`.
 
 ## NIR Graphs and edges
