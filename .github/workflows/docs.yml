@@ -43,7 +43,7 @@ jobs:
           pip install linkchecker
       - name: Check external links in source files
         run: |
-          linkchecker docs --check-extern --no-follow-url='.*'
+          linkchecker docs/neuroir.org --check-extern --no-follow-url='.*'
       - name: Prepare site dir
         run: |
           cp -r docs/neuroir.org _site
