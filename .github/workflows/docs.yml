@@ -40,6 +40,7 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r docs/requirements.txt
+          pip install linkchecker
       - name: Prepare site dir
         run: |
           cp -r docs/neuroir.org _site
@@ -47,6 +48,9 @@ jobs:
         run: |
          (cd docs/source && jupyter-book build --html) # Will put this in docs/source/_build/html
          mv docs/source/_build/html _site/docs
+      - name: Check all links in built site
+        run: |
+          linkchecker _site --check-extern
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
 
