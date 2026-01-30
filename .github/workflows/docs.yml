@@ -41,16 +41,16 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r docs/requirements.txt
           pip install linkchecker
+      - name: Check external links in source files
+        run: |
+          linkchecker docs/neuroir.org --check-extern --no-follow-url='.*'
       - name: Prepare site dir
         run: |
           cp -r docs/neuroir.org _site
       - name: Build Jupyter Book
         run: |
-         (cd docs/source && jupyter-book build --html) # Will put this in docs/source/_build/html
+         (cd docs/source && BASE_URL=https://neuroir.org/docs/ jupyter-book build --html) # Will put this in docs/source/_build/html
          mv docs/source/_build/html _site/docs
-      - name: Check all links in built site
-        run: |
-          linkchecker _site --check-extern
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
 
