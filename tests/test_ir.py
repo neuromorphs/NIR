@@ -755,6 +755,206 @@ def test_type_check_recurrent():
         )
 
 
+def test_scalar_lif_type_inference():
+    """Scalar LIF parameters get types resolved from Input predecessor."""
+    graph = nir.NIRGraph(
+        nodes={
+            "input": nir.Input(np.array([64])),
+            "lif": nir.LIF(
+                tau=np.array(0.01),
+                r=np.array(1.0),
+                v_leak=np.array(0.0),
+                v_threshold=np.array(1.0),
+            ),
+            "output": nir.Output(np.array([64])),
+        },
+        edges=[("input", "lif"), ("lif", "output")],
+    )
+    assert np.array_equal(graph.nodes["lif"].input_type["input"], [64])
+    assert np.array_equal(graph.nodes["lif"].output_type["output"], [64])
+    assert graph.nodes["lif"].tau.shape == ()
+    assert graph.nodes["lif"].r.shape == ()
+
+
+def test_scalar_lif_with_affine_predecessor():
+    """Scalar LIF infers shape from Affine predecessor output."""
+    graph = nir.NIRGraph(
+        nodes={
+            "input": nir.Input(np.array([784])),
+            "fc": nir.Affine(
+                weight=np.random.randn(128, 784),
+                bias=np.zeros(128),
+            ),
+            "lif": nir.LIF(
+                tau=np.array(0.01),
+                r=np.array(1.0),
+                v_leak=np.array(0.0),
+                v_threshold=np.array(1.0),
+            ),
+            "output": nir.Output(np.array([128])),
+        },
+        edges=[("input", "fc"), ("fc", "lif"), ("lif", "output")],
+    )
+    assert np.array_equal(graph.nodes["lif"].input_type["input"], [128])
+    assert np.array_equal(graph.nodes["lif"].output_type["output"], [128])
+
+
+def test_scalar_cubalif_type_inference():
+    """Scalar CubaLIF parameters get types resolved from predecessor."""
+    graph = nir.NIRGraph(
+        nodes={
+            "input": nir.Input(np.array([32])),
+            "lif": nir.CubaLIF(
+                tau_syn=np.array(0.01),
+                tau_mem=np.array(0.02),
+                r=np.array(1.0),
+                v_leak=np.array(0.0),
+                v_threshold=np.array(1.0),
+            ),
+            "output": nir.Output(np.array([32])),
+        },
+        edges=[("input", "lif"), ("lif", "output")],
+    )
+    assert np.array_equal(graph.nodes["lif"].input_type["input"], [32])
+    assert np.array_equal(graph.nodes["lif"].output_type["output"], [32])
+
+
+def test_scalar_if_type_inference():
+    """Scalar IF parameters get types resolved from predecessor."""
+    graph = nir.NIRGraph(
+        nodes={
+            "input": nir.Input(np.array([16])),
+            "neuron": nir.IF(
+                r=np.array(1.0),
+                v_threshold=np.array(1.0),
+            ),
+            "output": nir.Output(np.array([16])),
+        },
+        edges=[("input", "neuron"), ("neuron", "output")],
+    )
+    assert np.array_equal(graph.nodes["neuron"].input_type["input"], [16])
+    assert np.array_equal(graph.nodes["neuron"].output_type["output"], [16])
+
+
+def test_scalar_li_type_inference():
+    """Scalar LI parameters get types resolved from predecessor."""
+    graph = nir.NIRGraph(
+        nodes={
+            "input": nir.Input(np.array([8])),
+            "neuron": nir.LI(
+                tau=np.array(0.01),
+                r=np.array(1.0),
+                v_leak=np.array(0.0),
+            ),
+            "output": nir.Output(np.array([8])),
+        },
+        edges=[("input", "neuron"), ("neuron", "output")],
+    )
+    assert np.array_equal(graph.nodes["neuron"].input_type["input"], [8])
+    assert np.array_equal(graph.nodes["neuron"].output_type["output"], [8])
+
+
+def test_scalar_lif_multi_layer():
+    """Multiple scalar LIF layers get types resolved sequentially."""
+    graph = nir.NIRGraph(
+        nodes={
+            "input": nir.Input(np.array([784])),
+            "fc1": nir.Affine(
+                weight=np.random.randn(128, 784), bias=np.zeros(128)
+            ),
+            "lif1": nir.LIF(
+                tau=np.array(0.01),
+                r=np.array(1.0),
+                v_leak=np.array(0.0),
+                v_threshold=np.array(1.0),
+            ),
+            "fc2": nir.Affine(
+                weight=np.random.randn(10, 128), bias=np.zeros(10)
+            ),
+            "lif2": nir.LIF(
+                tau=np.array(0.02),
+                r=np.array(1.0),
+                v_leak=np.array(0.0),
+                v_threshold=np.array(0.5),
+            ),
+            "output": nir.Output(np.array([10])),
+        },
+        edges=[
+            ("input", "fc1"),
+            ("fc1", "lif1"),
+            ("lif1", "fc2"),
+            ("fc2", "lif2"),
+            ("lif2", "output"),
+        ],
+    )
+    assert np.array_equal(graph.nodes["lif1"].input_type["input"], [128])
+    assert np.array_equal(graph.nodes["lif1"].output_type["output"], [128])
+    assert np.array_equal(graph.nodes["lif2"].input_type["input"], [10])
+    assert np.array_equal(graph.nodes["lif2"].output_type["output"], [10])
+
+
+def test_scalar_lif_recurrent():
+    """Scalar LIF works in a recurrent graph with feedback connection."""
+    graph = nir.NIRGraph(
+        nodes={
+            "input": nir.Input(np.array([64])),
+            "lif": nir.LIF(
+                tau=np.array(0.01),
+                r=np.array(1.0),
+                v_leak=np.array(0.0),
+                v_threshold=np.array(1.0),
+            ),
+            "feedback": nir.Linear(weight=np.random.randn(64, 64)),
+            "output": nir.Output(np.array([64])),
+        },
+        edges=[
+            ("input", "lif"),
+            ("lif", "feedback"),
+            ("feedback", "lif"),
+            ("lif", "output"),
+        ],
+    )
+    assert np.array_equal(graph.nodes["lif"].input_type["input"], [64])
+    assert np.array_equal(graph.nodes["lif"].output_type["output"], [64])
+
+
+def test_nonscalar_mismatch_still_fails():
+    """Non-scalar type mismatches still raise ValueError as before."""
+    with pytest.raises(ValueError, match="type mismatch"):
+        nir.NIRGraph(
+            nodes={
+                "input": nir.Input(np.array([64])),
+                "lif": nir.LIF(
+                    tau=np.ones(128) * 0.01,
+                    r=np.ones(128),
+                    v_leak=np.zeros(128),
+                    v_threshold=np.ones(128),
+                ),
+                "output": nir.Output(np.array([128])),
+            },
+            edges=[("input", "lif"), ("lif", "output")],
+        )
+
+
+def test_explicit_array_params_unchanged():
+    """Nodes with explicit (non-scalar) array params behave as before."""
+    graph = nir.NIRGraph(
+        nodes={
+            "input": nir.Input(np.array([3])),
+            "lif": nir.LIF(
+                tau=np.array([0.01, 0.02, 0.03]),
+                r=np.array([1.0, 1.0, 1.0]),
+                v_leak=np.array([0.0, 0.0, 0.0]),
+                v_threshold=np.array([1.0, 1.0, 1.0]),
+            ),
+            "output": nir.Output(np.array([3])),
+        },
+        edges=[("input", "lif"), ("lif", "output")],
+    )
+    assert np.array_equal(graph.nodes["lif"].input_type["input"], [3])
+    assert np.array_equal(graph.nodes["lif"].output_type["output"], [3])
+
+
 def test_node():
     try:
         node = nir.ir.NIRNode()

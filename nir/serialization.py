@@ -242,13 +242,16 @@ def write(
             elif isinstance(v, str):
                 group.create_dataset(k, data=v, dtype=h5py.string_dtype())
             elif isinstance(v, np.ndarray):
-                group.create_dataset(
-                    k,
-                    data=v,
-                    dtype=v.dtype,
-                    compression=compression,
-                    compression_opts=compression_opts,
-                )
+                if v.ndim > 0:
+                    group.create_dataset(
+                        k,
+                        data=v,
+                        dtype=v.dtype,
+                        compression=compression,
+                        compression_opts=compression_opts,
+                    )
+                else:
+                    group.create_dataset(k, data=v, dtype=v.dtype)
             elif isinstance(v, dict):
                 write_recursive(group.create_group(str(k)), v)
             else:

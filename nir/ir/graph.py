@@ -318,16 +318,37 @@ class NIRGraph(NIRNode):
                     for k, v in pre_node.output_type.items()
                 }
             elif type_mismatch:
-                # set post input_type to be the same as pre output_type
-                pre_repr = (
-                    f"{pre_key}.output: {np.array(list(pre_node.output_type.values()))}"
+                # Check if post node has scalar-derived types (empty shape arrays).
+                # Scalar parameters (0-d arrays) produce input_type/output_type with
+                # empty arrays via np.array(param.shape) where shape=(). Resolve these
+                # by adopting the predecessor's output type. Parameters are untouched.
+                post_values = list(post_node.input_type.values())
+                is_scalar_type = all(
+                    isinstance(v, np.ndarray) and v.size == 0
+                    for v in post_values
                 )
-                post_repr = (
-                    f"{post_key}.input: {np.array(list(post_node.input_type.values()))}"
-                )
-                raise ValueError(
-                    f"Type inference error: type mismatch: {pre_repr} -> {post_repr}"
-                )
+                if is_scalar_type:
+                    post_node.input_type = {
+                        k.replace("output", "input"): v.copy()
+                        for k, v in pre_node.output_type.items()
+                    }
+                    post_node.output_type = {
+                        k.replace("input", "output"): v.copy()
+                        for k, v in post_node.input_type.items()
+                    }
+                else:
+                    pre_repr = (
+                        f"{pre_key}.output: "
+                        f"{np.array(list(pre_node.output_type.values()))}"
+                    )
+                    post_repr = (
+                        f"{post_key}.input: "
+                        f"{np.array(list(post_node.input_type.values()))}"
+                    )
+                    raise ValueError(
+                        f"Type inference error: type mismatch: "
+                        f"{pre_repr} -> {post_repr}"
+                    )
 
             # make sure that output nodes have output_type = input_type
             if isinstance(post_node, Output):
