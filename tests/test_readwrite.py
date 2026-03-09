@@ -363,18 +363,14 @@ def test_scalar_lif_multilayer_readwrite():
     ir = nir.NIRGraph(
         nodes={
             "input": nir.Input(np.array([784])),
-            "fc1": nir.Affine(
-                weight=np.random.randn(128, 784), bias=np.zeros(128)
-            ),
+            "fc1": nir.Affine(weight=np.random.randn(128, 784), bias=np.zeros(128)),
             "lif1": nir.LIF(
                 tau=np.array(0.01),
                 r=np.array(1.0),
                 v_leak=np.array(0.0),
                 v_threshold=np.array(1.0),
             ),
-            "fc2": nir.Affine(
-                weight=np.random.randn(10, 128), bias=np.zeros(10)
-            ),
+            "fc2": nir.Affine(weight=np.random.randn(10, 128), bias=np.zeros(10)),
             "lif2": nir.LIF(
                 tau=np.array(0.02),
                 r=np.array(1.0),
