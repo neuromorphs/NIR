@@ -324,8 +324,7 @@ class NIRGraph(NIRNode):
                 # by adopting the predecessor's output type. Parameters are untouched.
                 post_values = list(post_node.input_type.values())
                 is_scalar_type = all(
-                    isinstance(v, np.ndarray) and v.size == 0
-                    for v in post_values
+                    isinstance(v, np.ndarray) and v.size == 0 for v in post_values
                 )
                 if is_scalar_type:
                     post_node.input_type = {
