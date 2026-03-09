@@ -955,6 +955,43 @@ def test_explicit_array_params_unchanged():
     assert np.array_equal(graph.nodes["lif"].output_type["output"], [3])
 
 
+def test_scalar_lif_port_naming():
+    """Verify that scalar type inference preserves port naming conventions.
+    
+    This test demonstrates that the string replacement pattern (output -> input)
+    works correctly for both single-port and hypothetical multi-port nodes.
+    When multi-port support is added to NIR, port names like 'output_0', 'output_1'
+    will correctly map to 'input_0', 'input_1'.
+    """
+    affine = nir.Affine(weight=np.random.randn(10, 5), bias=np.zeros(10))
+    scalar_lif = nir.LIF(
+        tau=np.array(0.01),
+        r=np.array(1.0),
+        v_leak=np.array(0.0),
+        v_threshold=np.array(1.0),
+    )
+    
+    assert "input" in scalar_lif.input_type
+    assert scalar_lif.input_type["input"].size == 0
+    assert "output" in scalar_lif.output_type
+    assert scalar_lif.output_type["output"].size == 0
+    
+    graph = nir.NIRGraph(
+        nodes={
+            "input": nir.Input(np.array([5])),
+            "affine": affine,
+            "lif": scalar_lif,
+            "output": nir.Output(np.array([10])),
+        },
+        edges=[("input", "affine"), ("affine", "lif"), ("lif", "output")],
+    )
+    
+    assert "input" in graph.nodes["lif"].input_type
+    assert np.array_equal(graph.nodes["lif"].input_type["input"], [10])
+    assert "output" in graph.nodes["lif"].output_type
+    assert np.array_equal(graph.nodes["lif"].output_type["output"], [10])
+
+
 def test_node():
     try:
         node = nir.ir.NIRNode()
