@@ -988,6 +988,72 @@ def test_scalar_lif_port_naming():
     assert np.array_equal(graph.nodes["lif"].output_type["output"], [10])
 
 
+def test_validate_structure_dangling_source():
+    """Edge referencing a non-existent source node raises ValueError."""
+    with pytest.raises(ValueError, match="does not exist"):
+        nir.NIRGraph(
+            nodes={
+                "input": nir.Input(np.array([2])),
+                "output": nir.Output(np.array([2])),
+            },
+            edges=[("ghost", "output")],
+        )
+
+
+def test_validate_structure_dangling_destination():
+    """Edge referencing a non-existent destination node raises ValueError."""
+    with pytest.raises(ValueError, match="does not exist"):
+        nir.NIRGraph(
+            nodes={
+                "input": nir.Input(np.array([2])),
+                "output": nir.Output(np.array([2])),
+            },
+            edges=[("input", "ghost")],
+        )
+
+
+def test_validate_structure_duplicate_edge():
+    """Duplicate edges raise ValueError."""
+    with pytest.raises(ValueError, match="Duplicate edge"):
+        nir.NIRGraph(
+            nodes={
+                "input": nir.Input(np.array([2])),
+                "w": nir.Linear(weight=np.random.randn(2, 2)),
+                "output": nir.Output(np.array([2])),
+            },
+            edges=[("input", "w"), ("w", "output"), ("input", "w")],
+        )
+
+
+def test_validate_structure_valid_graph_passes():
+    """Well-formed graph passes structural validation without error."""
+    graph = nir.NIRGraph(
+        nodes={
+            "input": nir.Input(np.array([2])),
+            "w": nir.Linear(weight=np.random.randn(2, 2)),
+            "output": nir.Output(np.array([2])),
+        },
+        edges=[("input", "w"), ("w", "output")],
+    )
+    assert "input" in graph.nodes
+    assert "w" in graph.nodes
+    assert "output" in graph.nodes
+
+
+def test_validate_structure_recurrent_valid():
+    """Recurrent graph with all edges referencing valid nodes passes."""
+    graph = nir.NIRGraph(
+        nodes={
+            "input": nir.Input(np.array([2])),
+            "w": nir.Linear(weight=np.random.randn(2, 2)),
+            "neuron": nir.IF(r=np.random.randn(2), v_threshold=np.random.randn(2)),
+            "output": nir.Output(np.array([2])),
+        },
+        edges=[("input", "w"), ("w", "neuron"), ("neuron", "w"), ("neuron", "output")],
+    )
+    assert "neuron" in graph.nodes
+
+
 def test_node():
     try:
         node = nir.ir.NIRNode()

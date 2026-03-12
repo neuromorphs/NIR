@@ -173,6 +173,46 @@ class NIRGraph(NIRNode):
         ]
         return super().from_dict(kwargs_local)
 
+    def validate_structure(self):
+        """Validate the structural integrity of the graph.
+
+        Checks that all edge endpoints reference existing nodes and flags
+        duplicate edges. Called at the start of infer_types() so that
+        structural problems surface as clear errors rather than confusing
+        type inference failures.
+
+        Raises ValueError with a specific message for each violation.
+        """
+        node_keys = set(self.nodes.keys())
+
+        for src, dst in self.edges:
+            if src not in node_keys:
+                raise ValueError(
+                    f"Edge ({src!r}, {dst!r}) references source node "
+                    f"{src!r} which does not exist in the graph. "
+                    f"Available nodes: {sorted(node_keys)}"
+                )
+            if dst not in node_keys:
+                raise ValueError(
+                    f"Edge ({src!r}, {dst!r}) references destination node "
+                    f"{dst!r} which does not exist in the graph. "
+                    f"Available nodes: {sorted(node_keys)}"
+                )
+
+        edge_set = set()
+        for edge in self.edges:
+            edge_tuple = (edge[0], edge[1])
+            if edge_tuple in edge_set:
+                raise ValueError(f"Duplicate edge: ({edge[0]!r}, {edge[1]!r})")
+            edge_set.add(edge_tuple)
+
+        for name, node in self.nodes.items():
+            if isinstance(node, NIRGraph):
+                try:
+                    node.validate_structure()
+                except ValueError as e:
+                    raise ValueError(f"In subgraph {name!r}: {e}") from e
+
     def check_types(self):
         """Check that all nodes in the graph have input and output types.
 
@@ -232,6 +272,8 @@ class NIRGraph(NIRNode):
         """
         if not self.nodes:
             return
+
+        self.validate_structure()
 
         # Ensure all graph inputs flow through an Input node
         all_node_keys = set(self.nodes.keys())
