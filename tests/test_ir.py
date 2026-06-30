@@ -14,6 +14,27 @@ def test_has_NIRNode():
     assert hasattr(nir, "NIRNode")
 
 
+def test_input_output_type_mutable():
+    """The inherited input_type/output_type fields are populated in __post_init__
+    and must remain writable from the outside (graph type inference reassigns them
+    and mutates their keys in place)."""
+    node = mock_affine(2, 3)
+
+    # Mutate an existing key in place
+    node.input_type["input"] = np.array([42])
+    assert np.array_equal(node.input_type["input"], np.array([42]))
+
+    # Add a new key
+    node.output_type["extra"] = np.array([7])
+    assert np.array_equal(node.output_type["extra"], np.array([7]))
+
+    # Reassign the whole attribute
+    node.input_type = {"input": np.array([1, 1])}
+    node.output_type = {"output": np.array([1, 1])}
+    assert np.array_equal(node.input_type["input"], np.array([1, 1]))
+    assert np.array_equal(node.output_type["output"], np.array([1, 1]))
+
+
 def test_eq():
     a = nir.Input(np.array([2, 3]))
     a2 = nir.Input(np.array([2, 3]))

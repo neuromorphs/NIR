@@ -1,5 +1,5 @@
-from dataclasses import dataclass, field
-from typing import Any, Dict, Optional
+from dataclasses import dataclass
+from typing import Any, Dict
 
 import numpy as np
 
@@ -16,14 +16,11 @@ class Flatten(NIRNode):
     input_type must be a dict with one key: "input".
     """
 
-    # Shape of input tensor (overrrides input_type from
-    # NIRNode to allow for non-keyword (positional) initialization)
+    # Shape of input tensor. Overrides the keyword-only input_type from NIRNode
+    # so it can be passed positionally
     input_type: Types
     start_dim: int = 1  # First dimension to flatten
     end_dim: int = -1  # Last dimension to flatten
-    input_type: Optional[Dict[str, np.ndarray]] = None
-    output_type: Optional[Dict[str, np.ndarray]] = None
-    metadata: Dict[str, Any] = field(default_factory=dict)
 
     def __post_init__(self):
         self.input_type = parse_shape_argument(self.input_type, "input")
