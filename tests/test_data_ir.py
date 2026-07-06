@@ -142,3 +142,6 @@ def test_setter_getter():
     node_data = nir.NIRNodeData({"spikes": time_gridded_data})
     graph_data = nir.NIRGraphData({"node": node_data})
     assert np.allclose(graph_data["node"]["spikes"][:], spikes)
+    new_spikes = np.random.randint(0, 2, size=(10, 10, 10)).astype(bool)
+    graph_data["node"]["spikes"] = nir.TimeGriddedData(new_spikes, dt)
+    assert np.array_equal(graph_data["node"]["spikes"][:], new_spikes)
