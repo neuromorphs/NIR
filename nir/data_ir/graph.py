@@ -30,6 +30,12 @@ class TimeGriddedData:
                 "and of type np.ndarray"
             )
 
+    def __getitem__(self, idx):
+        return self.data[idx]
+
+    def __setitem__(self, idx, val):
+        self.data[idx] = val
+
     @property
     def shape(self):
         return self.data.shape
@@ -215,6 +221,12 @@ class NIRNodeData:
                 "observables must be a dictionary of EventData or TimeGriddedData"
             )
 
+    def __getitem__(self, idx):
+        return self.observables[idx]
+
+    def __setitem__(self, idx, val):
+        self.observables[idx] = val
+
     def check_observables(self, node: NIRNode):
         """
         Check that the shapes of the observables match the node's output shapes
@@ -242,6 +254,12 @@ class NIRGraphData:
     def __post_init__(self):
         if not isinstance(self.nodes, dict):
             raise TypeError("nodes must be a dictionary of NIRNodeData or NIRGraphData")
+
+    def __getitem__(self, idx):
+        return self.nodes[idx]
+
+    def __setitem__(self, idx, val):
+        self.nodes[idx] = val
 
     def check_nodes(self, graph: NIRGraph):
         """
