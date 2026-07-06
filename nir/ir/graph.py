@@ -1,6 +1,6 @@
 from collections import Counter
 from dataclasses import dataclass
-from typing import Any, Dict, Optional
+from typing import Any, Dict
 
 import numpy as np
 
@@ -39,23 +39,20 @@ class NIRGraph(NIRNode):
         self,
         nodes: Nodes,
         edges: Edges,
-        input_type: Optional[Dict[str, np.ndarray]] = None,
-        output_type: Optional[Dict[str, np.ndarray]] = None,
         metadata: Dict[str, Any] = dict,
         type_check: bool = True,
     ):
         self.nodes = nodes
         self.edges = edges
         self.metadata = metadata
-        self.input_type = input_type
-        self.output_type = output_type
 
         # Check that all nodes have input and output types, if requested (default)
         if type_check:
             self.infer_types()
             self.check_types()
 
-        # Call post init to set input_type and output_type
+        # input_type and output_type are derived from the graph's Input/Output
+        # nodes in __post_init__; they are not constructor arguments.
         self.__post_init__()
 
     @property
