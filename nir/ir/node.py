@@ -1,6 +1,8 @@
 from abc import ABC
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, field
 from typing import Any, Dict
+
+import numpy as np
 
 
 @dataclass(eq=False)
@@ -11,11 +13,14 @@ class NIRNode(ABC):
     instantiated.
     """
 
-    # Note: Adding input/output types and metadata as follows is ideal, but requires Python 3.10
-    # TODO: implement this in 2025 when 3.9 is EOL
-    # input_type: Dict[str, np.ndarray] = field(init=False, kw_only=True)
-    # output_type: Dict[str, np.ndarray] = field(init=False, kw_only=True)
-    # metadata: Dict[str, Any] = field(init=True, default_factory=dict)
+    # input_type and output_type are not initialized in the constructor, they are
+    # populated in __post_init__ for each subclass. metadata is an optional
+    # keyword argument. All three are keyword-only so that subclasses can add
+    # positional fields without running into the "non-default argument follows
+    # default argument" ordering error. (Requires Python 3.10+.)
+    input_type: Dict[str, np.ndarray] = field(init=False, kw_only=True)
+    output_type: Dict[str, np.ndarray] = field(init=False, kw_only=True)
+    metadata: Dict[str, Any] = field(default_factory=dict, kw_only=True)
 
     def __init__(self) -> None:
         raise AttributeError("NIRNode does not have a default constructor.")

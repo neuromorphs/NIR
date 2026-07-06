@@ -1,5 +1,5 @@
-from dataclasses import dataclass, field
-from typing import Any, Dict, Optional, Tuple, Union
+from dataclasses import dataclass
+from typing import Optional, Tuple, Union
 
 import numpy as np
 
@@ -41,9 +41,6 @@ class Conv1d(NIRNode):
     dilation: int  # Dilation
     groups: int  # Groups
     bias: np.ndarray  # Bias C_out
-    input_type: Optional[Dict[str, np.ndarray]] = None
-    output_type: Optional[Dict[str, np.ndarray]] = None
-    metadata: Dict[str, Any] = field(default_factory=dict)
 
     def __post_init__(self):
         if isinstance(self.padding, str) and self.padding not in ["same", "valid"]:
@@ -98,7 +95,6 @@ class Conv2d(NIRNode):
     :type bias: np.ndarray
     """
 
-    # Shape of input tensor (overrrides input_type from
     input_shape: Optional[Tuple[int, int]]  # N_x, N_y
     weight: np.ndarray  # Weight C_out * C_in * W_x * W_y
     stride: Union[int, Tuple[int, int]]  # Stride
@@ -106,7 +102,6 @@ class Conv2d(NIRNode):
     dilation: Union[int, Tuple[int, int]]  # Dilation
     groups: int  # Groups
     bias: np.ndarray  # Bias C_out
-    metadata: Dict[str, Any] = field(default_factory=dict)
 
     def __post_init__(self):
         if isinstance(self.padding, str) and self.padding not in ["same", "valid"]:

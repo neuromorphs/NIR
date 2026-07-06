@@ -32,7 +32,7 @@ classifiers = [
 ]
 dependencies = [ "numpy", "h5py" ]
 dynamic = ["version"] # Version number read from __init__.py
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 
 [project.urls]
 homepage = "https://github.com/neuromorphs/nir"

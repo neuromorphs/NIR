@@ -1,6 +1,6 @@
 from collections import Counter
-from dataclasses import dataclass, field
-from typing import Any, Dict, Optional
+from dataclasses import dataclass
+from typing import Any, Dict
 
 import numpy as np
 
@@ -34,31 +34,25 @@ class NIRGraph(NIRNode):
 
     nodes: Nodes  # List of computational nodes
     edges: Edges  # List of edges between nodes
-    input_type: Optional[Dict[str, np.ndarray]] = None
-    output_type: Optional[Dict[str, np.ndarray]] = None
-    metadata: Dict[str, Any] = field(default_factory=dict)
 
     def __init__(
         self,
         nodes: Nodes,
         edges: Edges,
-        input_type: Optional[Dict[str, np.ndarray]] = None,
-        output_type: Optional[Dict[str, np.ndarray]] = None,
         metadata: Dict[str, Any] = dict,
         type_check: bool = True,
     ):
         self.nodes = nodes
         self.edges = edges
         self.metadata = metadata
-        self.input_type = input_type
-        self.output_type = output_type
 
         # Check that all nodes have input and output types, if requested (default)
         if type_check:
             self.infer_types()
             self.check_types()
 
-        # Call post init to set input_type and output_type
+        # input_type and output_type are derived from the graph's Input/Output
+        # nodes in __post_init__; they are not constructor arguments.
         self.__post_init__()
 
     @property
@@ -501,10 +495,9 @@ class Input(NIRNode):
     This is a virtual node, which allows feeding in data into the graph.
     """
 
-    # Shape of incoming data (overrrides input_type from
-    # NIRNode to allow for non-keyword (positional) initialization)
+    # Shape of incoming data. Overrides the keyword-only input_type from
+    # NIRNode so it can be passed positionally as the node's defining argument.
     input_type: Types
-    metadata: Dict[str, Any] = field(default_factory=dict)
 
     def __post_init__(self):
         self.input_type = parse_shape_argument(self.input_type, "input")
@@ -529,10 +522,9 @@ class Output(NIRNode):
     Defines an output of the graph.
     """
 
-    # Type of incoming data (overrrides input_type from
-    # NIRNode to allow for non-keyword (positional) initialization)
+    # Type of outgoing data. Overrides the keyword-only output_type from
+    # NIRNode so it can be passed positionally
     output_type: Types
-    metadata: Dict[str, Any] = field(default_factory=dict)
 
     def __post_init__(self):
         self.output_type = parse_shape_argument(self.output_type, "output")
@@ -557,6 +549,8 @@ class Identity(NIRNode):
     This is a virtual node, which allows for the identity operation.
     """
 
+    # Shape of incoming data. Overrides the keyword-only input_type from
+    # NIRNode so it can be passed positionally
     input_type: Types
 
     def __post_init__(self):

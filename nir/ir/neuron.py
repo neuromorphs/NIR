@@ -1,4 +1,4 @@
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Any, Dict, Optional
 
 import numpy as np
@@ -32,9 +32,6 @@ class CubaLI(NIRNode):
     r: np.ndarray  # Resistance
     v_leak: np.ndarray  # Leak voltage
     w_in: np.ndarray = 1.0  # Input current weight
-    input_type: Optional[Dict[str, np.ndarray]] = None
-    output_type: Optional[Dict[str, np.ndarray]] = None
-    metadata: Dict[str, Any] = field(default_factory=dict)
 
     def __post_init__(self):
         assert (
@@ -91,9 +88,6 @@ class CubaLIF(NIRNode):
     v_threshold: np.ndarray  # Firing threshold
     v_reset: Optional[np.ndarray] = None  # Reset potential
     w_in: np.ndarray = 1.0  # Input current weight
-    input_type: Optional[Dict[str, np.ndarray]] = None
-    output_type: Optional[Dict[str, np.ndarray]] = None
-    metadata: Dict[str, Any] = field(default_factory=dict)
 
     def __post_init__(self):
         if self.v_reset is None:
@@ -129,9 +123,6 @@ class I(NIRNode):  # noqa: E742
     """
 
     r: np.ndarray
-    input_type: Optional[Dict[str, np.ndarray]] = None
-    output_type: Optional[Dict[str, np.ndarray]] = None
-    metadata: Dict[str, Any] = field(default_factory=dict)
 
     def __post_init__(self):
         self.input_type = {"input": np.array(self.r.shape)}
@@ -163,9 +154,6 @@ class IF(NIRNode):
     r: np.ndarray  # Resistance
     v_threshold: np.ndarray  # Firing threshold
     v_reset: Optional[np.ndarray] = None  # Reset potential
-    input_type: Optional[Dict[str, np.ndarray]] = None
-    output_type: Optional[Dict[str, np.ndarray]] = None
-    metadata: Dict[str, Any] = field(default_factory=dict)
 
     def __post_init__(self):
         if self.v_reset is None:
@@ -200,9 +188,6 @@ class LI(NIRNode):
     tau: np.ndarray  # Time constant
     r: np.ndarray  # Resistance
     v_leak: np.ndarray  # Leak voltage
-    input_type: Optional[Dict[str, np.ndarray]] = None
-    output_type: Optional[Dict[str, np.ndarray]] = None
-    metadata: Dict[str, Any] = field(default_factory=dict)
 
     def __post_init__(self):
         assert (
@@ -247,9 +232,6 @@ class LIF(NIRNode):
     v_leak: np.ndarray  # Leak voltage
     v_threshold: np.ndarray  # Firing threshold
     v_reset: Optional[np.ndarray] = None  # Reset potential
-    input_type: Optional[Dict[str, np.ndarray]] = None
-    output_type: Optional[Dict[str, np.ndarray]] = None
-    metadata: Dict[str, Any] = field(default_factory=dict)
 
     def __post_init__(self):
         if self.v_reset is None:
