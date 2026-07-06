@@ -133,3 +133,12 @@ def test_check_nodes():
         }
     )
     graph_data.check_nodes(graph)
+
+
+def test_setter_getter():
+    spikes = np.random.randint(0, 2, size=(10, 10, 10)).astype(bool)
+    dt = 0.1
+    time_gridded_data = nir.TimeGriddedData(spikes, dt)
+    node_data = nir.NIRNodeData({"spikes": time_gridded_data})
+    graph_data = nir.NIRGraphData({"node": node_data})
+    assert np.allclose(graph_data["node"]["spikes"][:], spikes)
