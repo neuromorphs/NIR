@@ -43,23 +43,14 @@ def test_generate_valued_event_data():
 
 
 def test_binary_conversion():
-    # time_shift = 0.0 * dt
-    spikes = np.random.randint(0, 2, size=(10, 10, 10)).astype(bool)
-    dt = 0.1
-    gridded_1 = nir.TimeGriddedData(spikes, dt)
-    event = gridded_1.to_event(n_events=100)
-    gridded_2 = event.to_time_gridded(dt=dt)
-    assert np.array_equal(gridded_1.data, gridded_2.data)
-    assert gridded_1.dt == gridded_2.dt
-
-    # time_shift = 0.5 * dt
-    spikes = np.random.randint(0, 2, size=(10, 10, 10)).astype(bool)
-    dt = 0.1
-    gridded_1 = nir.TimeGriddedData(spikes, dt)
-    event = gridded_1.to_event(n_events=100, time_shift=0.5 * dt)
-    gridded_2 = event.to_time_gridded(dt=dt)
-    assert np.array_equal(gridded_1.data, gridded_2.data)
-    assert gridded_1.dt == gridded_2.dt
+    for dynamic_before_transition in [True, False]:
+        spikes = np.random.randint(0, 2, size=(10, 10, 10)).astype(bool)
+        dt = 0.1
+        gridded_1 = nir.TimeGriddedData(spikes, dt, dynamic_before_transition)
+        event = gridded_1.to_event(n_events=100)
+        gridded_2 = event.to_time_gridded(dt, dynamic_before_transition)
+        assert np.array_equal(gridded_1.data, gridded_2.data)
+        assert gridded_1.dt == gridded_2.dt
 
 
 def test_valued_conversion():

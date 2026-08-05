@@ -1,6 +1,7 @@
 from __future__ import annotations
 from dataclasses import dataclass
 from typing import Dict, Union
+import warnings
 import numpy as np
 from nir.ir import NIRGraph, NIRNode
 
@@ -18,16 +19,21 @@ class TimeGriddedData:
         Input data. For binary data the dtype should be bool.
     dt: float
         Time step size.
+    dynamic_before_transition: bool, optional
+        If True, it is assumed that the framework evolves the state (e.g.,
+        membrane potential) of the neurons before checking if the threshold has
+        been crossed and generating an event (transition). If False, the state
+        is updated after the event generation.
     """
 
     data: np.ndarray
     dt: float  # pylint: disable=invalid-name
+    dynamic_before_transition: bool = True
 
     def __post_init__(self):
         if not isinstance(self.data, np.ndarray) or self.data.ndim != 3:
             raise ValueError(
-                "Data must be of shape (n_samples, n_time_steps, n_neurons)"
-                "and of type np.ndarray"
+                "Data must be of shape (n_samples, n_time_steps, n_neurons)and of type np.ndarray"
             )
 
     def __getitem__(self, idx):
@@ -56,15 +62,12 @@ class TimeGriddedData:
     def t_max(self):
         return self.n_time_steps * self.dt
 
-    def to_event(self, n_events: int, time_shift: float = 0.0) -> EventData:
+    def to_event(self, n_events: int) -> EventData:
         """
         Arguments
         ---------
         n_spikes : int
             Maximum number of events stored for each neuron.
-        time_shift : float, optional
-            Shift the event times by this value from the beginning of each time
-            step. Must be in interval [0, dt). Default is 0.0.
         """
 
         if not self.data.dtype == bool:
@@ -72,8 +75,6 @@ class TimeGriddedData:
         idx = np.full((self.n_samples, n_events), -1)
         time = np.full((self.n_samples, n_events), np.inf)
 
-        if time_shift < 0 or time_shift >= self.dt:
-            raise ValueError("time_shift must be in interval [0, dt)")
         for sample in range(self.n_samples):
             time_step, neuron = np.where(self.data[sample])
 
@@ -83,9 +84,25 @@ class TimeGriddedData:
 
             num_events = min(len(time_step), n_events)
             idx[sample, :num_events] = neuron[:num_events]
-            time[sample, :num_events] = time_step[:num_events] * self.dt + time_shift
+            time[sample, :num_events] = (
+                time_step[:num_events] + self.dynamic_before_transition
+            ) * self.dt
 
         return EventData(idx, time, self.n_neurons, self.t_max)
+
+    def toggle_dynamic_before_transition(self):
+        """
+        Toggle the dynamic_before_transition flag and update the data accordingly.
+        """
+        # if dynamic_before_transition is True, shift events back by one time step
+        if self.dynamic_before_transition:
+            self.data = np.roll(self.data, shift=-1, axis=1)
+            self.data[:, -1, :] = False  # Clear the last time step
+        else:
+            self.data = np.roll(self.data, shift=1, axis=1)
+            self.data[:, 0, :] = False  # Clear the first time step
+
+        self.dynamic_before_transition = not self.dynamic_before_transition
 
 
 @dataclass
@@ -125,26 +142,42 @@ class EventData:
         return self.idx.shape[0]
 
     def to_time_gridded(
-        self, dt: float  # pylint: disable=invalid-name
+        self,
+        dt: float,
+        dynamic_before_transition: bool = True,  # pylint: disable=invalid-name
     ) -> TimeGriddedData:
         """
         Arguments
         ---------
         dt : float
             Time step size.
+        dynamic_before_transition : bool, optional
+            If True, the membrane potential is updated before checking if the
+            threshold has been crossed and generating an event (transition). If
+            False, the state is updated after the event generation. Default is
+            True.
         """
-        n_time_steps = int(self.t_max / dt)
-        discrete_data = np.zeros(
-            (self.n_samples, n_time_steps, self.n_neurons), dtype=bool
-        )
+        n_time_steps = round(self.t_max / dt)
+        discrete_data = np.zeros((self.n_samples, n_time_steps, self.n_neurons), dtype=bool)
 
         for sample in range(self.n_samples):
             valid_spikes = self.idx[sample] != -1
             valid_times = self.time[sample][valid_spikes]
-            steps = np.floor((valid_times / dt)).astype(int)
+            eps = dt * 1e-10  # small epsilon to avoid floating point issues
+            steps = np.ceil((valid_times / dt - eps)).astype(int) - dynamic_before_transition
             neurons = self.idx[sample][valid_spikes]
+            mask = steps < n_time_steps
+            if np.any(mask):
+                steps, neurons = steps[mask], neurons[mask]
+                warnings.warn(
+                    "Some events got dropped because they occur after the"
+                    "maximum time of the recording."
+                )
+
             discrete_data[sample, steps, neurons] = True
-        return TimeGriddedData(discrete_data, dt)
+        return TimeGriddedData(
+            data=discrete_data, dt=dt, dynamic_before_transition=dynamic_before_transition
+        )
 
 
 @dataclass
@@ -176,6 +209,7 @@ class ValuedEventData(EventData):
     def to_time_gridded(
         self,
         dt: float,  # pylint: disable=invalid-name
+        dynamic_before_transition: bool = True,
     ) -> TimeGriddedData:
         """
         Currently, the values are assigned directly to the corresponding time
@@ -185,6 +219,11 @@ class ValuedEventData(EventData):
         ----------
         dt : float
             Time step size.
+        dynamic_before_transition : bool, optional
+            If True, the membrane potential is updated before checking if the
+            threshold has been crossed and generating an event (transition). If
+            False, the state is updated after the event generation. Default is
+            True.
         """
         n_samples = self.n_samples
         n_time_steps = int(self.t_max / dt)
@@ -193,12 +232,17 @@ class ValuedEventData(EventData):
         for sample in range(n_samples):
             valid_spikes = self.idx[sample] != -1
             valid_times = self.time[sample][valid_spikes]
-            steps = np.floor((valid_times / dt)).astype(int)
+            if dynamic_before_transition:
+                steps = np.floor(valid_times / dt).astype(int)
+            else:
+                steps = np.ceil(valid_times / dt).astype(int)
             neurons = self.idx[sample][valid_spikes]
             value = self.value[sample][valid_spikes]
             discrete_data[sample, steps, neurons] = value
 
-        return TimeGriddedData(discrete_data, dt)
+        return TimeGriddedData(
+            discrete_data, dt, dynamic_before_transition
+        )
 
 
 @dataclass
@@ -217,9 +261,7 @@ class NIRNodeData:
 
     def __post_init__(self):
         if not isinstance(self.observables, dict):
-            raise TypeError(
-                "observables must be a dictionary of EventData or TimeGriddedData"
-            )
+            raise TypeError("observables must be a dictionary of EventData or TimeGriddedData")
 
     def __getitem__(self, idx):
         return self.observables[idx]
@@ -278,6 +320,4 @@ class NIRGraphData:
                 if not isinstance(graph_node, NIRNode):
                     raise TypeError(f"Node {key} is not a NIRNode in the NIRGraph")
                 if not node.check_observables(graph_node):
-                    raise ValueError(
-                        f"Observables for node {key} do not match the NIRNode"
-                    )
+                    raise ValueError(f"Observables for node {key} do not match the NIRNode")
