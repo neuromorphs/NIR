@@ -22,7 +22,9 @@ def try_byte_to_str(a: bytes | Any) -> str | Any:
 def read_node(node: Any) -> nir.NIRNode:
     """Read a graph from a HDF5 file."""
     if node["type"][()] == b"Affine":
-        return nir.Affine(weight=node["weight"][()], bias=node["bias"][()], **_read_metadata(node))
+        return nir.Affine(
+            weight=node["weight"][()], bias=node["bias"][()], **_read_metadata(node)
+        )
     elif node["type"][()] == b"Conv1d":
         return nir.Conv1d(
             input_shape=(node["input_shape"][()] if "input_shape" in node else None),
@@ -64,7 +66,9 @@ def read_node(node: Any) -> nir.NIRNode:
         return nir.Flatten(
             start_dim=node["start_dim"][()],
             end_dim=node["end_dim"][()],
-            input_type={"input": node["input_type"][()] if "input_type" in node else None},
+            input_type={
+                "input": node["input_type"][()] if "input_type" in node else None
+            },
             **_read_metadata(node),
         )
     elif node["type"][()] == b"I":
@@ -73,13 +77,17 @@ def read_node(node: Any) -> nir.NIRNode:
         return nir.IF(
             r=node["r"][()],
             v_reset=(
-                node["v_reset"][()] if "v_reset" in node else np.zeros_like(node["v_threshold"][()])
+                node["v_reset"][()]
+                if "v_reset" in node
+                else np.zeros_like(node["v_threshold"][()])
             ),
             v_threshold=node["v_threshold"][()],
             **_read_metadata(node),
         )
     elif node["type"][()] == b"Input":
-        return nir.Input(input_type={"input": node["shape"][()]}, **_read_metadata(node))
+        return nir.Input(
+            input_type={"input": node["shape"][()]}, **_read_metadata(node)
+        )
     elif node["type"][()] == b"LI":
         return nir.LI(
             tau=node["tau"][()],
@@ -95,7 +103,9 @@ def read_node(node: Any) -> nir.NIRNode:
             r=node["r"][()],
             v_leak=node["v_leak"][()],
             v_reset=(
-                node["v_reset"][()] if "v_reset" in node else np.zeros_like(node["v_threshold"][()])
+                node["v_reset"][()]
+                if "v_reset" in node
+                else np.zeros_like(node["v_threshold"][()])
             ),
             v_threshold=node["v_threshold"][()],
             **_read_metadata(node),
@@ -116,7 +126,9 @@ def read_node(node: Any) -> nir.NIRNode:
             r=node["r"][()],
             v_leak=node["v_leak"][()],
             v_reset=(
-                node["v_reset"][()] if "v_reset" in node else np.zeros_like(node["v_threshold"][()])
+                node["v_reset"][()]
+                if "v_reset" in node
+                else np.zeros_like(node["v_threshold"][()])
             ),
             v_threshold=node["v_threshold"][()],
             w_in=node["w_in"][()],
@@ -129,7 +141,9 @@ def read_node(node: Any) -> nir.NIRNode:
             **_read_metadata(node),
         )
     elif node["type"][()] == b"Output":
-        return nir.Output(output_type={"output": node["shape"][()]}, **_read_metadata(node))
+        return nir.Output(
+            output_type={"output": node["shape"][()]}, **_read_metadata(node)
+        )
     elif node["type"][()] == b"Scale":
         return nir.Scale(scale=node["scale"][()], **_read_metadata(node))
     elif node["type"][()] == b"Threshold":

@@ -233,7 +233,9 @@ def test_flatten():
     ir = nir.NIRGraph(
         nodes={
             "in": nir.Input(input_type=np.array([4, 5, 2])),
-            "flat": nir.Flatten(start_dim=0, end_dim=1, input_type={"input": np.array([4, 5, 2])}),
+            "flat": nir.Flatten(
+                start_dim=0, end_dim=1, input_type={"input": np.array([4, 5, 2])}
+            ),
             "out": nir.Output(output_type=np.array([20, 2])),
         },
         edges=[("in", "flat"), ("flat", "out")],
@@ -246,12 +248,20 @@ def test_from_list_naming():
     ir = nir.NIRGraph.from_list(
         nir.Linear(weight=np.array([[3, 1], [-1, 2], [1, 2]])),
         nir.Linear(weight=np.array([[3, 1], [-1, 4], [1, 2]]).T),
-        nir.Affine(weight=np.array([[2, 1], [-1, 2], [1, 2]]), bias=np.array([1, 3, 2])),
-        nir.Affine(weight=np.array([[2, 1], [-1, 4], [1, 2]]).T, bias=np.array([-2, 2])),
+        nir.Affine(
+            weight=np.array([[2, 1], [-1, 2], [1, 2]]), bias=np.array([1, 3, 2])
+        ),
+        nir.Affine(
+            weight=np.array([[2, 1], [-1, 4], [1, 2]]).T, bias=np.array([-2, 2])
+        ),
         nir.Linear(weight=np.array([[3, 1], [-1, 1], [1, 2]])),
         nir.Linear(weight=np.array([[3, 1], [-1, 3], [1, 2]]).T),
-        nir.Affine(weight=np.array([[2, 1], [-1, 1], [1, 2]]), bias=np.array([1, 5, 2])),
-        nir.Affine(weight=np.array([[2, 1], [-1, 3], [1, 2]]).T, bias=np.array([-2, 3])),
+        nir.Affine(
+            weight=np.array([[2, 1], [-1, 1], [1, 2]]), bias=np.array([1, 5, 2])
+        ),
+        nir.Affine(
+            weight=np.array([[2, 1], [-1, 3], [1, 2]]).T, bias=np.array([-2, 3])
+        ),
     )
     assert "input" in ir.nodes
     assert "linear" in ir.nodes
@@ -265,16 +275,24 @@ def test_from_list_naming():
     assert "output" in ir.nodes
     assert np.allclose(ir.nodes["input"].input_type["input"], [2])
     assert np.allclose(ir.nodes["linear"].weight, np.array([[3, 1], [-1, 2], [1, 2]]))
-    assert np.allclose(ir.nodes["linear_1"].weight, np.array([[3, 1], [-1, 4], [1, 2]]).T)
+    assert np.allclose(
+        ir.nodes["linear_1"].weight, np.array([[3, 1], [-1, 4], [1, 2]]).T
+    )
     assert np.allclose(ir.nodes["affine"].weight, np.array([[2, 1], [-1, 2], [1, 2]]))
     assert np.allclose(ir.nodes["affine"].bias, np.array([1, 3, 2]))
-    assert np.allclose(ir.nodes["affine_1"].weight, np.array([[2, 1], [-1, 4], [1, 2]]).T)
+    assert np.allclose(
+        ir.nodes["affine_1"].weight, np.array([[2, 1], [-1, 4], [1, 2]]).T
+    )
     assert np.allclose(ir.nodes["affine_1"].bias, np.array([-2, 2]))
     assert np.allclose(ir.nodes["linear_2"].weight, np.array([[3, 1], [-1, 1], [1, 2]]))
-    assert np.allclose(ir.nodes["linear_3"].weight, np.array([[3, 1], [-1, 3], [1, 2]]).T)
+    assert np.allclose(
+        ir.nodes["linear_3"].weight, np.array([[3, 1], [-1, 3], [1, 2]]).T
+    )
     assert np.allclose(ir.nodes["affine_2"].weight, np.array([[2, 1], [-1, 1], [1, 2]]))
     assert np.allclose(ir.nodes["affine_2"].bias, np.array([1, 5, 2]))
-    assert np.allclose(ir.nodes["affine_3"].weight, np.array([[2, 1], [-1, 3], [1, 2]]).T)
+    assert np.allclose(
+        ir.nodes["affine_3"].weight, np.array([[2, 1], [-1, 3], [1, 2]]).T
+    )
     assert np.allclose(ir.nodes["affine_3"].bias, np.array([-2, 3]))
     print(ir.nodes["output"].input_type["input"])
     assert np.allclose(ir.nodes["output"].input_type["input"], [2])
@@ -365,7 +383,9 @@ def test_inputs_outputs_properties():
         nodes={
             "in1": nir.Input(np.array([4, 5, 2])),
             "in2": nir.Input(np.array([4, 5, 2])),
-            "flat": nir.Flatten(start_dim=0, end_dim=1, input_type={"input": np.array([4, 5, 2])}),
+            "flat": nir.Flatten(
+                start_dim=0, end_dim=1, input_type={"input": np.array([4, 5, 2])}
+            ),
             "out1": nir.Output(np.array([20, 2])),
             "out2": nir.Output(np.array([20, 2])),
         },
@@ -418,8 +438,12 @@ def test_sumpool_type_inference():
         edges=[("input", "sumpool"), ("sumpool", "output")],
     )
     assert np.array_equal(graph.output_type["output"], np.array([1, 32, 32]))
-    assert np.array_equal(graph.nodes["output"].input_type["input"], np.array([1, 32, 32]))
-    assert np.array_equal(graph.nodes["output"].output_type["output"], np.array([1, 32, 32]))
+    assert np.array_equal(
+        graph.nodes["output"].input_type["input"], np.array([1, 32, 32])
+    )
+    assert np.array_equal(
+        graph.nodes["output"].output_type["output"], np.array([1, 32, 32])
+    )
 
 
 def test_avgpool_type_inference():
@@ -436,8 +460,12 @@ def test_avgpool_type_inference():
         edges=[("input", "avgpool"), ("avgpool", "output")],
     )
     assert np.array_equal(graph.output_type["output"], np.array([1, 32, 32]))
-    assert np.array_equal(graph.nodes["output"].input_type["input"], np.array([1, 32, 32]))
-    assert np.array_equal(graph.nodes["output"].output_type["output"], np.array([1, 32, 32]))
+    assert np.array_equal(
+        graph.nodes["output"].input_type["input"], np.array([1, 32, 32])
+    )
+    assert np.array_equal(
+        graph.nodes["output"].output_type["output"], np.array([1, 32, 32])
+    )
 
 
 def test_flatten_type_inference():
@@ -482,10 +510,18 @@ def test_flatten_type_inference():
                 },
                 edges=[("input", "flatten"), ("flatten", "output")],
             )
-            assert np.array_equal(graph.nodes["flatten"].input_type["input"], test["input"])
-            assert np.array_equal(graph.nodes["flatten"].output_type["output"], test["output"])
-            assert np.array_equal(graph.nodes["output"].input_type["input"], test["output"])
-            assert np.array_equal(graph.nodes["output"].output_type["output"], test["output"])
+            assert np.array_equal(
+                graph.nodes["flatten"].input_type["input"], test["input"]
+            )
+            assert np.array_equal(
+                graph.nodes["flatten"].output_type["output"], test["output"]
+            )
+            assert np.array_equal(
+                graph.nodes["output"].input_type["input"], test["output"]
+            )
+            assert np.array_equal(
+                graph.nodes["output"].output_type["output"], test["output"]
+            )
             assert np.array_equal(graph.input_type["input"], test["input"])
             assert np.array_equal(graph.output_type["output"], test["output"])
 
@@ -554,15 +590,15 @@ def test_conv2d_type_inference():
         except Exception as ex:
             raise AssertionError(f"type check failed for: {name}: {ex}") from ex
 
-        assert np.array_equal(graph.nodes["output"].input_type["input"], np.array([1, 61, 61])), (
-            name
-        )
-        assert np.array_equal(graph.nodes["output"].output_type["output"], np.array([1, 61, 61])), (
-            name
-        )
-        assert np.array_equal(graph.nodes["conv"].output_type["output"], np.array([1, 61, 61])), (
-            name
-        )
+        assert np.array_equal(
+            graph.nodes["output"].input_type["input"], np.array([1, 61, 61])
+        ), name
+        assert np.array_equal(
+            graph.nodes["output"].output_type["output"], np.array([1, 61, 61])
+        ), name
+        assert np.array_equal(
+            graph.nodes["conv"].output_type["output"], np.array([1, 61, 61])
+        ), name
         assert np.array_equal(graph.input_type["input"], np.array([1, 64, 64])), name
         assert np.array_equal(graph.output_type["output"], np.array([1, 61, 61])), name
 
@@ -614,9 +650,15 @@ def test_conv1d_type_inference():
         except Exception as ex:
             raise AssertionError(f"type check failed for: {name}: {ex}") from ex
 
-        assert np.array_equal(graph.nodes["output"].input_type["input"], np.array([1, 61])), name
-        assert np.array_equal(graph.nodes["output"].output_type["output"], np.array([1, 61])), name
-        assert np.array_equal(graph.nodes["conv"].output_type["output"], np.array([1, 61])), name
+        assert np.array_equal(
+            graph.nodes["output"].input_type["input"], np.array([1, 61])
+        ), name
+        assert np.array_equal(
+            graph.nodes["output"].output_type["output"], np.array([1, 61])
+        ), name
+        assert np.array_equal(
+            graph.nodes["conv"].output_type["output"], np.array([1, 61])
+        ), name
         assert np.array_equal(graph.input_type["input"], np.array([1, 64])), name
         assert np.array_equal(graph.output_type["output"], np.array([1, 61])), name
 
@@ -699,7 +741,9 @@ def test_type_check_recurrent():
         nodes={
             "a": nir.Input(np.array([2])),
             "b": nir.Linear(np.random.rand(2, 2)),
-            "c": nir.IF(r=np.random.rand(2), v_threshold=np.random.rand(2), v_reset=np.zeros(2)),
+            "c": nir.IF(
+                r=np.random.rand(2), v_threshold=np.random.rand(2), v_reset=np.zeros(2)
+            ),
             "d": nir.Output(np.array([2])),
         },
         edges=[("a", "b"), ("b", "c"), ("c", "b"), ("c", "d")],
@@ -797,6 +841,8 @@ def test_validate_structure_recurrent_valid():
 def test_node():
     try:
         node = nir.ir.NIRNode()
-        assert node is None, f"test failed, we should not be able to construct an NIRNode: {node}"
+        assert (
+            node is None
+        ), f"test failed, we should not be able to construct an NIRNode: {node}"
     except AttributeError:
         pass

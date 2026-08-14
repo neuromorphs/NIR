@@ -34,9 +34,12 @@ class CubaLI(NIRNode):
     w_in: np.ndarray = 1.0  # Input current weight
 
     def __post_init__(self):
-        assert self.tau_syn.shape == self.tau_mem.shape == self.r.shape == self.v_leak.shape, (
-            "All parameters must have the same shape"
-        )
+        assert (
+            self.tau_syn.shape
+            == self.tau_mem.shape
+            == self.r.shape
+            == self.v_leak.shape
+        ), "All parameters must have the same shape"
         # If w_in is a scalar, make it an array of same shape as v_leak
         self.w_in = np.ones_like(self.v_leak) * self.w_in
         self.input_type = {"input": np.array(self.v_leak.shape)}
@@ -155,9 +158,9 @@ class IF(NIRNode):
     def __post_init__(self):
         if self.v_reset is None:
             self.v_reset = np.zeros_like(self.v_threshold)
-        assert self.r.shape == self.v_threshold.shape == self.v_reset.shape, (
-            "All parameters must have the same shape"
-        )
+        assert (
+            self.r.shape == self.v_threshold.shape == self.v_reset.shape
+        ), "All parameters must have the same shape"
         self.input_type = {"input": np.array(self.r.shape)}
         self.output_type = {"output": np.array(self.r.shape)}
 
@@ -187,9 +190,9 @@ class LI(NIRNode):
     v_leak: np.ndarray  # Leak voltage
 
     def __post_init__(self):
-        assert self.tau.shape == self.r.shape == self.v_leak.shape, (
-            "All parameters must have the same shape"
-        )
+        assert (
+            self.tau.shape == self.r.shape == self.v_leak.shape
+        ), "All parameters must have the same shape"
         self.input_type = {"input": np.array(self.r.shape)}
         self.output_type = {"output": np.array(self.r.shape)}
 

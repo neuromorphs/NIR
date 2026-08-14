@@ -57,11 +57,15 @@ class NIRGraph(NIRNode):
 
     @property
     def inputs(self):
-        return {name: node for name, node in self.nodes.items() if isinstance(node, Input)}
+        return {
+            name: node for name, node in self.nodes.items() if isinstance(node, Input)
+        }
 
     @property
     def outputs(self):
-        return {name: node for name, node in self.nodes.items() if isinstance(node, Output)}
+        return {
+            name: node for name, node in self.nodes.items() if isinstance(node, Output)
+        }
 
     @staticmethod
     def from_list(*nodes: NIRNode, type_check: bool = True) -> "NIRGraph":
@@ -110,15 +114,23 @@ class NIRGraph(NIRNode):
             self.metadata = {}
 
     def _update_input_output_types(self):
-        input_node_keys = [k for k, node in self.nodes.items() if isinstance(node, Input)]
+        input_node_keys = [
+            k for k, node in self.nodes.items() if isinstance(node, Input)
+        ]
         self.input_type = (
-            {node_key: self.nodes[node_key].input_type["input"] for node_key in input_node_keys}
+            {
+                node_key: self.nodes[node_key].input_type["input"]
+                for node_key in input_node_keys
+            }
             if len(input_node_keys) > 0
             else None
         )
-        output_node_keys = [k for k, node in self.nodes.items() if isinstance(node, Output)]
+        output_node_keys = [
+            k for k, node in self.nodes.items() if isinstance(node, Output)
+        ]
         self.output_type = {
-            node_key: self.nodes[node_key].output_type["output"] for node_key in output_node_keys
+            node_key: self.nodes[node_key].output_type["output"]
+            for node_key in output_node_keys
         }
 
     def to_dict(self) -> dict[str, Any]:
@@ -137,16 +149,20 @@ class NIRGraph(NIRNode):
         assert "edges" in kwargs, "The incoming dictionary must hade a 'edges' entry"
         # Assert that the type is well-formed
         if "type" in kwargs:
-            assert kwargs["type"] == "NIRGraph", (
-                "You are calling NIRGraph.from_dict with a different type "
-            )
+            assert (
+                kwargs["type"] == "NIRGraph"
+            ), "You are calling NIRGraph.from_dict with a different type "
             f"{type}. Either remove the entry or use <Specific NIRNode>.from_dict, such as Input.from_dict"
         kwargs_local["type"] = "NIRGraph"
 
-        kwargs_local["nodes"] = {k: dict2NIRNode(n) for k, n in kwargs_local["nodes"].items()}
+        kwargs_local["nodes"] = {
+            k: dict2NIRNode(n) for k, n in kwargs_local["nodes"].items()
+        }
         # h5py deserializes edges into a numpy array of type bytes and dtype=object,
         # hence using ensure_str here
-        kwargs_local["edges"] = [(ensure_str(a), ensure_str(b)) for a, b in kwargs_local["edges"]]
+        kwargs_local["edges"] = [
+            (ensure_str(a), ensure_str(b)) for a, b in kwargs_local["edges"]
+        ]
         return super().from_dict(kwargs_local)
 
     def validate_structure(self):
@@ -229,7 +245,9 @@ class NIRGraph(NIRNode):
                     post_repr = f"{edge[1]}.input: {post_input_type}"
                     raise ValueError(f"type mismatch: {pre_repr} -> {post_repr}")
             else:
-                raise NotImplementedError("multiple input/output types not supported yet")
+                raise NotImplementedError(
+                    "multiple input/output types not supported yet"
+                )
         return True
 
     def infer_types(self):
@@ -330,18 +348,26 @@ class NIRGraph(NIRNode):
             if undef_post_input_type:
                 # define post input_type to be the same as pre output_type
                 post_node.input_type = {
-                    k.replace("output", "input"): v for k, v in pre_node.output_type.items()
+                    k.replace("output", "input"): v
+                    for k, v in pre_node.output_type.items()
                 }
             elif type_mismatch:
                 # set post input_type to be the same as pre output_type
-                pre_repr = f"{pre_key}.output: {np.array(list(pre_node.output_type.values()))}"
-                post_repr = f"{post_key}.input: {np.array(list(post_node.input_type.values()))}"
-                raise ValueError(f"Type inference error: type mismatch: {pre_repr} -> {post_repr}")
+                pre_repr = (
+                    f"{pre_key}.output: {np.array(list(pre_node.output_type.values()))}"
+                )
+                post_repr = (
+                    f"{post_key}.input: {np.array(list(post_node.input_type.values()))}"
+                )
+                raise ValueError(
+                    f"Type inference error: type mismatch: {pre_repr} -> {post_repr}"
+                )
 
             # make sure that output nodes have output_type = input_type
             if isinstance(post_node, Output):
                 post_node.output_type = {
-                    k.replace("input", "output"): v for k, v in post_node.input_type.items()
+                    k.replace("input", "output"): v
+                    for k, v in post_node.input_type.items()
                 }
 
             # check if post output_type needs to be defined
@@ -373,7 +399,9 @@ class NIRGraph(NIRNode):
                         post_node.kernel_size,
                         post_node.stride,
                     )
-                    output_type = np.array([post_node.input_type["input"][0], *output_shape])
+                    output_type = np.array(
+                        [post_node.input_type["input"][0], *output_shape]
+                    )
                     post_node.output_type = {"output": output_type}
 
                 elif isinstance(post_node, Flatten):
@@ -386,7 +414,9 @@ class NIRGraph(NIRNode):
                     }
                     n_inputs = np.prod(post_node.input_type["input"])
                     n_outputs = np.prod(post_node.output_type["output"])
-                    assert n_inputs == n_outputs, "Flatten must not change the number of elements"
+                    assert (
+                        n_inputs == n_outputs
+                    ), "Flatten must not change the number of elements"
 
             seen.add(post_key)
             ready += [e for e in self.edges if e[0] == post_key and e[1] not in seen]

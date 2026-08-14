@@ -35,7 +35,9 @@ class Flatten(NIRNode):
             }
             # make sure input and output shape are valid
             if np.prod(self.input_type["input"]) != np.prod(self.output_type["output"]):
-                raise ValueError("input and output shape must have same number of elements")
+                raise ValueError(
+                    "input and output shape must have same number of elements"
+                )
 
     def to_dict(self) -> dict[str, Any]:
         ret = super().to_dict()

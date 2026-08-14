@@ -136,7 +136,9 @@ class EventData:
             Time step size.
         """
         n_time_steps = int(self.t_max / dt)
-        discrete_data = np.zeros((self.n_samples, n_time_steps, self.n_neurons), dtype=bool)
+        discrete_data = np.zeros(
+            (self.n_samples, n_time_steps, self.n_neurons), dtype=bool
+        )
 
         for sample in range(self.n_samples):
             valid_spikes = self.idx[sample] != -1
@@ -217,7 +219,9 @@ class NIRNodeData:
 
     def __post_init__(self):
         if not isinstance(self.observables, dict):
-            raise TypeError("observables must be a dictionary of EventData or TimeGriddedData")
+            raise TypeError(
+                "observables must be a dictionary of EventData or TimeGriddedData"
+            )
 
     def __getitem__(self, idx):
         return self.observables[idx]
@@ -274,4 +278,6 @@ class NIRGraphData:
                 if not isinstance(graph_node, NIRNode):
                     raise TypeError(f"Node {key} is not a NIRNode in the NIRGraph")
                 if not node.check_observables(graph_node):
-                    raise ValueError(f"Observables for node {key} do not match the NIRNode")
+                    raise ValueError(
+                        f"Observables for node {key} do not match the NIRNode"
+                    )
