@@ -25,7 +25,13 @@ GITHUB_RAW_URLS = [
     (
         "jaxsnn",
         "from_nir",
-        "https://raw.githubusercontent.com/electronicvisions/jaxsnn/refs/heads/main/src/pyjaxsnn/jaxsnn/event/from_nir.py",
+        "https://raw.githubusercontent.com/electronicvisions/jaxsnn/refs/heads/main/src/pyjaxsnn/jaxsnn/event/utils/from_nir.py",
+        None,
+    ),
+    (
+        "jaxsnn",
+        "to_nir",
+        "https://raw.githubusercontent.com/electronicvisions/jaxsnn/refs/heads/main/src/pyjaxsnn/jaxsnn/event/utils/to_nir.py",
         None,
     ),
     (
@@ -104,7 +110,7 @@ GITHUB_RAW_URLS = [
         "Spyx",
         "from_nir",
         "https://raw.githubusercontent.com/kmheckel/spyx/refs/heads/main/src/spyx/nir.py",
-        "_nir_node_to_spyx_node",
+        "_nir_node_to_spyx_module",
     ),
     (
         "Spyx",
@@ -124,7 +130,10 @@ for lib_name, direction, url, function in GITHUB_RAW_URLS:
         response = requests.get(url)
         pattern = rf"def {function}\s*\(.*?\):(.*?)(?=\ndef |\Z)"
         match = re.search(pattern, response.text, re.DOTALL)
-        converter_contents[key] = match.group(0)
+        if match == None:
+            raise ValueError(f"Function {function} not found in {url}")
+        else:
+            converter_contents[key] = match.group(0)
 
 # Check which primitives are supported in each library/direction
 supported = {}
@@ -171,6 +180,7 @@ This document lists which primitives are supported by the software frameworks fo
 - `←`: Supported for conversion to NIR
 - `⟷`: Supported for both conversion directions (to and from NIR)
 Please note that this list is generated automatically and may not be entirely accurate.
+<br />
 """
 
 full_md = static_md + "\n\n" + dynamic_md
