@@ -108,16 +108,17 @@ NIRTorch uses **explicit** state management, which may be more cumbersome to wri
 class MyState:
     voltage: float
 
+
 def stateful_function(data, state):
     # 1. Calculate a new voltage
-    new_voltage = ... 
+    new_voltage = ...
     # 2. Calculate the function output
-    output = ... 
+    output = ...
     # 3. Define a new state
     new_state = MyState(voltage=new_voltage)
     # 4. A tuple of (data, state) is returned
     #    Note that the new state returned and the original remains unchanged
-    return output, new_state 
+    return output, new_state
 ```
 
 Once NIRTorch has parsed a NIR module into Torch modules (read more about that in the page about [To PyTorch: Interpreting NIR](#nirtorch_interpreting)),
@@ -134,9 +135,9 @@ nir_weight = np.ones((2, 2))
 nir_graph = nir.NIRGraph.from_list(nir.Linear(weight=nir_weight))
 
 torch_module = nirtorch.nir_to_torch(
-    nir_graph=nir_graph, 
-    node_map={} # We can leave this empty since we only 
-                # use a linear layer which has a default mapping
+    nir_graph=nir_graph,
+    node_map={},  # We can leave this empty since we only
+    # use a linear layer which has a default mapping
 )
 
 ##

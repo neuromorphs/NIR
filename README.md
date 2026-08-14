@@ -30,7 +30,7 @@ Using NIR is typically a part of your favorite framework's workflow, but follows
 # Define a model
 my_model = ...
 # Save the model (source platform)
-nir.write("my_graph.nir", my_model) 
+nir.write("my_graph.nir", my_model)
 # Load the model (target platform)
 imported_graph = nir.read("my_graph.nir")
 ```

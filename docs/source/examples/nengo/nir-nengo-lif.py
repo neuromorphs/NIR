@@ -35,9 +35,7 @@ def nir_to_nengo(n, swap_linear_order=False):
                     n_neurons=N,
                     dimensions=1,
                     label=f"LIF {i}",
-                    neuron_type=nengo.RegularSpiking(
-                        nengo.LIFRate(tau_rc=obj.tau[0], tau_ref=0)
-                    ),
+                    neuron_type=nengo.RegularSpiking(nengo.LIFRate(tau_rc=obj.tau[0], tau_ref=0)),
                     # neuron_type=nengo.LIF(tau_rc=obj.tau[0], tau_ref=0),
                     gain=np.ones(N),
                     bias=np.zeros(N),
@@ -56,7 +54,7 @@ def nir_to_nengo(n, swap_linear_order=False):
                 if swap_linear_order:
                     weights = weights.T
                 w = nengo.Node(
-                    lambda t, x, obj=obj: weights @ x + obj.bias,
+                    lambda t, x, obj=obj, weights=weights: weights @ x + obj.bias,
                     size_in=weights.shape[1],
                     size_out=weights.shape[0],
                     label=f"({weights.shape[0]}x{weights.shape[1]})",
@@ -67,7 +65,7 @@ def nir_to_nengo(n, swap_linear_order=False):
                     None
                 )  # because NIR spec doesn't tell me the size, I can't create this yet
             else:
-                raise Exception(f"Unknown NIR object: {obj}")
+                raise TypeError(f"Unknown NIR object: {obj}")
         for pre, post in n.edges:
             if nengo_map[post] is None:
                 output = nengo.Node(
@@ -79,10 +77,7 @@ def nir_to_nengo(n, swap_linear_order=False):
             synapse = filters.get(nengo_map[post], None)
 
             if nengo_map[pre].size_out != nengo_map[post].size_in:
-                print("Error")
-                print("pre", nengo_map[pre])
-                print("post", nengo_map[post])
-                1 / 0
+                raise TypeError("Incompatible node sizes")
 
             else:
                 nengo.Connection(nengo_map[pre], nengo_map[post], synapse=synapse)

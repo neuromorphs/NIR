@@ -1,4 +1,4 @@
-from typing import Any, Dict
+from typing import Any
 
 from .conv import Conv1d, Conv2d
 from .delay import Delay
@@ -48,7 +48,7 @@ def str2NIRNode(type: str) -> NIRNode:
     return globals()[type]
 
 
-def dict2NIRNode(data_dict: Dict[str, Any]) -> NIRNode:
+def dict2NIRNode(data_dict: dict[str, Any]) -> NIRNode:
     """Assume data_dict["type"] exist and correspond to a subclass of NIRNode.
 
     Other items should match fields in the corresponding NIRNode subclass, unless
@@ -61,35 +61,35 @@ def dict2NIRNode(data_dict: Dict[str, Any]) -> NIRNode:
 # we could do this, but ruff complains
 # __all__ = __all_ir + ["str2NIRNode", "dict2NIRNode"]
 __all__ = [
+    "IF",
+    "LI",
+    "LIF",
+    # linear
+    "Affine",
+    # pooling
+    "AvgPool2d",
     # conv
     "Conv1d",
     "Conv2d",
+    # neuron
+    "CubaLI",
+    "CubaLIF",
     # delay
     "Delay",
     # flatten
     "Flatten",
+    "I",
     # graph
     "Input",
-    "NIRGraph",
-    "Output",
-    # linear
-    "Affine",
     "Linear",
-    "Scale",
-    # neuron
-    "CubaLI",
-    "CubaLIF",
-    "I",
-    "IF",
-    "LI",
-    "LIF",
+    "NIRGraph",
     # node
     "NIRNode",
-    # pooling
-    "AvgPool2d",
+    "Output",
+    "Scale",
     "SumPool2d",
     # surrogate_gradient
     "Threshold",
-    "str2NIRNode",
     "dict2NIRNode",
+    "str2NIRNode",
 ]

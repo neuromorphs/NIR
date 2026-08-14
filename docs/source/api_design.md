@@ -37,10 +37,7 @@ That would look like this: `edges = [("my_node", "my_node")]`.
 In sum, a rudimentary, self-cyclic graph can be described in NIR as follows:
 
 ```python
-NIRGraph(
-    nodes = {"my_node": MyNIRNode(np.array([...]))},
-    edges = [("my_node", "my_node")]
-)
+NIRGraph(nodes={"my_node": MyNIRNode(np.array([...]))}, edges=[("my_node", "my_node")])
 ```
 
 ## Input and output types

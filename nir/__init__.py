@@ -3,7 +3,8 @@
 Documentation: https://nnir.readthedocs.io
 """
 
-from importlib.metadata import version as metadata_version, PackageNotFoundError
+from importlib.metadata import PackageNotFoundError
+from importlib.metadata import version as metadata_version
 
 try:
     __version__ = version = metadata_version("nir")
@@ -12,10 +13,10 @@ except PackageNotFoundError:
     # package is not installed
     pass
 
-from . import ir, data_ir
-from .ir import *  # noqa: F403
+from . import data_ir, ir
+from .data_ir import *
+from .ir import *
 from .ir import typing  # noqa: F401
-from .data_ir import *  # noqa: F403
-from .serialization import read, write, read_data, write_data
+from .serialization import read, read_data, write, write_data
 
 __all__ = ir.__all__ + data_ir.__all__ + ["read", "write", "read_data", "write_data"]

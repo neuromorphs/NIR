@@ -18,6 +18,7 @@ Note that this requires you to provide a NIR model, so you need to find a way to
 The `nir.write` function takes two arguments: the file path and the model to write.
 ```python
 import nir
+
 my_nir_graph = ...
 nir.write("my_graph.nir", my_model)
 ```
@@ -27,6 +28,7 @@ To read a model from a file, use the `nir.read` function.
 This function takes a single argument: the file path.
 ```python
 import nir
+
 imported_graph = nir.read("my_graph.nir")
 ```
 

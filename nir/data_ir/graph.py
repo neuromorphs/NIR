@@ -1,7 +1,9 @@
 from __future__ import annotations
+
 from dataclasses import dataclass
-from typing import Dict, Union
+
 import numpy as np
+
 from nir.ir import NIRGraph, NIRNode
 
 
@@ -26,8 +28,7 @@ class TimeGriddedData:
     def __post_init__(self):
         if not isinstance(self.data, np.ndarray) or self.data.ndim != 3:
             raise ValueError(
-                "Data must be of shape (n_samples, n_time_steps, n_neurons)"
-                "and of type np.ndarray"
+                "Data must be of shape (n_samples, n_time_steps, n_neurons)and of type np.ndarray"
             )
 
     def __getitem__(self, idx):
@@ -125,7 +126,8 @@ class EventData:
         return self.idx.shape[0]
 
     def to_time_gridded(
-        self, dt: float  # pylint: disable=invalid-name
+        self,
+        dt: float,  # pylint: disable=invalid-name
     ) -> TimeGriddedData:
         """
         Arguments
@@ -134,14 +136,12 @@ class EventData:
             Time step size.
         """
         n_time_steps = int(self.t_max / dt)
-        discrete_data = np.zeros(
-            (self.n_samples, n_time_steps, self.n_neurons), dtype=bool
-        )
+        discrete_data = np.zeros((self.n_samples, n_time_steps, self.n_neurons), dtype=bool)
 
         for sample in range(self.n_samples):
             valid_spikes = self.idx[sample] != -1
             valid_times = self.time[sample][valid_spikes]
-            steps = np.floor((valid_times / dt)).astype(int)
+            steps = np.floor(valid_times / dt).astype(int)
             neurons = self.idx[sample][valid_spikes]
             discrete_data[sample, steps, neurons] = True
         return TimeGriddedData(discrete_data, dt)
@@ -193,7 +193,7 @@ class ValuedEventData(EventData):
         for sample in range(n_samples):
             valid_spikes = self.idx[sample] != -1
             valid_times = self.time[sample][valid_spikes]
-            steps = np.floor((valid_times / dt)).astype(int)
+            steps = np.floor(valid_times / dt).astype(int)
             neurons = self.idx[sample][valid_spikes]
             value = self.value[sample][valid_spikes]
             discrete_data[sample, steps, neurons] = value
@@ -213,13 +213,11 @@ class NIRNodeData:
         Dictionary of observables for a NIRNode.
     """
 
-    observables: Dict[str, Union[EventData, TimeGriddedData]]
+    observables: dict[str, EventData | TimeGriddedData]
 
     def __post_init__(self):
         if not isinstance(self.observables, dict):
-            raise TypeError(
-                "observables must be a dictionary of EventData or TimeGriddedData"
-            )
+            raise TypeError("observables must be a dictionary of EventData or TimeGriddedData")
 
     def __getitem__(self, idx):
         return self.observables[idx]
@@ -232,9 +230,7 @@ class NIRNodeData:
         Check that the shapes of the observables match the node's output shapes
         """
         output_shape = node.output_type["output"]
-        if not all(obs.n_neurons == output_shape for obs in self.observables.values()):
-            return False
-        return True
+        return all(obs.n_neurons == output_shape for obs in self.observables.values())
 
 
 @dataclass
@@ -249,7 +245,7 @@ class NIRGraphData:
         Dictionary of NIRNodeData or NIRGraphData for a NIRGraph.
     """
 
-    nodes: Dict[str, Union["NIRGraphData", NIRNodeData]]
+    nodes: dict[str, NIRGraphData | NIRNodeData]
 
     def __post_init__(self):
         if not isinstance(self.nodes, dict):
@@ -278,6 +274,4 @@ class NIRGraphData:
                 if not isinstance(graph_node, NIRNode):
                     raise TypeError(f"Node {key} is not a NIRNode in the NIRGraph")
                 if not node.check_observables(graph_node):
-                    raise ValueError(
-                        f"Observables for node {key} do not match the NIRNode"
-                    )
+                    raise ValueError(f"Observables for node {key} do not match the NIRNode")

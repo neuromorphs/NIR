@@ -4,19 +4,21 @@
 Sharp edges:
 - in lava-dl, the current and voltage state is not automatically reset. must do this manually after every forward pass.
 """
-import nir
+
+from dataclasses import dataclass
+from enum import Enum
+from functools import partial
+
 import nirtorch
 import numpy as np
-from dataclasses import dataclass
-from functools import partial
-from enum import Enum
-from lava.proc.lif.process import LIF
-from lava.proc.dense.process import Dense
-import lava.lib.dl.slayer as slayer
 import torch
+from lava.lib.dl import slayer
+from lava.proc.dense.process import Dense
+from lava.proc.lif.process import LIF
 
+import nir
 
-LavaLibrary = Enum('LavaLibrary', 'Lava LavaDl')
+LavaLibrary = Enum("LavaLibrary", "Lava LavaDl")
 
 
 @dataclass
@@ -34,13 +36,14 @@ class ImportConfig:
 # Lava helpers
 ##############################
 
+
 def get_outport(lava_node):
     if isinstance(lava_node, Dense):
         return lava_node.a_out
     elif isinstance(lava_node, LIF):
         return lava_node.s_out
     else:
-        raise ValueError(f"Unknown node type: {type(lava_node)}")
+        raise TypeError(f"Unknown node type: {type(lava_node)}")
 
 
 def get_inport(lava_node):
@@ -49,7 +52,7 @@ def get_inport(lava_node):
     elif isinstance(lava_node, LIF):
         return lava_node.a_in
     else:
-        raise ValueError(f"Unknown node type: {type(lava_node)}")
+        raise TypeError(f"Unknown node type: {type(lava_node)}")
 
 
 def _nir_node_to_lava(node: nir.NIRNode, import_config: ImportConfig):
@@ -63,7 +66,6 @@ def _nir_node_to_lava(node: nir.NIRNode, import_config: ImportConfig):
         dv = dt / tau_mem
         vthr = node.v_threshold  # * 10
         # no current leak
-        tau_syn = None  # 1/200
         du = 1.0  # no current leak
         # correction for input weights
         correction = dt / node.tau
@@ -77,12 +79,13 @@ def _nir_node_to_lava(node: nir.NIRNode, import_config: ImportConfig):
             w = (w * 256).astype(np.int32)
 
         lif = LIF(
-            shape=(1,), # u=0., # v=0.,
+            shape=(1,),  # u=0., # v=0.,
             du=du,
             dv=dv,
             vth=vthr,
-            bias_mant=0, bias_exp=0,  # no bias
-            name='lif'
+            bias_mant=0,
+            bias_exp=0,  # no bias
+            name="lif",
         )
         dense = Dense(weights=w)
         dense.a_out.connect(lif.a_in)
@@ -90,20 +93,17 @@ def _nir_node_to_lava(node: nir.NIRNode, import_config: ImportConfig):
 
     elif isinstance(node, nir.Affine):
         w = node.weight
-        assert np.allclose(node.bias, 0.), "Non-zero bias not supported by Lava"
+        assert np.allclose(node.bias, 0.0), "Non-zero bias not supported by Lava"
         if import_config.fixed_pt:
             w = (w * 256).astype(np.int32)
         dense = Dense(weights=w)
         return dense
 
-    elif isinstance(node, nir.Input):
-        return None
-
-    elif isinstance(node, nir.Output):
+    elif isinstance(node, (nir.Input, nir.Output)):
         return None
 
     else:
-        raise ValueError(f"Unknown node type: {type(node)}")
+        raise TypeError(f"Unknown node type: {type(node)}")
 
 
 def import_from_nir_to_lava(graph: nir.NIRGraph, import_config: ImportConfig):
@@ -118,11 +118,10 @@ def import_from_nir_to_lava(graph: nir.NIRGraph, import_config: ImportConfig):
         start_nodes (List[str]): The start nodes in the graph
         end_nodes (List[str]): The end nodes in the graph
     """
-    dt = import_config.dt
-    fixed_pt = import_config.fixed_pt
 
     lava_nodes = {
-        k: _nir_node_to_lava(n, import_config) for k, n in graph.nodes.items()
+        k: _nir_node_to_lava(n, import_config)
+        for k, n in graph.nodes.items()
         if not isinstance(n, (nir.Input, nir.Output))
     }
     start_nodes = []
@@ -148,9 +147,10 @@ def import_from_nir_to_lava(graph: nir.NIRGraph, import_config: ImportConfig):
 # Lava-dl helpers
 ##############################
 
+
 class Flatten(torch.nn.Module):
     def __init__(self, start_dim, end_dim):
-        super(Flatten, self).__init__()
+        super().__init__()
         self.start_dim = start_dim
         self.end_dim = end_dim
 
@@ -159,9 +159,7 @@ class Flatten(torch.nn.Module):
         end_dim = self.end_dim
         if self.end_dim == -1:
             end_dim -= 1
-        elif self.end_dim == len(x.shape):
-            end_dim = -2
-        elif self.end_dim == len(x.shape) - 1:
+        elif self.end_dim == len(x.shape) or self.end_dim == len(x.shape) - 1:
             end_dim = -2
         # if end_dim != self.end_dim:
         #     print(f'FLATTEN: changed end_dim from {self.start_dim} to {end_dim}')
@@ -215,23 +213,22 @@ def _replace_rnn_subgraph_with_nirgraph(graph: nir.NIRGraph) -> tuple[nir.NIRGra
     n_subgraphs = 0
     for edge1 in graph.edges:
         for edge2 in graph.edges:
-            if not edge1 == edge2:
-                if edge1[0] == edge2[1] and edge1[1] == edge2[0]:
-                    lif_nk = edge1[0]
-                    lif_n = graph.nodes[lif_nk]
-                    w_nk = edge1[1]
-                    w_n = graph.nodes[w_nk]
-                    is_lif = isinstance(lif_n, (nir.LIF, nir.CubaLIF))
-                    is_dense = isinstance(w_n, (nir.Affine, nir.Linear))
-                    # check if the dense only connects to the LIF
-                    w_out_nk = [e[1] for e in graph.edges if e[0] == w_nk]
-                    w_in_nk = [e[0] for e in graph.edges if e[1] == w_nk]
-                    is_rnn = len(w_out_nk) == 1 and len(w_in_nk) == 1
-                    # check if we found an RNN - if so, then parse it
-                    if is_rnn and is_lif and is_dense:
-                        print("creating rnn subgraph within nirgraph")
-                        graph = _create_rnn_subgraph(graph, edge1[0], edge1[1])
-                        n_subgraphs += 1
+            if edge1 != edge2 and edge1[0] == edge2[1] and edge1[1] == edge2[0]:
+                lif_nk = edge1[0]
+                lif_n = graph.nodes[lif_nk]
+                w_nk = edge1[1]
+                w_n = graph.nodes[w_nk]
+                is_lif = isinstance(lif_n, (nir.LIF, nir.CubaLIF))
+                is_dense = isinstance(w_n, (nir.Affine, nir.Linear))
+                # check if the dense only connects to the LIF
+                w_out_nk = [e[1] for e in graph.edges if e[0] == w_nk]
+                w_in_nk = [e[0] for e in graph.edges if e[1] == w_nk]
+                is_rnn = len(w_out_nk) == 1 and len(w_in_nk) == 1
+                # check if we found an RNN - if so, then parse it
+                if is_rnn and is_lif and is_dense:
+                    print("creating rnn subgraph within nirgraph")
+                    graph = _create_rnn_subgraph(graph, edge1[0], edge1[1])
+                    n_subgraphs += 1
     return graph, n_subgraphs
 
 
@@ -250,18 +247,14 @@ def _parse_rnn_subgraph(graph: nir.NIRGraph) -> tuple[nir.NIRNode, nir.NIRNode, 
     sub_nodes = graph.nodes.values()
     assert len(sub_nodes) == 4, "only 4-node RNN allowed in subgraph"
     try:
-        input_node = [n for n in sub_nodes if isinstance(n, nir.Input)][0]
-        output_node = [n for n in sub_nodes if isinstance(n, nir.Output)][0]
-        lif_node = [n for n in sub_nodes if isinstance(n, (nir.LIF, nir.CubaLIF))][0]
-        wrec_node = [n for n in sub_nodes if isinstance(n, (nir.Affine, nir.Linear))][0]
+        input_node = next(n for n in sub_nodes if isinstance(n, nir.Input))
+        output_node = next(n for n in sub_nodes if isinstance(n, nir.Output))
+        lif_node = next(n for n in sub_nodes if isinstance(n, (nir.LIF, nir.CubaLIF)))
+        wrec_node = next(n for n in sub_nodes if isinstance(n, (nir.Affine, nir.Linear)))
     except IndexError:
         raise ValueError("invalid RNN subgraph - could not find all required nodes")
-    lif_size = int(
-        list(input_node.input_type.values())[0][0]
-    )  # NOTE: needed for lava-dl
-    assert (
-        lif_size == list(output_node.output_type.values())[0][0]
-    ), "output size mismatch"
+    lif_size = int(next(iter(input_node.input_type.values()))[0])  # NOTE: needed for lava-dl
+    assert lif_size == next(iter(output_node.output_type.values()))[0], "output size mismatch"
     assert lif_size == lif_node.v_threshold.size, "lif size mismatch (v_threshold)"
     assert lif_size == wrec_node.weight.shape[0], "w_rec shape mismatch"
     assert lif_size == wrec_node.weight.shape[1], "w_rec shape mismatch"
@@ -293,60 +286,52 @@ def _nir_node_to_lava_dl(node: nir.NIRNode, import_config: ImportConfig):
         if debug_conv:
             print(f"Conv2d with weights of shape {node.weight.shape}:")
             print(f"\t{in_features} in, {out_features} out, kernel {kernel_size}")
-            print(
-                f"\tstride {node.stride}, padding {node.padding}, dilation {node.dilation}"
-            )
+            print(f"\tstride {node.stride}, padding {node.padding}, dilation {node.dilation}")
             print(f"\tgroups {node.groups}")
-        conv_synapse_params = dict(
-            in_features=in_features,
-            out_features=out_features,
-            kernel_size=kernel_size,
-            stride=node.stride,
-            padding=node.padding,
-            dilation=node.dilation,
-            groups=node.groups,
-            weight_scale=1,
-            weight_norm=False,
-            pre_hook_fx=None,
-        )
+        conv_synapse_params = {
+            "in_features": in_features,
+            "out_features": out_features,
+            "kernel_size": kernel_size,
+            "stride": node.stride,
+            "padding": node.padding,
+            "dilation": node.dilation,
+            "groups": node.groups,
+            "weight_scale": 1,
+            "weight_norm": False,
+            "pre_hook_fx": None,
+        }
         conv = slayer.synapse.Conv(**conv_synapse_params)
         conv.weight.data = torch.from_numpy(node.weight.reshape(conv.weight.shape))
         return conv
 
     elif isinstance(node, nir.SumPool2d):
         if debug_pool:
-            print(
-                f"SumPool2d: kernel {node.kernel_size} pad {node.padding}, stride {node.stride}"
-            )
-        pool_synapse_params = dict(
-            kernel_size=node.kernel_size,
-            stride=node.stride,
-            padding=node.padding,
-            dilation=1,
-            weight_scale=1,
-            weight_norm=False,
-            pre_hook_fx=None,
-        )
+            print(f"SumPool2d: kernel {node.kernel_size} pad {node.padding}, stride {node.stride}")
+        pool_synapse_params = {
+            "kernel_size": node.kernel_size,
+            "stride": node.stride,
+            "padding": node.padding,
+            "dilation": 1,
+            "weight_scale": 1,
+            "weight_norm": False,
+            "pre_hook_fx": None,
+        }
         return slayer.synapse.Pool(**pool_synapse_params)
 
     elif isinstance(node, nir.IF):
-        assert (
-            len(np.unique(node.v_threshold)) == 1
-        ), "v_threshold must be the same for all neurons"
-        assert (
-            len(np.unique(node.r)) == 1
-        ), "resistance must be the same for all neurons"
+        assert len(np.unique(node.v_threshold)) == 1, "v_threshold must be the same for all neurons"
+        assert len(np.unique(node.r)) == 1, "resistance must be the same for all neurons"
         v_thr = np.unique(node.v_threshold)[0]
         resistance = np.unique(node.r)[0]
         v_thr_eff = v_thr * resistance * scale_v_thr
         if debug_if:
             print(f"IF with v_thr={v_thr}, R={resistance} -> eff. v_thr={v_thr_eff}")
-        cuba_neuron_params = dict(
-            threshold=v_thr_eff,
-            current_decay=1.0,
-            voltage_decay=0.0,
-            scale=4096,
-        )
+        cuba_neuron_params = {
+            "threshold": v_thr_eff,
+            "current_decay": 1.0,
+            "voltage_decay": 0.0,
+            "scale": 4096,
+        }
         return slayer.neuron.cuba.Neuron(**cuba_neuron_params)
         # alif_neuron_params = dict(
         #     threshold=v_thr_eff, threshold_step=0.0, scale=4096,
@@ -375,15 +360,13 @@ def _nir_node_to_lava_dl(node: nir.NIRNode, import_config: ImportConfig):
             pre_hook_fx=None,
         )
         dense.weight = torch.nn.Parameter(
-            data=torch.from_numpy(node.weight.reshape(dense.weight.shape)),
-            requires_grad=True
+            data=torch.from_numpy(node.weight.reshape(dense.weight.shape)), requires_grad=True
         )
         dense.bias = torch.nn.Parameter(
-            data=torch.from_numpy(node.bias.reshape(node.weight.shape[0])),
-            requires_grad=True
+            data=torch.from_numpy(node.bias.reshape(node.weight.shape[0])), requires_grad=True
         )
         return dense
-    
+
     elif isinstance(node, nir.Linear):
         print("[WARNING] Linear layer not supported, using Dense instead")
         dense = slayer.synapse.Dense(
@@ -394,17 +377,16 @@ def _nir_node_to_lava_dl(node: nir.NIRNode, import_config: ImportConfig):
             pre_hook_fx=None,
         )
         dense.weight = torch.nn.Parameter(
-            data=torch.from_numpy(node.weight.reshape(dense.weight.shape)), 
+            data=torch.from_numpy(node.weight.reshape(dense.weight.shape)),
         )
         dense.bias = torch.nn.Parameter(
-            data=torch.zeros((node.weight.shape[0],)),
-            requires_grad=False
+            data=torch.zeros((node.weight.shape[0],)), requires_grad=False
         )
         return dense
 
     elif isinstance(node, nir.CubaLIF):
         # TODO: figure out how to make the n_neurons dynamic
-        n_neurons = int(node.input_type['input'][0])
+        n_neurons = int(node.input_type["input"][0])
 
         # bias = node.v_leak * dt / node.tau_mem
 
@@ -432,13 +414,13 @@ def _nir_node_to_lava_dl(node: nir.NIRNode, import_config: ImportConfig):
             weight_norm=False,
             pre_hook_fx=None,
             delay_shift=False,
-            neuron_params=dict(
-                threshold=np.unique(vthr)[0],
-                current_decay=np.unique(cur_decay)[0],
-                voltage_decay=np.unique(vol_decay)[0],
-                shared_param=True,
-                scale=scale,
-            ),
+            neuron_params={
+                "threshold": np.unique(vthr)[0],
+                "current_decay": np.unique(cur_decay)[0],
+                "voltage_decay": np.unique(vol_decay)[0],
+                "shared_param": True,
+                "scale": scale,
+            },
         )
         # block.neuron.threshold_eps = 0.0
 
@@ -459,27 +441,17 @@ def _nir_node_to_lava_dl(node: nir.NIRNode, import_config: ImportConfig):
 
         elif isinstance(lif_node, nir.CubaLIF):
             # bias = lif_node.v_leak * dt / lif_node.tau_mem
-            assert np.allclose(
-                lif_node.v_leak, 0
-            ), "v_leak not supported"  # not yet in lava-dl?
-            assert np.allclose(
-                lif_node.r, lif_node.tau_mem / dt
-            ), "r not supported in CubaLIF"
+            assert np.allclose(lif_node.v_leak, 0), "v_leak not supported"  # not yet in lava-dl?
+            assert np.allclose(lif_node.r, lif_node.tau_mem / dt), "r not supported in CubaLIF"
 
             cur_decay = dt / lif_node.tau_syn
             vol_decay = dt / lif_node.tau_mem
             w_scale = lif_node.w_in * (dt / lif_node.tau_syn)
             vthr = lif_node.v_threshold
 
-            assert (
-                np.unique(cur_decay).size == 1
-            ), "CubaLIF cur_decay must be same for all neurons"
-            assert (
-                np.unique(vol_decay).size == 1
-            ), "CubaLIF vol_decay must be same for all neurons"
-            assert (
-                np.unique(vthr).size == 1
-            ), "CubaLIF v_thr must be same for all neurons"
+            assert np.unique(cur_decay).size == 1, "CubaLIF cur_decay must be same for all neurons"
+            assert np.unique(vol_decay).size == 1, "CubaLIF vol_decay must be same for all neurons"
+            assert np.unique(vthr).size == 1, "CubaLIF v_thr must be same for all neurons"
 
             rnn_block = slayer.block.cuba.Recurrent(
                 in_neurons=lif_size,
@@ -488,13 +460,13 @@ def _nir_node_to_lava_dl(node: nir.NIRNode, import_config: ImportConfig):
                 weight_norm=False,
                 pre_hook_fx=None,
                 delay_shift=False,
-                neuron_params=dict(
-                    threshold=np.unique(vthr)[0],
-                    current_decay=np.unique(cur_decay)[0],
-                    voltage_decay=np.unique(vol_decay)[0],
-                    shared_param=True,
-                    scale=scale,
-                ),
+                neuron_params={
+                    "threshold": np.unique(vthr)[0],
+                    "current_decay": np.unique(cur_decay)[0],
+                    "voltage_decay": np.unique(vol_decay)[0],
+                    "shared_param": True,
+                    "scale": scale,
+                },
             )
 
             # rnn_block.neuron.threshold_eps = 0.0
@@ -504,21 +476,15 @@ def _nir_node_to_lava_dl(node: nir.NIRNode, import_config: ImportConfig):
                 # TODO: make sure that dims match up
                 print(f"[warning] scaling pre weights for w_in -> w_scale={w_scale[0]}")
                 w_pre = w_pre * w_scale
-            rnn_block.input_synapse.weight = torch.nn.Parameter(
-                data=w_pre, requires_grad=True
-            )
+            rnn_block.input_synapse.weight = torch.nn.Parameter(data=w_pre, requires_grad=True)
 
             wrec_shape = rnn_block.recurrent_synapse.weight.shape
             wrec = torch.from_numpy(wrec_node.weight).reshape(wrec_shape)
-            rnn_block.recurrent_synapse.weight = torch.nn.Parameter(
-                data=wrec, requires_grad=True
-            )
+            rnn_block.recurrent_synapse.weight = torch.nn.Parameter(data=wrec, requires_grad=True)
 
             if isinstance(wrec_node, nir.Affine) and wrec_node.bias is not None:
-                bias = torch.from_numpy(wrec_node.bias).reshape((lif_size))
-                rnn_block.recurrent_synapse.bias = torch.nn.Parameter(
-                    data=bias, requires_grad=True
-                )
+                bias = torch.from_numpy(wrec_node.bias).reshape(lif_size)
+                rnn_block.recurrent_synapse.bias = torch.nn.Parameter(data=bias, requires_grad=True)
 
             return rnn_block
 
@@ -526,12 +492,12 @@ def _nir_node_to_lava_dl(node: nir.NIRNode, import_config: ImportConfig):
         raise NotImplementedError("LIF not implemented yet in lava-dl")
 
     else:
-        raise ValueError(f"Unknown node type: {type(node)}")
+        raise TypeError(f"Unknown node type: {type(node)}")
 
 
 class NIR2LavaDLNetwork(torch.nn.Module):
     def __init__(self, module_list, jens_order=False):
-        super(NIR2LavaDLNetwork, self).__init__()
+        super().__init__()
         self.blocks = torch.nn.ModuleList(module_list)
 
     def forward(self, spike):
@@ -539,7 +505,7 @@ class NIR2LavaDLNetwork(torch.nn.Module):
             if isinstance(block, torch.nn.Module):
                 spike = block(spike)
             else:
-                raise Exception("Unknown block type")
+                raise TypeError("Unknown block type")
         return spike
 
 
@@ -554,8 +520,6 @@ def get_next_node_key(node_key, edges):
 
 def import_from_nir_to_lava_dl(graph: nir.NIRGraph, import_config: ImportConfig, debug=False):
     # TODO (RNN addition): allow parsing of input and output nodes -> mapped to None
-    dt = import_config.dt
-    fixed_pt = import_config.fixed_pt
 
     # replace RNN subgraphs with NIRGraph nodes (i.e., subgraphs)
     graph, n_subgraphs = _replace_rnn_subgraph_with_nirgraph(graph)
@@ -574,20 +538,20 @@ def import_from_nir_to_lava_dl(graph: nir.NIRGraph, import_config: ImportConfig,
                 print(f"node {node_key}: {type(node).__name__}")
             if node_key == "output":
                 continue
-            module_list.append(
-                _nir_node_to_lava_dl(node, import_config)
-            )
+            module_list.append(_nir_node_to_lava_dl(node, import_config))
         assert len(visited_node_keys) == len(graph.nodes), "not all nodes visited"
         return NIR2LavaDLNetwork(module_list)
-    
+
     else:
         # found RNN subgraphs, need to use NIRTorch to parse the network
         net = nirtorch.load(graph, partial(_nir_node_to_lava_dl, import_config=import_config))
         return net
 
+
 ##############################
 # Main functions
 ##############################
+
 
 def import_from_nir(graph: nir.NIRGraph, import_config: ImportConfig = None):
     if import_config is None:

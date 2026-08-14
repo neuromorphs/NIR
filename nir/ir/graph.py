@@ -1,6 +1,6 @@
 from collections import Counter
 from dataclasses import dataclass
-from typing import Any, Dict
+from typing import Any
 
 import numpy as np
 
@@ -39,7 +39,7 @@ class NIRGraph(NIRNode):
         self,
         nodes: Nodes,
         edges: Edges,
-        metadata: Dict[str, Any] = dict,
+        metadata: dict[str, Any] = dict,
         type_check: bool = True,
     ):
         self.nodes = nodes
@@ -57,30 +57,24 @@ class NIRGraph(NIRNode):
 
     @property
     def inputs(self):
-        return {
-            name: node for name, node in self.nodes.items() if isinstance(node, Input)
-        }
+        return {name: node for name, node in self.nodes.items() if isinstance(node, Input)}
 
     @property
     def outputs(self):
-        return {
-            name: node for name, node in self.nodes.items() if isinstance(node, Output)
-        }
+        return {name: node for name, node in self.nodes.items() if isinstance(node, Output)}
 
     @staticmethod
     def from_list(*nodes: NIRNode, type_check: bool = True) -> "NIRGraph":
         """Create a sequential graph from a list of nodes by labelling them after
         indices."""
 
-        if len(nodes) > 0 and (
-            isinstance(nodes[0], list) or isinstance(nodes[0], tuple)
-        ):
+        if len(nodes) > 0 and isinstance(nodes[0], (list, tuple)):
             nodes = [*nodes[0]]
 
         def unique_node_name(node, counts):
             basename = node.__class__.__name__.lower()
             id = counts[basename]
-            name = f"{basename}{f'_{id}' if id>0 else ''}"
+            name = f"{basename}{f'_{id}' if id > 0 else ''}"
             counts[basename] += 1
             return name
 
@@ -116,32 +110,24 @@ class NIRGraph(NIRNode):
             self.metadata = {}
 
     def _update_input_output_types(self):
-        input_node_keys = [
-            k for k, node in self.nodes.items() if isinstance(node, Input)
-        ]
+        input_node_keys = [k for k, node in self.nodes.items() if isinstance(node, Input)]
         self.input_type = (
-            {
-                node_key: self.nodes[node_key].input_type["input"]
-                for node_key in input_node_keys
-            }
+            {node_key: self.nodes[node_key].input_type["input"] for node_key in input_node_keys}
             if len(input_node_keys) > 0
             else None
         )
-        output_node_keys = [
-            k for k, node in self.nodes.items() if isinstance(node, Output)
-        ]
+        output_node_keys = [k for k, node in self.nodes.items() if isinstance(node, Output)]
         self.output_type = {
-            node_key: self.nodes[node_key].output_type["output"]
-            for node_key in output_node_keys
+            node_key: self.nodes[node_key].output_type["output"] for node_key in output_node_keys
         }
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         ret = super().to_dict()
         ret["nodes"] = {k: n.to_dict() for k, n in self.nodes.items()}
         return ret
 
     @classmethod
-    def from_dict(cls, kwargs: Dict[str, Any]) -> "NIRGraph":
+    def from_dict(cls, kwargs: dict[str, Any]) -> "NIRGraph":
         from . import dict2NIRNode
 
         kwargs_local = kwargs.copy()  # Copy the input to avoid overwriting attributes
@@ -151,20 +137,16 @@ class NIRGraph(NIRNode):
         assert "edges" in kwargs, "The incoming dictionary must hade a 'edges' entry"
         # Assert that the type is well-formed
         if "type" in kwargs:
-            assert (
-                kwargs["type"] == "NIRGraph"
-            ), "You are calling NIRGraph.from_dict with a different type "
+            assert kwargs["type"] == "NIRGraph", (
+                "You are calling NIRGraph.from_dict with a different type "
+            )
             f"{type}. Either remove the entry or use <Specific NIRNode>.from_dict, such as Input.from_dict"
         kwargs_local["type"] = "NIRGraph"
 
-        kwargs_local["nodes"] = {
-            k: dict2NIRNode(n) for k, n in kwargs_local["nodes"].items()
-        }
+        kwargs_local["nodes"] = {k: dict2NIRNode(n) for k, n in kwargs_local["nodes"].items()}
         # h5py deserializes edges into a numpy array of type bytes and dtype=object,
         # hence using ensure_str here
-        kwargs_local["edges"] = [
-            (ensure_str(a), ensure_str(b)) for a, b in kwargs_local["edges"]
-        ]
+        kwargs_local["edges"] = [(ensure_str(a), ensure_str(b)) for a, b in kwargs_local["edges"]]
         return super().from_dict(kwargs_local)
 
     def validate_structure(self):
@@ -240,16 +222,14 @@ class NIRGraph(NIRNode):
 
             # make sure the type values match up
             if len(pre_node.output_type.keys()) == 1:
-                post_input_type = list(post_node.input_type.values())[0]
-                pre_output_type = list(pre_node.output_type.values())[0]
+                post_input_type = next(iter(post_node.input_type.values()))
+                pre_output_type = next(iter(pre_node.output_type.values()))
                 if not np.array_equal(post_input_type, pre_output_type):
                     pre_repr = f"{edge[0]}.output: {pre_output_type}"
                     post_repr = f"{edge[1]}.input: {post_input_type}"
                     raise ValueError(f"type mismatch: {pre_repr} -> {post_repr}")
             else:
-                raise NotImplementedError(
-                    "multiple input/output types not supported yet"
-                )
+                raise NotImplementedError("multiple input/output types not supported yet")
         return True
 
     def infer_types(self):
@@ -274,7 +254,7 @@ class NIRGraph(NIRNode):
         destination_nodes = {edge[1] for edge in self.edges}
         root_nodes = all_node_keys - destination_nodes
 
-        new_nodes: Dict[str, NIRNode] = {}
+        new_nodes: dict[str, NIRNode] = {}
         new_edges: Edges = []
 
         for node_key in root_nodes:
@@ -316,7 +296,7 @@ class NIRGraph(NIRNode):
             self.edges.extend(new_edges)
 
         # Start type inference from input nodes
-        ready = [e for e in self.edges if e[0] in self.inputs.keys()]
+        ready = [e for e in self.edges if e[0] in self.inputs]
         if len(ready) == 0:
             raise ValueError(
                 "Failed to start type inference: No input nodes found. "
@@ -325,7 +305,7 @@ class NIRGraph(NIRNode):
                 "or disable type checking (`type_check=False`)."
             )
 
-        seen = set([e[0] for e in ready])
+        seen = {e[0] for e in ready}
         while len(ready) > 0:
             pre_key, post_key = ready.pop()
             pre_node = self.nodes[pre_key]
@@ -350,26 +330,18 @@ class NIRGraph(NIRNode):
             if undef_post_input_type:
                 # define post input_type to be the same as pre output_type
                 post_node.input_type = {
-                    k.replace("output", "input"): v
-                    for k, v in pre_node.output_type.items()
+                    k.replace("output", "input"): v for k, v in pre_node.output_type.items()
                 }
             elif type_mismatch:
                 # set post input_type to be the same as pre output_type
-                pre_repr = (
-                    f"{pre_key}.output: {np.array(list(pre_node.output_type.values()))}"
-                )
-                post_repr = (
-                    f"{post_key}.input: {np.array(list(post_node.input_type.values()))}"
-                )
-                raise ValueError(
-                    f"Type inference error: type mismatch: {pre_repr} -> {post_repr}"
-                )
+                pre_repr = f"{pre_key}.output: {np.array(list(pre_node.output_type.values()))}"
+                post_repr = f"{post_key}.input: {np.array(list(post_node.input_type.values()))}"
+                raise ValueError(f"Type inference error: type mismatch: {pre_repr} -> {post_repr}")
 
             # make sure that output nodes have output_type = input_type
             if isinstance(post_node, Output):
                 post_node.output_type = {
-                    k.replace("input", "output"): v
-                    for k, v in post_node.input_type.items()
+                    k.replace("input", "output"): v for k, v in post_node.input_type.items()
                 }
 
             # check if post output_type needs to be defined
@@ -378,7 +350,7 @@ class NIRGraph(NIRNode):
             )
             if undef_post_output_type:
                 # define post output_type
-                if isinstance(post_node, Conv1d) or isinstance(post_node, Conv2d):
+                if isinstance(post_node, (Conv1d, Conv2d)):
                     if isinstance(post_node, Conv1d):
                         post_node.input_shape = post_node.input_type["input"][1]
                     else:
@@ -393,7 +365,7 @@ class NIRGraph(NIRNode):
                     output_type = np.array([post_node.weight.shape[0], *output_shape])
                     post_node.output_type = {"output": output_type}
 
-                elif isinstance(post_node, SumPool2d):
+                elif isinstance(post_node, (SumPool2d, AvgPool2d)):
                     output_shape = calculate_conv_output(
                         pre_node.output_type["output"][1:],
                         post_node.padding,
@@ -401,22 +373,7 @@ class NIRGraph(NIRNode):
                         post_node.kernel_size,
                         post_node.stride,
                     )
-                    output_type = np.array(
-                        [post_node.input_type["input"][0], *output_shape]
-                    )
-                    post_node.output_type = {"output": output_type}
-
-                elif isinstance(post_node, AvgPool2d):
-                    output_shape = calculate_conv_output(
-                        pre_node.output_type["output"][1:],
-                        post_node.padding,
-                        1,
-                        post_node.kernel_size,
-                        post_node.stride,
-                    )
-                    output_type = np.array(
-                        [post_node.input_type["input"][0], *output_shape]
-                    )
+                    output_type = np.array([post_node.input_type["input"][0], *output_shape])
                     post_node.output_type = {"output": output_type}
 
                 elif isinstance(post_node, Flatten):
@@ -429,9 +386,7 @@ class NIRGraph(NIRNode):
                     }
                     n_inputs = np.prod(post_node.input_type["input"])
                     n_outputs = np.prod(post_node.output_type["output"])
-                    assert (
-                        n_inputs == n_outputs
-                    ), "Flatten must not change the number of elements"
+                    assert n_inputs == n_outputs, "Flatten must not change the number of elements"
 
             seen.add(post_key)
             ready += [e for e in self.edges if e[0] == post_key and e[1] not in seen]
@@ -449,7 +404,7 @@ class NIRGraph(NIRNode):
                 "or disable type checking (`type_check=False`)."
             )
 
-        new_nodes: Dict[str, NIRNode] = {}
+        new_nodes: dict[str, NIRNode] = {}
         new_edges: Edges = []
 
         for node_key in leaf_nodes:
@@ -503,13 +458,13 @@ class Input(NIRNode):
         self.input_type = parse_shape_argument(self.input_type, "input")
         self.output_type = {"output": self.input_type["input"]}
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         ret = super().to_dict()
         ret["shape"] = self.input_type["input"]
         return ret
 
     @classmethod
-    def from_dict(cls, node: Dict[str, Any]) -> "NIRNode":
+    def from_dict(cls, node: dict[str, Any]) -> "NIRNode":
         node["input_type"] = {"input": node["shape"]}
         del node["shape"]
         return super().from_dict(node)
@@ -530,13 +485,13 @@ class Output(NIRNode):
         self.output_type = parse_shape_argument(self.output_type, "output")
         self.input_type = {"input": self.output_type["output"]}
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         ret = super().to_dict()
         ret["shape"] = self.output_type["output"]
         return ret
 
     @classmethod
-    def from_dict(cls, node: Dict[str, Any]) -> "NIRNode":
+    def from_dict(cls, node: dict[str, Any]) -> "NIRNode":
         node["output_type"] = {"output": node["shape"]}
         del node["shape"]
         return super().from_dict(node)
@@ -556,11 +511,11 @@ class Identity(NIRNode):
     def __post_init__(self):
         self.output_type = self.input_type
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         ret = super().to_dict()
         ret["shape"] = self.output_type["output"]
         return ret
 
     @classmethod
-    def from_dict(cls, node: Dict[str, Any]) -> "NIRNode":
+    def from_dict(cls, node: dict[str, Any]) -> "NIRNode":
         return super().from_dict(node)

@@ -1,4 +1,5 @@
 import numpy as np
+
 import nir
 
 
@@ -7,7 +8,7 @@ def test_generate_time_gridded_data():
     dt = 0.1
     gridded = nir.TimeGriddedData(spikes, dt)
     node = nir.NIRNodeData({"spikes": gridded})
-    graph = nir.NIRGraphData({"node": node})  # noqa: F841
+    graph = nir.NIRGraphData({"node": node})
     assert np.allclose(graph.nodes["node"].observables["spikes"].data, spikes)
     assert graph.nodes["node"].observables["spikes"].dt == dt
 
@@ -19,7 +20,7 @@ def test_generate_event_data():
     t_max = 1.0
     event = nir.EventData(idx, time, n_neurons, t_max)
     node = nir.NIRNodeData({"spikes": event})
-    graph = nir.NIRGraphData({"node": node})  # noqa: F841
+    graph = nir.NIRGraphData({"node": node})
     assert np.allclose(graph.nodes["node"].observables["spikes"].idx, idx)
     assert np.allclose(graph.nodes["node"].observables["spikes"].time, time)
     assert graph.nodes["node"].observables["spikes"].n_neurons == n_neurons
@@ -34,7 +35,7 @@ def test_generate_valued_event_data():
     t_max = 1.0
     valued_event = nir.ValuedEventData(idx, time, n_neurons, t_max, value)
     node = nir.NIRNodeData({"current": valued_event})
-    graph = nir.NIRGraphData({"node": node})  # noqa: F841
+    graph = nir.NIRGraphData({"node": node})
     assert np.allclose(graph.nodes["node"].observables["current"].idx, idx)
     assert np.allclose(graph.nodes["node"].observables["current"].time, time)
     assert np.allclose(graph.nodes["node"].observables["current"].value, value)
@@ -70,7 +71,7 @@ def test_valued_conversion():
     dt = 0.01
     t_max = 0.3
     valued_event = nir.ValuedEventData(idx, time, n_neurons, t_max, value)
-    gridded = valued_event.to_time_gridded(dt=dt)  # noqa: F841
+    gridded = valued_event.to_time_gridded(dt=dt)
     expected = np.zeros((1, 30, 2))
     expected[0, 5, 0] = 1
     expected[0, 10, 1] = 2

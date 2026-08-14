@@ -24,13 +24,9 @@ class Affine(NIRNode):
     def __post_init__(self):
         assert len(self.weight.shape) >= 2, "Weight must be at least 2D"
         self.input_type = {
-            "input": np.array(
-                self.weight.shape[:-2] + tuple(np.array(self.weight.shape[-1:]).T)
-            )
+            "input": np.array(self.weight.shape[:-2] + tuple(np.array(self.weight.shape[-1:]).T))
         }
-        self.output_type = {
-            "output": np.array(self.weight.shape[:-2] + (self.weight.shape[-2],))
-        }
+        self.output_type = {"output": np.array(self.weight.shape[:-2] + (self.weight.shape[-2],))}
 
 
 @dataclass(eq=False)
@@ -46,9 +42,7 @@ class Linear(NIRNode):
     def __post_init__(self):
         assert len(self.weight.shape) >= 2, "Weight must be at least 2D"
         self.input_type = {
-            "input": np.array(
-                self.weight.shape[:-2] + tuple(np.array(self.weight.shape[-1:]).T)
-            )
+            "input": np.array(self.weight.shape[:-2] + tuple(np.array(self.weight.shape[-1:]).T))
         }
         self.output_type = {"output": self.weight.shape[:-2] + (self.weight.shape[-2],)}
 

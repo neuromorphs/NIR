@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Any, Dict, Optional
+from typing import Any
 
 import numpy as np
 
@@ -34,12 +34,9 @@ class CubaLI(NIRNode):
     w_in: np.ndarray = 1.0  # Input current weight
 
     def __post_init__(self):
-        assert (
-            self.tau_syn.shape
-            == self.tau_mem.shape
-            == self.r.shape
-            == self.v_leak.shape
-        ), "All parameters must have the same shape"
+        assert self.tau_syn.shape == self.tau_mem.shape == self.r.shape == self.v_leak.shape, (
+            "All parameters must have the same shape"
+        )
         # If w_in is a scalar, make it an array of same shape as v_leak
         self.w_in = np.ones_like(self.v_leak) * self.w_in
         self.input_type = {"input": np.array(self.v_leak.shape)}
@@ -86,7 +83,7 @@ class CubaLIF(NIRNode):
     r: np.ndarray  # Resistance
     v_leak: np.ndarray  # Leak voltage
     v_threshold: np.ndarray  # Firing threshold
-    v_reset: Optional[np.ndarray] = None  # Reset potential
+    v_reset: np.ndarray | None = None  # Reset potential
     w_in: np.ndarray = 1.0  # Input current weight
 
     def __post_init__(self):
@@ -106,14 +103,14 @@ class CubaLIF(NIRNode):
         self.output_type = {"output": np.array(self.v_threshold.shape)}
 
     @classmethod
-    def from_dict(cls, kwargs: Dict[str, Any]) -> "CubaLIF":
+    def from_dict(cls, kwargs: dict[str, Any]) -> "CubaLIF":
         if "v_reset" not in kwargs:
             kwargs["v_reset"] = np.zeros_like(kwargs["v_threshold"])
         return super().from_dict(kwargs)
 
 
 @dataclass(eq=False)
-class I(NIRNode):  # noqa: E742
+class I(NIRNode):
     r"""Integrator.
 
     The integrator neuron model is defined by the following equation:
@@ -153,19 +150,19 @@ class IF(NIRNode):
 
     r: np.ndarray  # Resistance
     v_threshold: np.ndarray  # Firing threshold
-    v_reset: Optional[np.ndarray] = None  # Reset potential
+    v_reset: np.ndarray | None = None  # Reset potential
 
     def __post_init__(self):
         if self.v_reset is None:
             self.v_reset = np.zeros_like(self.v_threshold)
-        assert (
-            self.r.shape == self.v_threshold.shape == self.v_reset.shape
-        ), "All parameters must have the same shape"
+        assert self.r.shape == self.v_threshold.shape == self.v_reset.shape, (
+            "All parameters must have the same shape"
+        )
         self.input_type = {"input": np.array(self.r.shape)}
         self.output_type = {"output": np.array(self.r.shape)}
 
     @classmethod
-    def from_dict(cls, kwargs: Dict[str, Any]) -> "IF":
+    def from_dict(cls, kwargs: dict[str, Any]) -> "IF":
         if "v_reset" not in kwargs:
             kwargs["v_reset"] = np.zeros_like(kwargs["v_threshold"])
         return super().from_dict(kwargs)
@@ -190,9 +187,9 @@ class LI(NIRNode):
     v_leak: np.ndarray  # Leak voltage
 
     def __post_init__(self):
-        assert (
-            self.tau.shape == self.r.shape == self.v_leak.shape
-        ), "All parameters must have the same shape"
+        assert self.tau.shape == self.r.shape == self.v_leak.shape, (
+            "All parameters must have the same shape"
+        )
         self.input_type = {"input": np.array(self.r.shape)}
         self.output_type = {"output": np.array(self.r.shape)}
 
@@ -231,7 +228,7 @@ class LIF(NIRNode):
     r: np.ndarray  # Resistance
     v_leak: np.ndarray  # Leak voltage
     v_threshold: np.ndarray  # Firing threshold
-    v_reset: Optional[np.ndarray] = None  # Reset potential
+    v_reset: np.ndarray | None = None  # Reset potential
 
     def __post_init__(self):
         if self.v_reset is None:
@@ -247,7 +244,7 @@ class LIF(NIRNode):
         self.output_type = {"output": np.array(self.r.shape)}
 
     @classmethod
-    def from_dict(cls, kwargs: Dict[str, Any]) -> "LIF":
+    def from_dict(cls, kwargs: dict[str, Any]) -> "LIF":
         if "v_reset" not in kwargs:
             kwargs["v_reset"] = np.zeros_like(kwargs["v_threshold"])
         return super().from_dict(kwargs)

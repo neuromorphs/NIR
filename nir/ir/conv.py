@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from typing import Optional, Tuple, Union
 
 import numpy as np
 
@@ -34,28 +33,24 @@ class Conv1d(NIRNode):
     :type bias: np.ndarray
     """
 
-    input_shape: Optional[int]  # N
+    input_shape: int | None  # N
     weight: np.ndarray  # Weight C_out * C_in * N
     stride: int  # Stride
-    padding: Union[int, str]  # Padding
+    padding: int | str  # Padding
     dilation: int  # Dilation
     groups: int  # Groups
     bias: np.ndarray  # Bias C_out
 
     def __post_init__(self):
         if isinstance(self.padding, str) and self.padding not in ["same", "valid"]:
-            raise ValueError(
-                f"padding must be 'same', 'valid', or int, not {self.padding}"
-            )
+            raise ValueError(f"padding must be 'same', 'valid', or int, not {self.padding}")
         if self.input_shape is None:
             # leave input and output types undefined
             self.input_type = {"input": None}
             self.output_type = {"output": None}
         else:
             # infer input and output types from input_shape
-            self.input_type = {
-                "input": np.array([self.weight.shape[1], self.input_shape])
-            }
+            self.input_type = {"input": np.array([self.weight.shape[1], self.input_shape])}
             output_shape = calculate_conv_output(
                 self.input_shape,
                 self.padding,
@@ -63,9 +58,7 @@ class Conv1d(NIRNode):
                 self.weight.shape[2],
                 self.stride,
             )
-            self.output_type = {
-                "output": np.array([self.weight.shape[0], *output_shape])
-            }
+            self.output_type = {"output": np.array([self.weight.shape[0], *output_shape])}
 
 
 @dataclass(eq=False)
@@ -95,19 +88,17 @@ class Conv2d(NIRNode):
     :type bias: np.ndarray
     """
 
-    input_shape: Optional[Tuple[int, int]]  # N_x, N_y
+    input_shape: tuple[int, int] | None  # N_x, N_y
     weight: np.ndarray  # Weight C_out * C_in * W_x * W_y
-    stride: Union[int, Tuple[int, int]]  # Stride
-    padding: Union[int, Tuple[int, int], str]  # Padding
-    dilation: Union[int, Tuple[int, int]]  # Dilation
+    stride: int | tuple[int, int]  # Stride
+    padding: int | tuple[int, int] | str  # Padding
+    dilation: int | tuple[int, int]  # Dilation
     groups: int  # Groups
     bias: np.ndarray  # Bias C_out
 
     def __post_init__(self):
         if isinstance(self.padding, str) and self.padding not in ["same", "valid"]:
-            raise ValueError(
-                f"padding must be 'same', 'valid', or int, not {self.padding}"
-            )
+            raise ValueError(f"padding must be 'same', 'valid', or int, not {self.padding}")
         if isinstance(self.padding, int):
             self.padding = (self.padding, self.padding)
         if isinstance(self.stride, int):
@@ -120,9 +111,7 @@ class Conv2d(NIRNode):
             self.output_type = {"output": None}
         else:
             # infer input and output types from input_shape
-            self.input_type = {
-                "input": np.array([self.weight.shape[1], *self.input_shape])
-            }
+            self.input_type = {"input": np.array([self.weight.shape[1], *self.input_shape])}
             output_shape = calculate_conv_output(
                 self.input_shape,
                 self.padding,
@@ -130,6 +119,4 @@ class Conv2d(NIRNode):
                 self.weight.shape[2],
                 self.stride,
             )
-            self.output_type = {
-                "output": np.array([self.weight.shape[0], *output_shape])
-            }
+            self.output_type = {"output": np.array([self.weight.shape[0], *output_shape])}
