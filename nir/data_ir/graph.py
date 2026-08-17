@@ -7,9 +7,9 @@ from nir.ir import NIRGraph, NIRNode
 
 
 @dataclass
-class BaseData:
+class ObservableData:
     """
-    Base class for data representations.
+    Base class for observable data in SNNs.
     """
 
     def get_event(self, n_events: int | None) -> EventData:
@@ -25,7 +25,7 @@ class BaseData:
 
 
 @dataclass
-class TimeGriddedData(BaseData):
+class TimeGriddedData(ObservableData):
     """
     Either boolean entries indicate whether a binary event is present at a
     particular time step, or a real-valued signal provides the measurement
@@ -191,7 +191,7 @@ class TimeGriddedData(BaseData):
 
 
 @dataclass
-class EventData(BaseData):
+class EventData(ObservableData):
     """
     Event-based data represented as a list of event indices and their
     corresponding timestamps. Each event is discrete and carries no magnitude;
