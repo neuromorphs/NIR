@@ -327,6 +327,71 @@ def test_read_without_type_check():
     )
 
 
+def test_scalar_lif_readwrite():
+    """Scalar LIF graph survives write/read roundtrip with type_check=True."""
+    ir = nir.NIRGraph(
+        nodes={
+            "input": nir.Input(np.array([64])),
+            "lif": nir.LIF(
+                tau=np.array(0.01),
+                r=np.array(1.0),
+                v_leak=np.array(0.0),
+                v_threshold=np.array(1.0),
+            ),
+            "output": nir.Output(np.array([64])),
+        },
+        edges=[("input", "lif"), ("lif", "output")],
+    )
+    assert np.array_equal(ir.nodes["lif"].input_type["input"], [64])
+
+    with tempfile.TemporaryFile() as fp:
+        nir.write(fp, ir)
+        ir2 = nir.read(fp)
+
+    assert np.array_equal(ir2.nodes["lif"].input_type["input"], [64])
+    assert np.array_equal(ir2.nodes["lif"].output_type["output"], [64])
+    assert ir2.nodes["lif"].tau.shape == ()
+    assert ir2.nodes["lif"].r.shape == ()
+
+
+def test_scalar_lif_multilayer_readwrite():
+    """Multi-layer scalar LIF graph survives write/read roundtrip."""
+    ir = nir.NIRGraph(
+        nodes={
+            "input": nir.Input(np.array([784])),
+            "fc1": nir.Affine(weight=np.random.randn(128, 784), bias=np.zeros(128)),
+            "lif1": nir.LIF(
+                tau=np.array(0.01),
+                r=np.array(1.0),
+                v_leak=np.array(0.0),
+                v_threshold=np.array(1.0),
+            ),
+            "fc2": nir.Affine(weight=np.random.randn(10, 128), bias=np.zeros(10)),
+            "lif2": nir.LIF(
+                tau=np.array(0.02),
+                r=np.array(1.0),
+                v_leak=np.array(0.0),
+                v_threshold=np.array(0.5),
+            ),
+            "output": nir.Output(np.array([10])),
+        },
+        edges=[
+            ("input", "fc1"),
+            ("fc1", "lif1"),
+            ("lif1", "fc2"),
+            ("fc2", "lif2"),
+            ("lif2", "output"),
+        ],
+    )
+
+    with tempfile.TemporaryFile() as fp:
+        nir.write(fp, ir)
+        ir2 = nir.read(fp)
+
+    assert np.array_equal(ir2.nodes["lif1"].input_type["input"], [128])
+    assert np.array_equal(ir2.nodes["lif2"].input_type["input"], [10])
+
+
 def test_serialize_deserialize_data():
     graph_data = nir.NIRGraphData(
         nodes={
