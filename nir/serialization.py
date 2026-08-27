@@ -1,6 +1,6 @@
 import io
 import pathlib
-from typing import Any, Dict, Union
+from typing import Any
 
 import h5py
 import numpy as np
@@ -8,14 +8,14 @@ import numpy as np
 import nir
 
 
-def _read_metadata(node: Any) -> Dict[str, Any]:
-    if "metadata" in node.keys():
+def _read_metadata(node: Any) -> dict[str, Any]:
+    if "metadata" in node:
         return {"metadata": {k: v[()] for k, v in node["metadata"].items()}}
     else:
         return {}
 
 
-def try_byte_to_str(a: Union[bytes, Any]) -> Union[str, Any]:
+def try_byte_to_str(a: bytes | Any) -> str | Any:
     return a.decode("utf8") if isinstance(a, bytes) else a
 
 
@@ -27,9 +27,7 @@ def read_node(node: Any) -> nir.NIRNode:
         )
     elif node["type"][()] == b"Conv1d":
         return nir.Conv1d(
-            input_shape=(
-                node["input_shape"][()] if "input_shape" in node.keys() else None
-            ),
+            input_shape=(node["input_shape"][()] if "input_shape" in node else None),
             weight=node["weight"][()],
             stride=node["stride"][()],
             padding=node["padding"][()],
@@ -40,9 +38,7 @@ def read_node(node: Any) -> nir.NIRNode:
         )
     elif node["type"][()] == b"Conv2d":
         return nir.Conv2d(
-            input_shape=(
-                node["input_shape"][()] if "input_shape" in node.keys() else None
-            ),
+            input_shape=(node["input_shape"][()] if "input_shape" in node else None),
             weight=node["weight"][()],
             stride=node["stride"][()],
             padding=node["padding"][()],
@@ -71,7 +67,7 @@ def read_node(node: Any) -> nir.NIRNode:
             start_dim=node["start_dim"][()],
             end_dim=node["end_dim"][()],
             input_type={
-                "input": node["input_type"][()] if "input_type" in node.keys() else None
+                "input": node["input_type"][()] if "input_type" in node else None
             },
             **_read_metadata(node),
         )
@@ -156,7 +152,7 @@ def read_node(node: Any) -> nir.NIRNode:
         raise ValueError(f"Unknown unit type: {node['type'][()]}")
 
 
-def hdf2dict(node: Any) -> Dict[str, Any]:
+def hdf2dict(node: Any) -> dict[str, Any]:
     ret = {}
 
     def read_hdf_to_dict(node, data_dict):
@@ -173,7 +169,7 @@ def hdf2dict(node: Any) -> Dict[str, Any]:
     return ret
 
 
-def read(filename: Union[str, pathlib.Path], type_check: bool = True) -> nir.NIRGraph:
+def read(filename: str | pathlib.Path, type_check: bool = True) -> nir.NIRGraph:
     """Load a NIR from a HDF/conn5 file.
     Attempts to read a NIRGraph from a file and pass in the key-value parameters to the
     corresponding NIR nodes.
@@ -198,7 +194,7 @@ def read(filename: Union[str, pathlib.Path], type_check: bool = True) -> nir.NIR
         return nir.dict2NIRNode(data_dict)
 
 
-def read_version(filename: Union[str, pathlib.Path]) -> str:
+def read_version(filename: str | pathlib.Path) -> str:
     """Reads the filename of a given NIR file, and raises an exception if the version
     does not exist in the file.
 
@@ -210,7 +206,7 @@ def read_version(filename: Union[str, pathlib.Path]) -> str:
 
 
 def write(
-    filename: Union[str, pathlib.Path, io.RawIOBase],
+    filename: str | pathlib.Path | io.RawIOBase,
     graph: nir.NIRNode,
     compression: str = "gzip",
     compression_opts: Any = None,
@@ -237,7 +233,7 @@ def write(
     def write_recursive(group: h5py.Group, node: dict) -> None:
         for k, v in node.items():
             if k == "metadata":
-                if not v == {}:  # Skip metadata if empty
+                if v != {}:  # Skip metadata if empty
                     write_recursive(group.create_group(k), v)
             elif isinstance(v, str):
                 group.create_dataset(k, data=v, dtype=h5py.string_dtype())
@@ -334,7 +330,7 @@ def read_data(path: str) -> nir.NIRGraphData:
 
 
 def write_data(
-    filename: Union[str, pathlib.Path, io.RawIOBase],
+    filename: str | pathlib.Path | io.RawIOBase,
     graph_data: nir.NIRGraphData,
     compression: str = "gzip",
     compression_opts: Any = None,
@@ -410,11 +406,11 @@ def write_data(
             else:
                 raise TypeError(f"Unsupported observable type: {type(obs)}")
 
-    def _write_graph_data(group: h5py.Group, node: dict) -> None:
+    def _write_graph_data(group: h5py.Group, graph: nir.NIRGraphData) -> None:
         group.attrs["__type__"] = "NIRGraphData"
         nodes_group = group.create_group("nodes")
 
-        for name, node in graph_data.nodes.items():
+        for name, node in graph.nodes.items():
             g = nodes_group.create_group(name)
             if isinstance(node, nir.NIRNodeData):
                 _write_node_data(g, node)

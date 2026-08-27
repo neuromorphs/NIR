@@ -1,6 +1,6 @@
 from abc import ABC
 from dataclasses import asdict, dataclass, field
-from typing import Any, Dict
+from typing import Any
 
 import numpy as np
 
@@ -18,9 +18,9 @@ class NIRNode(ABC):
     # keyword argument. All three are keyword-only so that subclasses can add
     # positional fields without running into the "non-default argument follows
     # default argument" ordering error. (Requires Python 3.10+.)
-    input_type: Dict[str, np.ndarray] = field(init=False, kw_only=True)
-    output_type: Dict[str, np.ndarray] = field(init=False, kw_only=True)
-    metadata: Dict[str, Any] = field(default_factory=dict, kw_only=True)
+    input_type: dict[str, np.ndarray] = field(init=False, kw_only=True)
+    output_type: dict[str, np.ndarray] = field(init=False, kw_only=True)
+    metadata: dict[str, Any] = field(default_factory=dict, kw_only=True)
 
     def __init__(self) -> None:
         raise AttributeError("NIRNode does not have a default constructor.")
@@ -28,12 +28,12 @@ class NIRNode(ABC):
     def __eq__(self, other):
         return self is other
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Serialize into a dictionary."""
         ret = asdict(self)
-        if "input_type" in ret.keys():
+        if "input_type" in ret:
             del ret["input_type"]
-        if "output_type" in ret.keys():
+        if "output_type" in ret:
             del ret["output_type"]
         # Note: The customization below won't be automatically done recursively for nested NIRNode.
         # Therefore, classes with nested NIRNode e.g. NIRGraph must implement its own to_dict
@@ -42,7 +42,7 @@ class NIRNode(ABC):
         return ret
 
     @classmethod
-    def from_dict(cls, kwargs: Dict[str, Any]) -> "NIRNode":
+    def from_dict(cls, kwargs: dict[str, Any]) -> "NIRNode":
         assert kwargs["type"] == cls.__name__
         kwargs = kwargs.copy()  # Local scope
         del kwargs["type"]

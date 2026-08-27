@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Any, Dict, Optional
+from typing import Any
 
 import numpy as np
 
@@ -86,7 +86,7 @@ class CubaLIF(NIRNode):
     r: np.ndarray  # Resistance
     v_leak: np.ndarray  # Leak voltage
     v_threshold: np.ndarray  # Firing threshold
-    v_reset: Optional[np.ndarray] = None  # Reset potential
+    v_reset: np.ndarray | None = None  # Reset potential
     w_in: np.ndarray = 1.0  # Input current weight
 
     def __post_init__(self):
@@ -106,14 +106,14 @@ class CubaLIF(NIRNode):
         self.output_type = {"output": np.array(self.v_threshold.shape)}
 
     @classmethod
-    def from_dict(cls, kwargs: Dict[str, Any]) -> "CubaLIF":
+    def from_dict(cls, kwargs: dict[str, Any]) -> "CubaLIF":
         if "v_reset" not in kwargs:
             kwargs["v_reset"] = np.zeros_like(kwargs["v_threshold"])
         return super().from_dict(kwargs)
 
 
 @dataclass(eq=False)
-class I(NIRNode):  # noqa: E742
+class I(NIRNode):
     r"""Integrator.
 
     The integrator neuron model is defined by the following equation:
@@ -153,7 +153,7 @@ class IF(NIRNode):
 
     r: np.ndarray  # Resistance
     v_threshold: np.ndarray  # Firing threshold
-    v_reset: Optional[np.ndarray] = None  # Reset potential
+    v_reset: np.ndarray | None = None  # Reset potential
 
     def __post_init__(self):
         if self.v_reset is None:
@@ -165,7 +165,7 @@ class IF(NIRNode):
         self.output_type = {"output": np.array(self.r.shape)}
 
     @classmethod
-    def from_dict(cls, kwargs: Dict[str, Any]) -> "IF":
+    def from_dict(cls, kwargs: dict[str, Any]) -> "IF":
         if "v_reset" not in kwargs:
             kwargs["v_reset"] = np.zeros_like(kwargs["v_threshold"])
         return super().from_dict(kwargs)
@@ -231,7 +231,7 @@ class LIF(NIRNode):
     r: np.ndarray  # Resistance
     v_leak: np.ndarray  # Leak voltage
     v_threshold: np.ndarray  # Firing threshold
-    v_reset: Optional[np.ndarray] = None  # Reset potential
+    v_reset: np.ndarray | None = None  # Reset potential
 
     def __post_init__(self):
         if self.v_reset is None:
@@ -247,7 +247,7 @@ class LIF(NIRNode):
         self.output_type = {"output": np.array(self.r.shape)}
 
     @classmethod
-    def from_dict(cls, kwargs: Dict[str, Any]) -> "LIF":
+    def from_dict(cls, kwargs: dict[str, Any]) -> "LIF":
         if "v_reset" not in kwargs:
             kwargs["v_reset"] = np.zeros_like(kwargs["v_threshold"])
         return super().from_dict(kwargs)

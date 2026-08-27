@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from typing import Optional, Tuple, Union
 
 import numpy as np
 
@@ -34,10 +33,10 @@ class Conv1d(NIRNode):
     :type bias: np.ndarray
     """
 
-    input_shape: Optional[int]  # N
+    input_shape: int | None  # N
     weight: np.ndarray  # Weight C_out * C_in * N
     stride: int  # Stride
-    padding: Union[int, str]  # Padding
+    padding: int | str  # Padding
     dilation: int  # Dilation
     groups: int  # Groups
     bias: np.ndarray  # Bias C_out
@@ -95,11 +94,11 @@ class Conv2d(NIRNode):
     :type bias: np.ndarray
     """
 
-    input_shape: Optional[Tuple[int, int]]  # N_x, N_y
+    input_shape: tuple[int, int] | None  # N_x, N_y
     weight: np.ndarray  # Weight C_out * C_in * W_x * W_y
-    stride: Union[int, Tuple[int, int]]  # Stride
-    padding: Union[int, Tuple[int, int], str]  # Padding
-    dilation: Union[int, Tuple[int, int]]  # Dilation
+    stride: int | tuple[int, int]  # Stride
+    padding: int | tuple[int, int] | str  # Padding
+    dilation: int | tuple[int, int]  # Dilation
     groups: int  # Groups
     bias: np.ndarray  # Bias C_out
 

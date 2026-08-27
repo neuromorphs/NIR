@@ -39,7 +39,8 @@ One example is the [`export_to_nir` function in snnTorch](https://snntorch.readt
 
 ```python
 import snntorch
-my_snntorch_net = torch.nn.Sequential( ... )
+
+my_snntorch_net = torch.nn.Sequential(...)
 nir_graph = snntorch.export_to_nir(my_snntorch_net)
 ```
 
@@ -50,6 +51,7 @@ Note that we provide a reference implementation in Python in the `nir` package, 
 To read a model from a file, use the `nir.read` function with the path to the graph.
 ```python
 import nir
+
 nir_graph = nir.read("my_graph.nir")
 ```
 
@@ -64,8 +66,8 @@ The topmost node is typically a [`NIRGraph` node](https://github.com/neuromorphs
 You can access those by the `.nodes` and `.edges` properties, respectively.
 
 ```python
-nodes = nir_graph.nodes # A Dictionary of str -> nir.NIRNode
-edges = nir_graph.edges # A List tuples (str, str)
+nodes = nir_graph.nodes  # A Dictionary of str -> nir.NIRNode
+edges = nir_graph.edges  # A List tuples (str, str)
 ```
 
 Edges are pretty boring, because they just list the connections from one node to another.
@@ -96,6 +98,7 @@ If you have a `NIRGraph` present, you can write it directly using the `nir.write
 The `nir.write` function takes two arguments: the file path and the model to write.
 ```python
 import nir
+
 my_nir_graph = ...
 nir.write("my_graph.nir", my_model)
 ```

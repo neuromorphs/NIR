@@ -41,7 +41,7 @@ import sinabs
 from sinabs.backend.dynapcnn import DynapcnnNetwork
 
 # Convert NIR model to Sinabs
-batch_size = ... # Define batch size to your liking
+batch_size = ...  # Define batch size to your liking
 sinabs.from_nir(nir_model, batch_size=batch_size)
 # Convert Sinabsmodel to chip-supported CNN
 dynapcnn_model = DynapcnnNetwork(sinabs_model, input_shape=sample_data.shape[-1])
@@ -67,6 +67,7 @@ To write this graph to file, you can use
 
 ```python
 import nir
+
 nir.write(nir_model, "my_model.nir")
 ```
 
@@ -75,6 +76,7 @@ Reading a NIR file is similarly easy and will give you a graph object that you c
 
 ```python
 import nir
+
 nir_model = nir.read("my_model.nir")
 ```
 

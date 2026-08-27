@@ -59,12 +59,9 @@ Note that a single node can be both an input and an output node.
 To clarify the dimensionality/input types of the input and output nodes, we require the user to specify the shape *and* name of the input, like so:
 ```python
 import numpy as np
-nir.Input(
-    input_type = {"input": np.array([28, 28])}
-)
-nir.Output(
-    output_type = {"output": np.array([2])}
-)
+
+nir.Input(input_type={"input": np.array([28, 28])})
+nir.Output(output_type={"output": np.array([2])})
 ```
 
 ## Metadata
@@ -77,10 +74,7 @@ Here is an example of a metadata dictionary attached to a graph:
 ```python
 import nir
 
-nir.NIRGraph(
-    ...,
-    metadata = {"some": "metadata", "info": 1}
-)
+nir.NIRGraph(..., metadata={"some": "metadata", "info": 1})
 ```
 
 

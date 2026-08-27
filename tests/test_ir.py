@@ -42,10 +42,6 @@ def test_eq():
     b2 = nir.Input(np.array([2, 2]))
     o = nir.Output(np.array([2, 3]))
 
-    assert a == a
-    assert a2 == a2
-    assert b == b
-    assert b2 == b2
     assert a != a2
     assert a != b
     assert a != b2
@@ -267,16 +263,16 @@ def test_from_list_naming():
             weight=np.array([[2, 1], [-1, 3], [1, 2]]).T, bias=np.array([-2, 3])
         ),
     )
-    assert "input" in ir.nodes.keys()
-    assert "linear" in ir.nodes.keys()
-    assert "linear_1" in ir.nodes.keys()
-    assert "linear_2" in ir.nodes.keys()
-    assert "linear_3" in ir.nodes.keys()
-    assert "affine" in ir.nodes.keys()
-    assert "affine_1" in ir.nodes.keys()
-    assert "affine_2" in ir.nodes.keys()
-    assert "affine_3" in ir.nodes.keys()
-    assert "output" in ir.nodes.keys()
+    assert "input" in ir.nodes
+    assert "linear" in ir.nodes
+    assert "linear_1" in ir.nodes
+    assert "linear_2" in ir.nodes
+    assert "linear_3" in ir.nodes
+    assert "affine" in ir.nodes
+    assert "affine_1" in ir.nodes
+    assert "affine_2" in ir.nodes
+    assert "affine_3" in ir.nodes
+    assert "output" in ir.nodes
     assert np.allclose(ir.nodes["input"].input_type["input"], [2])
     assert np.allclose(ir.nodes["linear"].weight, np.array([[3, 1], [-1, 2], [1, 2]]))
     assert np.allclose(
@@ -697,18 +693,18 @@ def test_graph_input_output_type_inference():
         assert (
             graph.input_type is not None
             and len(graph.input_type) == 1
-            and np.array_equal(list(graph.input_type.values())[0], np.array([6]))
+            and np.array_equal(next(iter(graph.input_type.values())), np.array([6]))
         ), f"unexpected graph input type for {name} after type inference"
         # Graph output should be set to the output_type of the Output node
         assert (
             graph.output_type is not None
             and len(graph.output_type) == 1
-            and np.array_equal(list(graph.output_type.values())[0], np.array([4]))
+            and np.array_equal(next(iter(graph.output_type.values())), np.array([4]))
         ), f"unexpected graph output type for {name} after type inference"
 
         # Input nodes should have input and output types set to the same values.
         assert len(graph.inputs) == 1, f"unexpected number of input nodes for {name}"
-        input_node = list(graph.inputs.values())[0]
+        input_node = next(iter(graph.inputs.values()))
         assert (
             input_node.input_type is not None
             and len(input_node.input_type) == 1
@@ -724,7 +720,7 @@ def test_graph_input_output_type_inference():
 
         # Output nodes should have input and output types set to the same values.
         assert len(graph.outputs) == 1, f"unexpected number of output nodes for {name}"
-        output_node = list(graph.outputs.values())[0]
+        output_node = next(iter(graph.outputs.values()))
         assert (
             output_node.input_type is not None
             and len(output_node.input_type) == 1

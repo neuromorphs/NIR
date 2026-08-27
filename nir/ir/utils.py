@@ -1,4 +1,4 @@
-from typing import Sequence, Union
+from collections.abc import Sequence
 
 import numpy as np
 
@@ -18,11 +18,11 @@ def parse_shape_argument(x: Types, key: str):
 
 
 def calculate_conv_output(
-    input_shape: Union[int, Sequence[int]],
-    padding: Union[int, str, Sequence[int]],
-    dilation: Union[int, Sequence[int]],
-    kernel_size: Union[int, Sequence[int]],
-    stride: Union[int, Sequence[int]],
+    input_shape: int | Sequence[int],
+    padding: int | str | Sequence[int],
+    dilation: int | Sequence[int],
+    kernel_size: int | Sequence[int],
+    stride: int | Sequence[int],
 ) -> Sequence[int]:
     """Calculates the output for a single dimension of a convolutional layer.
     https://pytorch.org/docs/stable/generated/torch.nn.Conv1d.html#torch.nn.Conv1d
@@ -87,7 +87,7 @@ def calc_flatten_output(input_shape: Sequence[int], start_dim: int, end_dim: int
     )
 
 
-def _index_tuple(tuple: Union[int, Sequence[int]], index: int) -> np.ndarray:
+def _index_tuple(tuple: int | Sequence[int], index: int) -> np.ndarray:
     """If the input is a tuple/array, index it.
 
     Otherwise, return it as-is.
@@ -105,7 +105,7 @@ def _index_tuple(tuple: Union[int, Sequence[int]], index: int) -> np.ndarray:
             raise TypeError(f"tuple must be int or np.ndarray, not {type(tuple)}")
 
 
-def ensure_str(a: Union[str, bytes]) -> str:
+def ensure_str(a: str | bytes) -> str:
     if isinstance(a, bytes):
         return a.decode("utf8")
     elif isinstance(a, str):

@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Any, Dict
+from typing import Any
 
 import numpy as np
 
@@ -39,14 +39,12 @@ class Flatten(NIRNode):
                     "input and output shape must have same number of elements"
                 )
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         ret = super().to_dict()
         ret["input_type"] = self.input_type["input"]
         return ret
 
     @classmethod
-    def from_dict(cls, node: Dict[str, Any]):
-        node["input_type"] = {
-            "input": node["input_type"] if "input_type" in node else None
-        }
+    def from_dict(cls, node: dict[str, Any]):
+        node["input_type"] = {"input": node.get("input_type", None)}
         return super().from_dict(node)

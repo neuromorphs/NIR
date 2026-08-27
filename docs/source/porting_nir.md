@@ -20,6 +20,7 @@ If your graph is stored in a file, you can load it using the `nir.read` function
 
 ```python
 import nir
+
 my_graph = nir.read("path_to_my_graph.nir")
 ```
 
@@ -28,8 +29,8 @@ Note that the top-level graph may be recursive, so we recommend a recursive func
 Here's a simple example (with recursion):
 
 ```python
-
 import nir
+
 
 def parse_graph(graph: nir.NIRGraph):
     # Create a dictionary of nodes
@@ -44,18 +45,17 @@ def parse_graph(graph: nir.NIRGraph):
             nodes[name] = MyPlatformAffine(node.weights, node.bias)
         elif isinstance(node, nir.Output):
             nodes[name] = MyPlatformOutput()
-        elif isinstance(node, nir.NIRGraph): # Recurse through subgraphs
+        elif isinstance(node, nir.NIRGraph):  # Recurse through subgraphs
             nodes[name] = parse_graph(node)
         else:
             raise NotImplementedError(f"Node {node} not supported.")
-    
+
     # Connect the nodes
     for edge in graph.edges:
         # Connect the nodes
         nodes[edge[0]].connect(nodes[edge[1]])
 
     return nodes
-
 ```
 
 Matching the nodes to your primitives is the critical part here.
@@ -78,6 +78,7 @@ Since several libraries are built on top of PyTorch, we provide default PyTorch 
 ```python
 import nir, nirtorch
 
+
 # Map nodes that are specific to your library
 # - nirtorch will map obvious nodes like `Input`, `Output`, `Affine`, `Conv2d` etc.
 # - but only if your parsing function do not return a module for that node
@@ -85,7 +86,8 @@ def parse_module(node: nir.NIRNode) -> Optional[torch.nn.Module]:
     if isinstance(module, LIFBoxCell):
         return ...
     else:
-        return None # Return none to allow nirtorch to map the node
+        return None  # Return none to allow nirtorch to map the node
+
 
 # Interpret a NIR graph as a PyTorch module (`torch.nn.Module`)
 nir_graph = ...

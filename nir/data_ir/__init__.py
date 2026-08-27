@@ -1,15 +1,15 @@
 from .graph import (
     EventData,
-    ValuedEventData,
-    TimeGriddedData,
-    NIRNodeData,
     NIRGraphData,
+    NIRNodeData,
+    TimeGriddedData,
+    ValuedEventData,
 )
 
 __all__ = [
-    "TimeGriddedData",
     "EventData",
-    "ValuedEventData",
-    "NIRNodeData",
     "NIRGraphData",
+    "NIRNodeData",
+    "TimeGriddedData",
+    "ValuedEventData",
 ]

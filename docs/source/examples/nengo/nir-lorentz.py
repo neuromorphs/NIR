@@ -38,7 +38,7 @@ def nengo_to_nir(model):
                 output = nengo.Node(lambda t, x: x, size_in=p.target.size_out)
                 nengo.Connection(p.target, output, synapse=p.synapse)
         else:
-            raise Exception(f"Unhandled Probe {p}")
+            raise TypeError(f"Unhandled Probe {p}")
 
     sim = nengo.simulator.Simulator(model2)
     nengo2nir = {}
@@ -119,9 +119,7 @@ def nengo_to_nir(model):
         if conn.synapse is not None:
             assert isinstance(conn.synapse, nengo.synapses.Lowpass)
             N = conn.size_out
-            ir = nir.LI(
-                tau=np.tile(conn.synapse.tau, N), r=np.tile(1, N), v_leak=np.tile(0, N)
-            )
+            ir = nir.LI(tau=np.tile(conn.synapse.tau, N), r=np.tile(1, N), v_leak=np.tile(0, N))
             nir_nodes.append(ir)
             nir_edges.append((source_index, len(nir_nodes) - 1))
             source_index = len(nir_nodes) - 1
@@ -153,9 +151,7 @@ def nir_to_nengo(n):
                     n_neurons=N,
                     dimensions=1,
                     label=f"LIF {i}",
-                    neuron_type=nengo.RegularSpiking(
-                        nengo.LIFRate(tau_rc=obj.tau[0], tau_ref=0)
-                    ),
+                    neuron_type=nengo.RegularSpiking(nengo.LIFRate(tau_rc=obj.tau[0], tau_ref=0)),
                     # neuron_type=nengo.LIF(tau_rc=obj.tau[0], tau_ref=0),
                     gain=np.ones(N),
                     bias=np.zeros(N),
@@ -182,7 +178,7 @@ def nir_to_nengo(n):
                     None
                 )  # because NIR spec doesn't tell me the size, I can't create this yet
             else:
-                raise Exception(f"Unknown NIR object: {obj}")
+                raise TypeError(f"Unknown NIR object: {obj}")
         for pre, post in n.edges:
             if nengo_map[post] is None:
                 output = nengo.Node(
@@ -194,11 +190,7 @@ def nir_to_nengo(n):
             synapse = filters.get(nengo_map[post], None)
 
             if nengo_map[pre].size_out != nengo_map[post].size_in:
-                print("Error")
-                print("pre", nengo_map[pre])
-                print("post", nengo_map[post])
-                1 / 0
-
+                raise TypeError("Incompatible node sizes")
             else:
                 nengo.Connection(nengo_map[pre], nengo_map[post], synapse=synapse)
 

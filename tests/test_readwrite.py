@@ -23,11 +23,7 @@ def assert_equivalence(ir: nir.NIRGraph, ir2: nir.NIRGraph):
             assert_equivalence(ir.nodes[ik], ir2.nodes[ik])
         else:
             for k, v in ir.nodes[ik].__dict__.items():
-                if (
-                    isinstance(v, np.ndarray)
-                    or isinstance(v, list)
-                    or isinstance(v, tuple)
-                ):
+                if isinstance(v, (np.ndarray, list, tuple)):
                     assert np.array_equal(v, getattr(ir2.nodes[ik], k))
                 elif isinstance(v, dict):
                     d = getattr(ir2.nodes[ik], k)
@@ -312,7 +308,7 @@ def test_deserialize():
             nir.read(os.path.join(nir_base, file))
         except Exception as e:
             print(f"Failed to read {file}: {e}")
-            raise e
+            raise
 
 
 def test_read_without_type_check():

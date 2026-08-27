@@ -1,9 +1,9 @@
+import importlib
+
 import numpy as np
 import pytest
 
 from nir.ir.utils import _index_tuple
-
-import importlib
 
 _TORCH_SPEC = importlib.util.find_spec("torch") is not None
 
