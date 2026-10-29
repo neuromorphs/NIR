@@ -237,6 +237,9 @@ def write(
                     write_recursive(group.create_group(k), v)
             elif isinstance(v, str):
                 group.create_dataset(k, data=v, dtype=h5py.string_dtype())
+            elif isinstance(v, np.ndarray) and v.ndim == 0:
+                # HDF5 cannot chunk or compress scalar datasets
+                group.create_dataset(k, data=v, dtype=v.dtype)
             elif isinstance(v, np.ndarray):
                 group.create_dataset(
                     k,

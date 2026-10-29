@@ -372,3 +372,16 @@ def test_serialize_deserialize_data():
                     assert np.array_equal(v1, v2)
                 else:
                     assert v1 == v2
+
+
+def test_write_zero_dim_arrays():
+    # 0-d arrays cannot be compressed by HDF5 and must still be writable
+    ir = nir.NIRGraph.from_list(
+        nir.Threshold(threshold=np.array(1.0)), type_check=False
+    )
+    ir.metadata = {"dt": np.array(1e-4)}
+    with tempfile.TemporaryFile() as fp:
+        nir.write(fp, ir)
+        ir2 = nir.read(fp, type_check=False)
+    assert ir2.metadata["dt"] == 1e-4
+    assert ir2.nodes["threshold"].threshold == 1.0
