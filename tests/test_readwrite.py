@@ -3,6 +3,7 @@ import os
 import sys
 import tempfile
 
+import h5py
 import numpy as np
 import pytest
 
@@ -336,6 +337,12 @@ def test_serialize_deserialize_data():
                         data=np.array([[[0.1, 0.2], [0.3, 0.4]]]),
                         dt=0.1,
                     ),
+                    "time-gridded-reordered": nir.TimeGriddedData(
+                        data=np.zeros((1, 2, 3), dtype=bool),
+                        dt=0.1,
+                        dimension_order=("batch", "neuron", "time"),
+                        dynamic_before_transition=False,
+                    ),
                     "event": nir.EventData(
                         idx=np.array([0, 1, 0]),
                         time=np.array([0.1, 0.2, 0.3]),
@@ -372,3 +379,33 @@ def test_serialize_deserialize_data():
                     assert np.array_equal(v1, v2)
                 else:
                     assert v1 == v2
+
+
+def test_read_data_without_time_gridded_attributes():
+    graph_data = nir.NIRGraphData(
+        nodes={
+            "node1": nir.NIRNodeData(
+                observables={
+                    "time-gridded": nir.TimeGriddedData(
+                        data=np.zeros((1, 2, 3)),
+                        dt=0.1,
+                    ),
+                }
+            )
+        }
+    )
+
+    with tempfile.NamedTemporaryFile() as f:
+        nir.write_data(f.name, graph_data)
+        with h5py.File(f.name, "r+") as h5:
+            attrs = h5["nodes/node1/observables/time-gridded"].attrs
+            del attrs["dimension_order"]
+            del attrs["dynamic_before_transition"]
+        graph_data2 = nir.read_data(f.name)
+
+    obs = graph_data2.nodes["node1"].observables["time-gridded"]
+    assert obs.dimension_order == ("time", "batch", "neuron")
+    assert obs.dynamic_before_transition
+    assert obs.n_time_steps == 1
+    assert obs.n_samples == 2
+    assert obs.n_neurons == 3
