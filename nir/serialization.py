@@ -269,7 +269,19 @@ def read_data(path: str) -> nir.NIRGraphData:
     def _read_time_gridded(group: h5py.Group) -> nir.TimeGriddedData:
         data = group["data"][()]
         dt = float(group.attrs["dt"])
-        return nir.TimeGriddedData(data=data, dt=dt)
+        dimension_order = tuple(
+            d.decode() if isinstance(d, bytes) else str(d)
+            for d in group.attrs.get("dimension_order", ("time", "batch", "neuron"))
+        )
+        dynamic_before_transition = bool(
+            group.attrs.get("dynamic_before_transition", True)
+        )
+        return nir.TimeGriddedData(
+            data=data,
+            dt=dt,
+            dimension_order=dimension_order,
+            dynamic_before_transition=dynamic_before_transition,
+        )
 
     def _read_event_data(group: h5py.Group) -> nir.EventData:
         idx = group["idx"][()]
@@ -364,6 +376,8 @@ def write_data(
             compression_opts=compression_opts,
         )
         group.attrs["dt"] = data.dt
+        group.attrs["dimension_order"] = list(data.dimension_order)
+        group.attrs["dynamic_before_transition"] = data.dynamic_before_transition
 
     def _write_event_data(group: h5py.Group, data: nir.EventData):
         group.attrs["__type__"] = type(data).__name__

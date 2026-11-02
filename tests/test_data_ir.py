@@ -72,10 +72,10 @@ def test_valued_conversion():
     valued_event = nir.ValuedEventData(idx, time, n_neurons, t_max, value)
     gridded = valued_event.get_time_gridded(dt=dt)
     expected = np.zeros((30, 1, 2))
-    expected[5, 0, 0] = 1
-    expected[10, 0, 1] = 2
-    expected[15, 0, 0] = 4
-    expected[20, 0, 1] = 3
+    expected[4, 0, 0] = 1
+    expected[9, 0, 1] = 2
+    expected[14, 0, 0] = 4
+    expected[19, 0, 1] = 3
     assert np.array_equal(gridded.data, expected)
     assert gridded.dt == dt
     assert gridded.dimension_order == ("time", "batch", "neuron")  # default value
@@ -148,3 +148,66 @@ def test_setter_getter():
     new_spikes = np.random.randint(0, 2, size=(10, 10, 10)).astype(bool)
     graph_data["node"]["spikes"] = nir.TimeGriddedData(new_spikes, dt)
     assert np.array_equal(graph_data["node"]["spikes"][:], new_spikes)
+
+
+def test_events_outside_time_grid_are_dropped():
+    event = nir.EventData(
+        idx=np.array([[0, 1, 0]]),
+        time=np.array([[0.0, 0.1, 0.5]]),
+        n_neurons=2,
+        t_max=0.3,
+    )
+    gridded = event.get_time_gridded(dt=0.1)
+    expected = np.zeros((3, 1, 2), dtype=bool)
+    expected[0, 0, 1] = True
+    assert np.array_equal(gridded.data, expected)
+
+    valued = nir.ValuedEventData(
+        idx=event.idx,
+        time=event.time,
+        n_neurons=2,
+        t_max=0.3,
+        value=np.array([[1.0, 2.0, 3.0]]),
+    )
+    gridded = valued.get_time_gridded(dt=0.1)
+    expected = np.zeros((3, 1, 2))
+    expected[0, 0, 1] = 2.0
+    assert np.array_equal(gridded.data, expected)
+
+
+def test_change_dynamic_before_transition():
+    # with dynamic_before_transition, events occur one time step earlier
+    spikes = np.zeros((10, 1, 1), dtype=bool)
+    spikes[5, 0, 0] = True
+    for dynamic_before_transition, expected_step in [(True, 6), (False, 4)]:
+        gridded = nir.TimeGriddedData(
+            spikes, dt=1.0, dynamic_before_transition=dynamic_before_transition
+        )
+        target = not dynamic_before_transition
+        toggled = gridded.get_time_gridded(1.0, dynamic_before_transition=target)
+        via_events = gridded.get_event().get_time_gridded(
+            1.0, dynamic_before_transition=target
+        )
+        assert toggled.dynamic_before_transition == target
+        assert np.argmax(toggled.data[:, 0, 0]) == expected_step
+        assert np.array_equal(toggled.data, via_events.data)
+
+    # random data with a non-default dimension order, both directions
+    spikes = np.random.rand(20, 3, 5) < 0.2
+    spikes[0] = spikes[-1] = False  # keep all events on the grid after shifting
+    for dynamic_before_transition in [True, False]:
+        gridded = nir.TimeGriddedData(
+            spikes.transpose(1, 2, 0),
+            dt=0.1,
+            dimension_order=("batch", "neuron", "time"),
+            dynamic_before_transition=dynamic_before_transition,
+        )
+        target = not dynamic_before_transition
+        toggled = gridded.get_time_gridded(
+            0.1, ("batch", "neuron", "time"), dynamic_before_transition=target
+        )
+        via_events = gridded.get_event().get_time_gridded(
+            0.1, ("batch", "neuron", "time"), dynamic_before_transition=target
+        )
+        assert np.array_equal(toggled.data, via_events.data)
+        assert toggled.data.sum() == spikes.sum()
