@@ -45,7 +45,7 @@ Recently, NIR has been extended by an intermediate representation for data excha
 | **Framework** | **Write to NIR** | **Read from NIR** | **Examples** |
 | --------------- | :--: | :--: | :------: |
 | [hxtorch](https://github.com/electronicvisions/hxtorch) ([BrainScaleS-2](https://wiki.ebrains.eu/bin/view/Collabs/neuromorphic/BrainScaleS/)) | ✓ | ✓ | [hxtorch examples](https://neuroir.org/docs/examples/hxtorch/nir-conversion/) |
-| [jaxsnn](https://github.com/electronicvisions/jaxsnn) ([BrainScaleS-2](https://wiki.ebrains.eu/bin/view/Collabs/neuromorphic/BrainScaleS/)) | ⬚ | ✓ | [jaxsnn examples](https://neuroir.org/docs/examples/jaxsnn/nir-conversion/) |
+| [jaxsnn](https://github.com/electronicvisions/jaxsnn) ([BrainScaleS-2](https://wiki.ebrains.eu/bin/view/Collabs/neuromorphic/BrainScaleS/)) | ✓ | ✓ | [jaxsnn examples](https://neuroir.org/docs/examples/jaxsnn/nir-conversion/) |
 | [Lava-DL](https://github.com/lava-nc/lava-dl) | ⬚ | ✓ | [Lava/Loihi examples](https://neuroir.org/docs/examples/lava/nir-conversion/) |
 | [Nengo](https://nengo.ai) | ✓ | ✓ | [Nengo examples](https://neuroir.org/docs/examples/nengo/nir-conversion/) |
 | [Norse](https://github.com/norse/norse) | ✓ | ✓ | [Norse examples](https://neuroir.org/docs/examples/norse/nir-conversion/) |

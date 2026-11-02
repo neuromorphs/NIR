@@ -9,7 +9,8 @@ primitives = [p for p in primitives if p not in ["Input", "Output", "NIRGraph"]]
 
 # Fetch raw converter file from GitHub
 GITHUB_RAW_URLS = [
-    # (LibraryName, Direction, URL, function)
+    # (LibraryName, Direction, URL, function(s))
+    # function may be None (whole file), a function name, or a tuple of names
     (
         "hxtorch",
         "from_nir",
@@ -110,48 +111,48 @@ GITHUB_RAW_URLS = [
         "Spyx",
         "from_nir",
         "https://raw.githubusercontent.com/kmheckel/spyx/refs/heads/main/src/spyx/nir.py",
-        "_nir_node_to_spyx_module",
+        ("_nir_node_to_spyx_module", "_build_model"),
     ),
     (
         "Spyx",
         "to_nir",
         "https://raw.githubusercontent.com/kmheckel/spyx/refs/heads/main/src/spyx/nir.py",
-        "to_nir",
+        ("to_nir", "_spyx_recurrent_to_nirgraph"),
     ),
 ]
 
 converter_contents = {}
-for lib_name, direction, url, function in GITHUB_RAW_URLS:
-    if function is None:
-        key = f"{lib_name}_{direction}"
-        converter_contents[key] = requests.get(url).text
-    else:
-        key = f"{lib_name}_{direction}"
-        response = requests.get(url)
-        pattern = rf"def {function}\s*\(.*?\):(.*?)(?=\ndef |\Z)"
+for lib_name, direction, url, functions in GITHUB_RAW_URLS:
+    key = f"{lib_name}_{direction}"
+    response = requests.get(url, timeout=30)
+    response.raise_for_status()
+    if functions is None:
+        converter_contents[key] = response.text
+        continue
+    if isinstance(functions, str):
+        functions = (functions,)
+    bodies = []
+    for function in functions:
+        pattern = rf"def {function}\s*\(.*?(?=\n(?:def|class) |\Z)"
         match = re.search(pattern, response.text, re.DOTALL)
-        if match == None:
+        if match is None:
             raise ValueError(f"Function {function} not found in {url}")
-        else:
-            converter_contents[key] = match.group(0)
+        bodies.append(match.group(0))
+    converter_contents[key] = "\n".join(bodies)
+
+
+def is_supported(name, content):
+    # Matches e.g. `nir.LIF`, `nir.ir.LIF`, `ir.LIF` but not `nir.LIFBox`
+    return re.search(rf"ir\.{name}\b", content) is not None
+
 
 # Check which primitives are supported in each library/direction
 supported = {}
 for name in primitives:
     supported[name] = {}
     for lib_name, _, _, _ in GITHUB_RAW_URLS:
-        from_key = f"{lib_name}_from_nir"
-        to_key = f"{lib_name}_to_nir"
-        from_supported = (
-            f"ir.{name})" in converter_contents.get(from_key, "")
-            or f"ir.{name}(" in converter_contents.get(from_key, "")
-            or f"ir.{name}:" in converter_contents.get(from_key, "")
-        )
-        to_supported = (
-            f"ir.{name})" in converter_contents.get(to_key, "")
-            or f"ir.{name}(" in converter_contents.get(to_key, "")
-            or f"ir.{name}:" in converter_contents.get(to_key, "")
-        )
+        from_supported = is_supported(name, converter_contents.get(f"{lib_name}_from_nir", ""))
+        to_supported = is_supported(name, converter_contents.get(f"{lib_name}_to_nir", ""))
         if from_supported and to_supported:
             supported[name][lib_name] = "⟷"
         elif from_supported:
@@ -209,7 +210,7 @@ for lib in libs:
         if support_from_nir:
             lib_md += "\n\nThis library supports conversion of the following nodes from NIR:"
         else:
-            lib_md += "This library does not support conversion of any nodes from NIR."
+            lib_md += "\n\nThis library does not support conversion of any nodes from NIR."
         for primitive in primitives:
             if supported[primitive][lib] in ["→", "⟷"]:
                 lib_md += f"\n- {primitive}"

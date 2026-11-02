@@ -31,27 +31,32 @@ jobs:
         run: python docs/supported_primitives.py
 
       - name: Commit and push changes
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          
-          git add docs/**/supported_primitives.md
-          git commit -m "chore: weekly supported primitives update" || {
+
+          git add 'docs/**/supported_primitives.md'
+          if git diff --cached --quiet; then
             echo "No changes to commit"
             exit 0
-          }
-          
+          fi
+          git commit -m "chore: Weekly supported primitives update"
+
           if [ "$GITHUB_EVENT_NAME" != "pull_request" ]; then
             BRANCH="chore/weekly-supported-primitives"
-          
+
             git checkout -B "$BRANCH"
             git push origin "$BRANCH" --force
-          
-            gh pr create \
-              --base main \
-              --head "$BRANCH" \
-              --title "chore: Weekly supported primitives update" \
-              --body "Automated weekly update of documentation regarding the supported primitives." \
-              || echo "Pull request already exists"
-          fi
 
+            if [ -z "$(gh pr list --head "$BRANCH" --state open --json number --jq '.[].number')" ]; then
+              gh pr create \
+                --base main \
+                --head "$BRANCH" \
+                --title "chore: Weekly supported primitives update" \
+                --body "Automated weekly update of documentation regarding the supported primitives."
+            else
+              echo "Pull request already exists, branch updated"
+            fi
+          fi

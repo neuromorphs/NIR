@@ -20,8 +20,8 @@ Please note that this list is generated automatically and may not be entirely ac
 | CubaLIF | ⟷ | ⟷ | → |  | ⟷ | ⟷ |  | ⟷ | → | ⟷ |
 | I |  |  |  |  |  |  |  |  |  |  |
 | IF |  |  | → |  | ⟷ |  | ⟷ | → | → | ⟷ |
-| LI |  |  |  | ⟷ | ⟷ | ⟷ | ⟷ |  |  | ← |
+| LI |  |  |  | ⟷ | ⟷ | ⟷ | ⟷ |  |  | ⟷ |
 | LIF |  |  | → | ⟷ | ⟷ | ⟷ | ⟷ | ⟷ | → | ⟷ |
 | AvgPool2d |  |  |  |  | ← |  |  | ⟷ |  |  |
 | SumPool2d |  |  | → |  | → |  | ⟷ |  | → | ⟷ |
-| Threshold |  |  |  |  |  |  |  |  |  | ← |
+| Threshold |  |  |  |  |  |  |  |  |  | ⟷ |
