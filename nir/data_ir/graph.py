@@ -1,10 +1,13 @@
 from __future__ import annotations
 
+import logging
 from dataclasses import dataclass
-from typing import Dict, Union
+
 import numpy as np
 
 from nir.ir import NIRGraph, NIRNode
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -13,7 +16,7 @@ class ObservableData:
     Base class for observable data in SNNs.
     """
 
-    def get_event(self, n_events: int | None) -> EventData:
+    def get_event(self, n_events: int | None = None) -> EventData:
         pass
 
     def get_time_gridded(
@@ -34,8 +37,9 @@ class TimeGriddedData(ObservableData):
 
     Arguments
     ---------
-    data : np.ndarray, shape (n_samples, n_time_steps, n_neurons)
-        Input data. For binary data the dtype should be bool.
+    data : np.ndarray, 3D
+        Input data with axes ordered as given by `dimension_order`. For binary
+        data the dtype should be bool.
     dt: float
         Time step size.
     dimension_order: tuple, optional
@@ -63,7 +67,9 @@ class TimeGriddedData(ObservableData):
             or "batch" not in self.dimension_order
             or "neuron" not in self.dimension_order
         ):
-            raise ValueError("dimension_order must contain 'time', 'batch', and 'neuron'")
+            raise ValueError(
+                "dimension_order must contain 'time', 'batch', and 'neuron'"
+            )
 
     def _view_as(self, order):
         if order == self.dimension_order:
@@ -110,54 +116,71 @@ class TimeGriddedData(ObservableData):
         accordingly.
         """
         time_axis = self.dimension_order.index("time")
-        # if dynamic_before_transition is True, shift events back by one time step
+        # with dynamic_before_transition, events occur one time step earlier
+        # than without, so shift them forward when switching it off and back
+        src = [slice(None)] * self.data.ndim
+        dst = [slice(None)] * self.data.ndim
+        dropped = [slice(None)] * self.data.ndim
         if self.dynamic_before_transition:
-            self.data = np.roll(self.data, shift=-1, axis=time_axis)
-            # build an indexer equivalent to [:, -1, :] but for the correct axis
-            idx = [slice(None)] * self.data.ndim
-            idx[time_axis] = -1
-            self.data[tuple(idx)] = False
+            src[time_axis], dst[time_axis], dropped[time_axis] = (
+                slice(None, -1),
+                slice(1, None),
+                -1,
+            )
         else:
-            self.data = np.roll(self.data, shift=1, axis=time_axis)
-            # build an indexer equivalent to [:, 0, :] but for the correct axis
-            idx = [slice(None)] * self.data.ndim
-            idx[time_axis] = 0
-            self.data[tuple(idx)] = False
+            src[time_axis], dst[time_axis], dropped[time_axis] = (
+                slice(1, None),
+                slice(None, -1),
+                0,
+            )
+        if np.any(self.data[tuple(dropped)]):
+            logger.warning(
+                "Some events got dropped because they occur outside of "
+                "the time grid of the recording."
+            )
+        shifted = np.zeros_like(self.data)
+        shifted[tuple(dst)] = self.data[tuple(src)]
+        self.data = shifted
 
         self.dynamic_before_transition = not self.dynamic_before_transition
 
     def get_event(self, n_events: int | None = None) -> EventData:
         """
-        Convert the time-gridded data to event-based data, where each neuron
-        can have at most `n_events` events. If a neuron has more than
+        Convert the time-gridded data to event-based data, where each sample
+        can have at most `n_events` events. If a sample has more than
         `n_events`, the earliest events are kept and the rest are dropped.
 
         Arguments
         ---------
-        n_spikes : int
-            Maximum number of events stored for each neuron.
+        n_events : int, optional
+            Maximum number of events stored for each sample. If None, the
+            largest number of events in any sample is used, so no event is
+            dropped.
         """
-        if n_events == None:
-            n_events = self.n_time_steps
         if not self.data.dtype == bool:
             raise ValueError("Data must be boolean to convert to EventData.")
+        data = self._view_as(("batch", "time", "neuron"))
+        if n_events is None:
+            n_events = int(data.sum(axis=(1, 2)).max(initial=0))
         idx = np.full((self.n_samples, n_events), -1)
         time = np.full((self.n_samples, n_events), np.inf)
 
+        n_dropped = 0
         for sample in range(self.n_samples):
-            sample_idx = [slice(None)] * self.data.ndim
-            sample_idx[self.dimension_order.index("batch")] = sample
-            time_step, neuron = np.where(self.data[tuple(sample_idx)])
-
-            order = np.argsort(time_step)  # sort events by time
-            time_step = time_step[order]
-            neuron = neuron[order]
+            # np.where returns events ordered by time step
+            time_step, neuron = np.where(data[sample])
 
             num_events = min(len(time_step), n_events)
+            n_dropped += len(time_step) - num_events
             idx[sample, :num_events] = neuron[:num_events]
             time[sample, :num_events] = (
                 time_step[:num_events] + self.dynamic_before_transition
             ) * self.dt
+
+        if n_dropped > 0:
+            logger.warning(
+                f"{n_dropped} events got dropped because n_events={n_events} is too small."
+            )
 
         return EventData(idx, time, self.n_neurons, self.t_max)
 
@@ -178,16 +201,13 @@ class TimeGriddedData(ObservableData):
             return event_data.get_time_gridded(
                 dt=dt,
                 dimension_order=dimension_order,
-                dynamic_before_transition=dynamic_before_transition
+                dynamic_before_transition=dynamic_before_transition,
             )
-
-        if self.dimension_order == dimension_order:
-            return self
         else:
             new_data = TimeGriddedData(
                 data=self._view_as(dimension_order),
                 dt=dt,
-                dimension_order=self.dimension_order,
+                dimension_order=dimension_order,
                 dynamic_before_transition=self.dynamic_before_transition,
             )
             if self.dynamic_before_transition != dynamic_before_transition:
@@ -231,7 +251,7 @@ class EventData(ObservableData):
     def n_samples(self):
         return self.idx.shape[0]
 
-    def get_event(self, n_events: int | None) -> EventData:
+    def get_event(self, n_events: int | None = None) -> EventData:
         """
         Return a new EventData object with at most `n_events` events per sample.
         If a sample has more than `n_events`, the earliest events are kept and
@@ -240,24 +260,33 @@ class EventData(ObservableData):
         Arguments
         ---------
         n_events : int
-            Maximum number of events stored for each sample. If None, return all events.
+            Maximum number of events stored for each sample. If None, return
+            all events. If larger than the current number of event slots, the
+            data is padded with empty events.
         """
-        if n_events is None or n_events >= self.idx.shape[1]:
+        if n_events is None or n_events == self.idx.shape[1]:
             return self
 
         new_idx = np.full((self.n_samples, n_events), -1)
         new_time = np.full((self.n_samples, n_events), np.inf)
 
+        n_dropped = 0
         for sample in range(self.n_samples):
-            valid_events = self.idx[sample] != -1
-            valid_times = self.time[sample][valid_events]
-            valid_indices = self.idx[sample][valid_events]
+            mask_valid = self.idx[sample] != -1
+            valid_times = self.time[sample][mask_valid]
+            valid_indices = self.idx[sample][mask_valid]
 
             num_events = min(len(valid_times), n_events)
+            n_dropped += len(valid_times) - num_events
             if num_events > 0:
                 order = np.argsort(valid_times)  # sort events by time
                 new_idx[sample, :num_events] = valid_indices[order][:num_events]
                 new_time[sample, :num_events] = valid_times[order][:num_events]
+
+        if n_dropped > 0:
+            logger.warning(
+                f"{n_dropped} events got dropped because n_events={n_events} is too small."
+            )
 
         return EventData(new_idx, new_time, self.n_neurons, self.t_max)
 
@@ -279,27 +308,36 @@ class EventData(ObservableData):
             True.
         """
         n_time_steps = round(self.t_max / dt)
-        discrete_data = np.zeros((n_time_steps, self.n_samples, self.n_neurons), dtype=bool)
+        discrete_data = np.zeros(
+            (n_time_steps, self.n_samples, self.n_neurons), dtype=bool
+        )
         for sample in range(self.n_samples):
-            valid_spikes = self.idx[sample] != -1
-            valid_times = self.time[sample][valid_spikes]
+            mask_valid = self.idx[sample] != -1
+            valid_times = self.time[sample][mask_valid]
             eps = dt * 1e-10  # small epsilon to avoid floating point issues
-            steps = np.ceil(valid_times / dt - eps).astype(int) - dynamic_before_transition
-            neurons = self.idx[sample][valid_spikes]
-            mask = steps < n_time_steps
-            if np.any(mask):
+            steps = (
+                np.ceil(valid_times / dt - eps).astype(int) - dynamic_before_transition
+            )
+            neurons = self.idx[sample][mask_valid]
+            mask = (steps >= 0) & (steps < n_time_steps)
+            if np.any(~mask):
                 steps, neurons = steps[mask], neurons[mask]
-                warnings.warn(
-                    "Some events got dropped because they occur after the "
-                    "maximum time of the recording."
+                logger.warning(
+                    "Some events got dropped because they occur outside of "
+                    "the time grid of the recording."
                 )
 
             discrete_data[steps, sample, neurons] = True
         if dimension_order != ("time", "batch", "neuron"):
-            perm = tuple(("time", "batch", "neuron").index(dim) for dim in dimension_order)
+            perm = tuple(
+                ("time", "batch", "neuron").index(dim) for dim in dimension_order
+            )
             discrete_data = discrete_data.transpose(perm)
         return TimeGriddedData(
-            data=discrete_data, dt=dt, dynamic_before_transition=dynamic_before_transition
+            data=discrete_data,
+            dt=dt,
+            dimension_order=dimension_order,
+            dynamic_before_transition=dynamic_before_transition,
         )
 
 
@@ -329,7 +367,7 @@ class ValuedEventData(EventData):
         if self.idx.shape != self.time.shape or self.idx.shape != self.value.shape:
             raise ValueError("idx, time and value must have the same shape")
 
-    def get_event(self, n_events: int | None) -> ValuedEventData:
+    def get_event(self, n_events: int | None = None) -> ValuedEventData:
         """
         Return a new ValuedEventData object with at most `n_events` events per
         sample. If a sample has more than `n_events`, the earliest events are
@@ -338,27 +376,36 @@ class ValuedEventData(EventData):
         Arguments
         ---------
         n_events : int
-            Maximum number of events stored for each sample. If None, return all events.
+            Maximum number of events stored for each sample. If None, return
+            all events. If larger than the current number of event slots, the
+            data is padded with empty events.
         """
-        if n_events is None or n_events >= self.idx.shape[1]:
+        if n_events is None or n_events == self.idx.shape[1]:
             return self
 
         new_idx = np.full((self.n_samples, n_events), -1)
         new_time = np.full((self.n_samples, n_events), np.inf)
         new_value = np.zeros((self.n_samples, n_events))
 
+        n_dropped = 0
         for sample in range(self.n_samples):
-            valid_events = self.idx[sample] != -1
-            valid_times = self.time[sample][valid_events]
-            valid_indices = self.idx[sample][valid_events]
-            valid_values = self.value[sample][valid_events]
+            mask_valid = self.idx[sample] != -1
+            valid_times = self.time[sample][mask_valid]
+            valid_indices = self.idx[sample][mask_valid]
+            valid_values = self.value[sample][mask_valid]
 
             num_events = min(len(valid_times), n_events)
+            n_dropped += len(valid_times) - num_events
             if num_events > 0:
                 order = np.argsort(valid_times)  # sort events by time
                 new_idx[sample, :num_events] = valid_indices[order][:num_events]
                 new_time[sample, :num_events] = valid_times[order][:num_events]
                 new_value[sample, :num_events] = valid_values[order][:num_events]
+
+        if n_dropped > 0:
+            logger.warning(
+                f"{n_dropped} events got dropped because n_events={n_events} is too small."
+            )
 
         return ValuedEventData(new_idx, new_time, self.n_neurons, self.t_max, new_value)
 
@@ -382,21 +429,33 @@ class ValuedEventData(EventData):
             False, the state is updated after the event generation. Default is
             True.
         """
-        n_samples = self.n_samples
-        n_time_steps = int(self.t_max / dt)
-        discrete_data = np.zeros((n_samples, n_time_steps, self.n_neurons), dtype=float)
+        n_time_steps = round(self.t_max / dt)
+        discrete_data = np.zeros(
+            (n_time_steps, self.n_samples, self.n_neurons), dtype=float
+        )
+        for sample in range(self.n_samples):
+            mask_valid = self.idx[sample] != -1
+            valid_times = self.time[sample][mask_valid]
+            eps = dt * 1e-10  # small epsilon to avoid floating point issues
+            steps = (
+                np.ceil(valid_times / dt - eps).astype(int) - dynamic_before_transition
+            )
+            neurons = self.idx[sample][mask_valid]
+            values = self.value[sample][mask_valid]
+            mask = (steps >= 0) & (steps < n_time_steps)
+            if np.any(~mask):
+                steps, neurons, values = steps[mask], neurons[mask], values[mask]
+                logger.warning(
+                    "Some events got dropped because they occur outside of "
+                    "the time grid of the recording."
+                )
 
-        for sample in range(n_samples):
-            valid_spikes = self.idx[sample] != -1
-            valid_times = self.time[sample][valid_spikes]
-            if dynamic_before_transition:
-                steps = np.floor(valid_times / dt).astype(int)
-            else:
-                steps = np.ceil(valid_times / dt).astype(int)
-            neurons = self.idx[sample][valid_spikes]
-            value = self.value[sample][valid_spikes]
-            discrete_data[sample, steps, neurons] = value
-
+            discrete_data[steps, sample, neurons] = values
+        if dimension_order != ("time", "batch", "neuron"):
+            perm = tuple(
+                ("time", "batch", "neuron").index(dim) for dim in dimension_order
+            )
+            discrete_data = discrete_data.transpose(perm)
         return TimeGriddedData(
             data=discrete_data,
             dt=dt,
@@ -413,7 +472,7 @@ class NIRNodeData:
 
     Arguments
     ---------
-    observables : Dict[str, Union[EventData, TimeGriddedData]]
+    observables : dict[str, Union[EventData, TimeGriddedData]]
         Dictionary of observables for a NIRNode.
     """
 
@@ -421,7 +480,9 @@ class NIRNodeData:
 
     def __post_init__(self):
         if not isinstance(self.observables, dict):
-            raise TypeError("observables must be a dictionary of EventData or TimeGriddedData")
+            raise TypeError(
+                "observables must be a dictionary of EventData or TimeGriddedData"
+            )
 
     def __getitem__(self, idx):
         return self.observables[idx]
@@ -431,10 +492,12 @@ class NIRNodeData:
 
     def check_observables(self, node: NIRNode):
         """
-        Check that the shapes of the observables match the node's output shapes
+        Check that no observable records more neurons than the node outputs.
+        Observables may cover only a subset of the node (e.g. a membrane trace
+        of a single neuron).
         """
-        output_shape = node.output_type["output"]
-        return all(obs.n_neurons == output_shape for obs in self.observables.values())
+        n_outputs = int(np.prod(node.output_type["output"]))
+        return all(obs.n_neurons <= n_outputs for obs in self.observables.values())
 
 
 @dataclass
@@ -475,7 +538,11 @@ class NIRGraphData:
                     raise TypeError(f"Node {key} is not a NIRGraph in the NIRGraph")
                 node.check_nodes(graph_node)
             elif isinstance(node, NIRNodeData):
-                if not isinstance(graph_node, NIRNode):
+                if not isinstance(graph_node, NIRNode) or isinstance(
+                    graph_node, NIRGraph
+                ):
                     raise TypeError(f"Node {key} is not a NIRNode in the NIRGraph")
                 if not node.check_observables(graph_node):
-                    raise ValueError(f"Observables for node {key} do not match the NIRNode")
+                    raise ValueError(
+                        f"Observables for node {key} do not match the NIRNode"
+                    )

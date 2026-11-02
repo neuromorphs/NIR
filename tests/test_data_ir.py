@@ -51,10 +51,14 @@ def test_binary_conversion():
             spikes, dt, dynamic_before_transition=dynamic_before_transition
         )
         event = gridded_1.get_event(n_events=100)
-        gridded_2 = event.get_time_gridded(dt, dynamic_before_transition=dynamic_before_transition)
+        gridded_2 = event.get_time_gridded(
+            dt, dynamic_before_transition=dynamic_before_transition
+        )
         assert np.array_equal(gridded_1.data, gridded_2.data)
         assert gridded_1.dt == gridded_2.dt
-        assert gridded_1.dynamic_before_transition == gridded_2.dynamic_before_transition
+        assert (
+            gridded_1.dynamic_before_transition == gridded_2.dynamic_before_transition
+        )
         assert gridded_1.dimension_order == gridded_2.dimension_order
 
 
@@ -67,11 +71,11 @@ def test_valued_conversion():
     t_max = 0.3
     valued_event = nir.ValuedEventData(idx, time, n_neurons, t_max, value)
     gridded = valued_event.get_time_gridded(dt=dt)
-    expected = np.zeros((1, 30, 2))
-    expected[0, 5, 0] = 1
-    expected[0, 10, 1] = 2
-    expected[0, 15, 0] = 4
-    expected[0, 20, 1] = 3
+    expected = np.zeros((30, 1, 2))
+    expected[5, 0, 0] = 1
+    expected[10, 0, 1] = 2
+    expected[15, 0, 0] = 4
+    expected[20, 0, 1] = 3
     assert np.array_equal(gridded.data, expected)
     assert gridded.dt == dt
     assert gridded.dimension_order == ("time", "batch", "neuron")  # default value
