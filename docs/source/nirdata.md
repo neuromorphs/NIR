@@ -16,7 +16,15 @@ The format supports multiple observables per node, currently supporting valueles
 In contrast to the intermediate representation for SNN topologies, here the different frameworks have to identify the type of observable by the key.
 
 ### NIRGraphData
-NIRGraphData contains one batch of output data for the entire graph, organized as a dictionary with one entry per node as `NIRNodeData` objects. The dictionary keys must correspond to the node keys in the associated `NIRGraph` to ensure data-graph consistency validation.
+NIRGraphData contains one batch of output data for the entire graph, organized as a dictionary with one entry per node as `NIRNodeData` objects (or nested `NIRGraphData` objects for subgraphs). The link to the topology is made only through the dictionary keys, which correspond to the node keys of a `NIRGraph`. `NIRGraphData` holds no reference to the graph itself, so the same data object can be used with several graphs that share node names, and the topology IR stays free of observables.
+
+Consistency between data and graph is checked on demand:
+
+```python
+graph_data.check_nodes(graph)
+```
+
+This raises an error if a key is not a node of `graph`, if `NIRGraphData` and `NIRNodeData` entries do not match subgraphs and nodes, respectively, or if the observables of a node do not fit it (see below).
 
 ```python
 graph_data = NIRGraphData(
@@ -41,6 +49,8 @@ lif_data = NIRNodeData(
 )
 ```
 
+An observable does not need to cover the whole node. `check_nodes` therefore only requires that each observable has at most as many neurons as the node has outputs, `n_neurons <= prod(node.output_type["output"])`. Nodes with multidimensional outputs (e.g. `Conv2d`) are recorded with the outputs flattened into the neuron axis.
+
 ## Observable data types
 
 NIRData supports a flexible design to accommodate arbitrary observables through two complementary approaches used across the neuromorphic community:
@@ -48,7 +58,7 @@ NIRData supports a flexible design to accommodate arbitrary observables through 
 * **Discrete time-gridded format**: Divides the time axis into discrete steps (e.g., Norse, snnTorch)
 * **Continuous event-based format**: Represents events as tuples of neuron indices and precise spike times (e.g., jaxsnn)
 
-The format provides internal conversion functions between these representations via the `TimeGriddedData` and `EventData` classes. Conversion to and from NIRData itself intended to be implemented by the respective software/hardware platforms. As an example, these conversions are is implemented for two software frameworks: The event-based conversion is provided in [jaxsnn](https://github.com/electronicvisions/jaxsnn/blob/main/src/pyjaxsnn/jaxsnn/event/utils/to_nir_data.py), while the time-gridded one is implemented in [hxtorch](https://github.com/electronicvisions/hxtorch/blob/master/src/pyhxtorch/hxtorch/spiking/utils/to_nir_data.py). In both cases, the framework supplies complementary `from_nir_data.py` and a `to_nir_data.py` modules.
+All observable types derive from `ObservableData` and provide two conversion methods, `get_event(n_events=None)` and `get_time_gridded(dt, dimension_order, dynamic_before_transition)`, which convert between these representations. Conversion to and from NIRData itself intended to be implemented by the respective software/hardware platforms. As an example, these conversions are is implemented for two software frameworks: The event-based conversion is provided in [jaxsnn](https://github.com/electronicvisions/jaxsnn/blob/main/src/pyjaxsnn/jaxsnn/event/utils/to_nir_data.py), while the time-gridded one is implemented in [hxtorch](https://github.com/electronicvisions/hxtorch/blob/master/src/pyhxtorch/hxtorch/spiking/utils/to_nir_data.py). In both cases, the framework supplies complementary `from_nir_data.py` and a `to_nir_data.py` modules.
 
 ### TimeGriddedData
 
@@ -57,8 +67,10 @@ The `TimeGriddedData` format represents time as a sequence of discrete steps. Fo
 Beyond binary spikes, the same structure can also accommodate continuous-valued signals—for example, storing membrane potential measurements sampled at fixed temporal intervals.
 
 The parameters include:
-* `data`: an `np.ndarray` of shape (n_samples, n_time_steps, n_neurons) and
-* `dt`: the size of the time step, representing the temporal resolution.
+* `data`: a 3D `np.ndarray` with a time, a batch and a neuron axis,
+* `dt`: the size of the time step, representing the temporal resolution,
+* `dimension_order`: the order of the axes of `data`, a permutation of `("time", "batch", "neuron")` (default), so that each framework can store its native layout without copying, and
+* `dynamic_before_transition`: the update convention of the framework that produced the data (default `True`). If `True`, the state (e.g. the membrane potential) is evolved within a time step before the threshold is checked and an event is generated. If `False`, events are generated from the state at the beginning of the time step before it is evolved. This decides at which time an event in a time step occurred, see the conversion below.
 
 ### EventData
 
@@ -76,22 +88,29 @@ This structured approach allows for efficient representation and conversion betw
 
 `ValuedEventData` extends the `EventData` format to support events with associated values. This is achieved by introducing a third array, `value`, which stores the value corresponding to each event.
 
-### Conversion Between Event-Based and Time-Gridded Representations (Binary Data)
+### Conversion Between Event-Based and Time-Gridded Representations
 
-The following conversions apply to *valueless (binary)* event data, where events indicate only the presence or absence of an event.
-
-**EventData → TimeGriddedData**  
-Converting from `EventData` to `TimeGriddedData` is largely straightforward. Each event time is assigned to a discrete time step according to
-
-\[
-\text{step} = \left\lfloor \frac{\text{time}}{dt} \right\rfloor .
-\]
-
-The corresponding entry in the time-gridded tensor is set to 1.
+Placing events on a time grid requires a convention for when within a time step an event happens. This is given by `dynamic_before_transition` ($d \in \{0, 1\}$ below). With $d = 1$, the event of time step $k$ is the result of the dynamics during that step, so it occurs at the end of the step. With $d = 0$, it occurs at the beginning of the step.
 
 **TimeGriddedData → EventData**  
-The inverse conversion is less rigid, as it requires a convention for placing an event within a discrete time bin. To address this, a parameter $\text{time\_shift} \in [0, dt)$ is introduced. This parameter specifies the offset within each time step at which the event time is placed.
+`get_event(n_events=None)` requires boolean data. An event in time step $k$ is placed at
 
-### ValuedEventData Conversion Support
+\[
+\text{time} = (k + d) \cdot dt .
+\]
 
-At present, only a conversion from `ValuedEventData` to `TimeGriddedData` is supported. In contrast to the conversion of binary data, the resulting tensor stores the event values at the corresponding time steps rather than `'1'`s.
+Events are sorted by time and stored in arrays of shape (n_samples, n_events). By default, `n_events` is the largest number of events in any sample, so no event is lost. If a smaller `n_events` is given, only the earliest events of each sample are kept and a warning reports how many were dropped. Calling `get_event(n_events)` on `EventData` or `ValuedEventData` truncates in the same way, or pads with empty events (index `-1`, time `inf`) if `n_events` is larger than the current number of event slots.
+
+**EventData → TimeGriddedData**  
+`get_time_gridded(dt, dimension_order, dynamic_before_transition)` creates a grid with $\text{round}(t_\text{max} / dt)$ time steps and assigns each event to the step
+
+\[
+\text{step} = \left\lceil \frac{\text{time}}{dt} \right\rceil - d ,
+\]
+
+which is the inverse of the conversion above. Events whose step lies outside the grid (e.g. after $t_\text{max}$, or at time 0 with $d = 1$) are dropped with a warning. For `EventData` the corresponding entries are set to `True`. For `ValuedEventData` the event values are stored instead, without any interpolation between events.
+
+**TimeGriddedData → TimeGriddedData**  
+`get_time_gridded` on `TimeGriddedData` returns the data in the requested `dimension_order` and shifts the events by one time step if `dynamic_before_transition` changes. If `dt` changes, binary data is converted to `EventData` and back to the new grid. Changing `dt` of real-valued data is not supported yet.
+
+At present, there is no conversion from real-valued `TimeGriddedData` to `ValuedEventData`.
