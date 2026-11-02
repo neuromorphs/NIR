@@ -19,5 +19,7 @@ This library supports conversion of the following nodes from NIR:
 - Linear
 - CubaLIF
 - IF
+- LI
 - LIF
 - SumPool2d
+- Threshold
