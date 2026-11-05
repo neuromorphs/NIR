@@ -60,6 +60,13 @@ def read_node(node: Any) -> nir.NIRNode:
             stride=node["stride"][()],
             padding=node["padding"][()],
         )
+    elif node["type"][()] == b"Upsample2d":
+        return nir.Upsample2d(
+            scale_factor=node["scale_factor"][()],
+            mode=try_byte_to_str(node["mode"][()]),
+            align_corners=node["align_corners"][()],
+            **_read_metadata(node),
+        )
     elif node["type"][()] == b"Delay":
         return nir.Delay(delay=node["delay"][()])
     elif node["type"][()] == b"Flatten":

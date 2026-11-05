@@ -291,6 +291,23 @@ def test_avg_pool_2d():
     factory_test_metadata(ir)
 
 
+@pytest.mark.parametrize(
+    "mode, align_corners", [("nearest", False), ("bilinear", False), ("bilinear", True)]
+)
+def test_upsample_2d(mode, align_corners):
+    ir = nir.NIRGraph.from_list(
+        [
+            nir.Input(input_type=np.array([2, 5, 5])),
+            nir.Upsample2d(
+                scale_factor=np.array([2, 2]), mode=mode, align_corners=align_corners
+            ),
+            nir.Output(output_type=np.array([2, 10, 10])),
+        ]
+    )
+    factory_test_graph(ir)
+    factory_test_metadata(ir)
+
+
 def test_deserialize():
     # Test reading the NIRGraphs from the paper
     current_path = os.path.abspath(__file__)
