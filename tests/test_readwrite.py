@@ -119,6 +119,26 @@ def test_conv1d_2():
     factory_test_metadata(ir)
 
 
+def test_depthwise_conv2d():
+    # groups == C_in, weight layout (C_out, C_in / groups, k_h, k_w) as in PyTorch
+    ir = nir.NIRGraph.from_list(
+        nir.Input(input_type=np.array([4, 8, 8])),
+        nir.Conv2d(
+            input_shape=None,
+            weight=np.random.randn(4, 1, 3, 3),
+            stride=1,
+            padding=0,
+            dilation=1,
+            groups=4,
+            bias=np.random.randn(4),
+        ),
+        nir.Output(output_type=None),
+    )
+    assert np.array_equal(ir.nodes["conv2d"].input_type["input"], [4, 8, 8])
+    factory_test_graph(ir)
+    factory_test_metadata(ir)
+
+
 def test_integrator():
     r = np.array([1, 1])
     ir = nir.NIRGraph(
