@@ -516,6 +516,50 @@ def test_avgpool_type_inference():
     )
 
 
+@pytest.mark.parametrize("mode", ["nearest", "bilinear"])
+def test_upsample_type_inference(mode):
+    graph = nir.NIRGraph(
+        nodes={
+            "input": nir.Input(input_type=np.array([3, 16, 24])),
+            "upsample": nir.Upsample2d(scale_factor=np.array([2, 3]), mode=mode),
+            "output": nir.Output(output_type=None),
+        },
+        edges=[("input", "upsample"), ("upsample", "output")],
+    )
+    assert np.array_equal(graph.output_type["output"], np.array([3, 32, 72]))
+    assert np.array_equal(
+        graph.nodes["output"].input_type["input"], np.array([3, 32, 72])
+    )
+
+
+def test_upsample_after_pooling():
+    # pooling followed by upsampling restores the input shape, as in a UNet
+    graph = nir.NIRGraph.from_list(
+        nir.Input(input_type=np.array([2, 10, 10])),
+        nir.AvgPool2d(
+            kernel_size=np.array([2, 2]),
+            stride=np.array([2, 2]),
+            padding=np.array([0, 0]),
+        ),
+        nir.Upsample2d(scale_factor=2),
+        nir.Output(output_type=None),
+    )
+    assert np.array_equal(graph.output_type["output"], np.array([2, 10, 10]))
+
+
+def test_upsample_arguments():
+    node = nir.Upsample2d(scale_factor=2)
+    assert np.array_equal(node.scale_factor, np.array([2, 2]))
+    assert node.mode == "nearest"
+    assert node.align_corners is False
+    with pytest.raises(ValueError):
+        nir.Upsample2d(scale_factor=np.array([2, 2]), mode="bicubic")
+    with pytest.raises(ValueError):
+        nir.Upsample2d(scale_factor=np.array([0, 2]))
+    with pytest.raises(ValueError):
+        nir.Upsample2d(scale_factor=np.array([2, 2, 2]))
+
+
 def test_flatten_type_inference():
     tests = [
         {

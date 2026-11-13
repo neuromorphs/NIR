@@ -9,6 +9,7 @@ from .flatten import Flatten
 from .node import NIRNode
 from .pooling import AvgPool2d, SumPool2d
 from .typing import Edges, Nodes, Types
+from .upsample import Upsample2d
 from .utils import (
     calc_flatten_output,
     calculate_conv_output,
@@ -260,7 +261,7 @@ class NIRGraph(NIRNode):
         {'output': ...}.
 
         Currently supports the inference of output types for Conv1d, Conv2d, SumPool2d,
-        AvgPool2d, and Flatten nodes.
+        AvgPool2d, Upsample2d, and Flatten nodes.
         """
         if not self.nodes:
             return
@@ -401,6 +402,17 @@ class NIRGraph(NIRNode):
                     )
                     output_type = np.array(
                         [post_node.input_type["input"][0], *output_shape]
+                    )
+                    post_node.output_type = {"output": output_type}
+
+                elif isinstance(post_node, Upsample2d):
+                    channels, height, width = post_node.input_type["input"]
+                    output_type = np.array(
+                        [
+                            channels,
+                            height * post_node.scale_factor[0],
+                            width * post_node.scale_factor[1],
+                        ]
                     )
                     post_node.output_type = {"output": output_type}
 
