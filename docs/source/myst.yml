@@ -37,6 +37,7 @@ project:
             - file: examples/rockpool/nir-conversion.ipynb
             - file: examples/sinabs/nir-conversion.ipynb
             - file: examples/snntorch/nir-conversion.ipynb
+            - file: examples/spikeforge/nir-conversion.md
             - file: examples/spinnaker2/import.ipynb
             - file: examples/spyx/conversion.ipynb
             - file: examples/snntorch_to_norse.ipynb
