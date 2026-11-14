@@ -273,6 +273,51 @@ def test_sum_pool_2d():
         ]
     )
     factory_test_graph(ir)
+    factory_test_metadata(ir)
+
+
+@pytest.mark.parametrize("pool", [nir.SumPool2d, nir.AvgPool2d])
+@pytest.mark.parametrize(
+    "input_shape, kernel_size, stride, padding",
+    [
+        ((2, 10, 10), (2, 2), (2, 2), (0, 0)),
+        ((3, 9, 7), (3, 2), (2, 1), (1, 0)),
+        ((1, 8, 8), (3, 3), (1, 1), (1, 1)),
+        ((4, 11, 6), (2, 3), (3, 2), (0, 1)),
+    ],
+)
+def test_pool_2d_read_from_file_and_infer_types(
+    tmp_path, pool, input_shape, kernel_size, stride, padding
+):
+    # Regression test for #150: graphs with pooling nodes can be read back
+    # from a file, and the output type can be inferred after reading
+    ir = nir.NIRGraph.from_list(
+        nir.Input(input_type=np.array(input_shape)),
+        pool(
+            kernel_size=np.array(kernel_size),
+            stride=np.array(stride),
+            padding=np.array(padding),
+        ),
+        nir.Output(output_type=None),
+    )
+    path = tmp_path / "pool.nir"
+    nir.write(path, ir)
+    ir2 = nir.read(path)
+
+    pool_nodes = [node for node in ir2.nodes.values() if isinstance(node, pool)]
+    assert len(pool_nodes) == 1
+    node = pool_nodes[0]
+    assert np.array_equal(node.kernel_size, kernel_size)
+    assert np.array_equal(node.stride, stride)
+    assert np.array_equal(node.padding, padding)
+
+    ir2.infer_types()
+    expected = [input_shape[0]] + [
+        (input_shape[i + 1] + 2 * padding[i] - kernel_size[i]) // stride[i] + 1
+        for i in range(2)
+    ]
+    assert np.array_equal(node.output_type["output"], expected)
+    assert ir2.check_types()
 
 
 def test_avg_pool_2d():
