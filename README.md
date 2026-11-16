@@ -20,6 +20,22 @@ NIR is useful when you want to move a model from one platform to another, for in
 
 > See [which frameworks are currently supported by NIR](https://neuroir.org/docs/support/).
 
+## Installation
+
+NIR is published on [PyPI](https://pypi.org/project/nir/) and requires Python 3.10 or newer:
+
+```shell
+pip install nir
+```
+
+To install the latest development version directly from GitHub:
+
+```shell
+pip install git+https://github.com/neuromorphs/NIR.git
+```
+
+If you want to contribute to NIR, see the [developer guide](docs/source/contributing.md) for setting up a development environment.
+
 ## Usage
 > Read more in our [documentation about NIR usage](https://neuroir.org/docs/usage) and see more examples in our [examples section](https://neuroir.org/docs/examples)
 
