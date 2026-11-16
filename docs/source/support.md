@@ -12,14 +12,17 @@ By "reading" a NIR graph, we mean converting it into a platform-specific represe
 | --------------- | :--: | :--: | :------: |
 | [hxtorch](https://github.com/electronicvisions/hxtorch) ([BrainScaleS-2](https://wiki.ebrains.eu/bin/view/Collabs/neuromorphic/BrainScaleS/)) | ✓ | ✓ | [hxtorch examples](https://neuroir.org/docs/examples/hxtorch/nir-conversion/) |
 | [jaxsnn](https://github.com/electronicvisions/jaxsnn) ([BrainScaleS-2](https://wiki.ebrains.eu/bin/view/Collabs/neuromorphic/BrainScaleS/)) | ✓ | ✓ | [jaxsnn examples](https://neuroir.org/docs/examples/jaxsnn/nir-conversion/) |
-| [Lava-DL](https://github.com/lava-nc/lava-dl) | ⬚ | ✓ | [Lava/Loihi examples](https://neuroir.org/docs/examples/lava/nir-conversion/) |
+| [Lava-DL](https://github.com/lava-nc/lava-dl) (archived, see note below) | ⬚ | ✓ | [Lava/Loihi examples](https://neuroir.org/docs/examples/lava/nir-conversion/) |
 | [Nengo](https://nengo.ai) | ✓ | ✓ | [Nengo examples](https://neuroir.org/docs/examples/nengo/nir-conversion/) |
 | [Norse](https://github.com/norse/norse) | ✓ | ✓ | [Norse examples](https://neuroir.org/docs/examples/norse/nir-conversion/) |
 | [Rockpool](https://rockpool.ai) ([SynSense Xylo chip](https://www.synsense.ai/products/xylo/)) | ✓ | ✓ | [Rockpool/Xylo examples](https://neuroir.org/docs/examples/rockpool/nir-conversion/)
 | [Sinabs](https://sinabs.readthedocs.io) ([SynSense Speck chip](https://www.synsense.ai/products/speck-2/)) | ✓ | ✓ | [Sinabs/Speck examples](https://neuroir.org/docs/examples/sinabs/nir-conversion/) |
 | [snnTorch](https://github.com/jeshraghian/snntorch/) | ✓ | ✓ | [snnTorch examples](https://neuroir.org/docs/examples/snntorch/nir-conversion/) |
 | [SpiNNaker2](https://www.cs.manchester.ac.uk/research/expertise/advanced-processor-technologies/) | ⬚ | ✓ | [SpiNNaker2 examples](https://neuroir.org/docs/examples/spinnaker2/import/) |
+| [spikeforge](https://github.com/Capsize-Games/spikeforge) | ✓ | ✓ | [spikeforge examples](https://github.com/Capsize-Games/spikeforge/blob/main/examples/04_nir_export_validate.py) |
 | [Spyx](https://github.com/kmheckel/spyx) | ✓ | ✓ | [Spyx examples](https://neuroir.org/docs/examples/spyx/conversion/)
+
+> **Note on Lava / Loihi:** the [Lava](https://github.com/lava-nc/lava) and [Lava-DL](https://github.com/lava-nc/lava-dl) repositories were archived by their maintainers in May 2026 and are now read-only. The NIR import path and examples remain available for the last released versions, but are no longer maintained upstream.
 
 ## Why are some platforms only reading or writing but not both?
 Some platforms support both reading and writing, but in other cases it does not make sense to both read *and* write NIR graphs.
