@@ -1,6 +1,6 @@
 from typing import Any
 
-from .conv import Conv1d, Conv2d
+from .conv import Conv1d, Conv2d, SparseConv2D
 from .delay import Delay
 from .flatten import Flatten
 from .graph import Input, NIRGraph, Output
@@ -15,6 +15,7 @@ __all_ir = [
     # conv
     "Conv1d",
     "Conv2d",
+    "SparseConv2D",
     # delay
     "Delay",
     # flatten
@@ -87,6 +88,7 @@ __all__ = [
     "NIRNode",
     "Output",
     "Scale",
+    "SparseConv2D",
     "SumPool2d",
     # surrogate_gradient
     "Threshold",
