@@ -19,7 +19,7 @@ class Conv1d(NIRNode):
 
     :param input_shape: Shape of spatial input (N,)
     :type input_shape: Optional[int]
-    :param weight: Weight, shape (C_out, C_in, N)
+    :param weight: Weight, shape (C_out, C_in / groups, N)
     :type weight: np.ndarray
     :param stride: Stride
     :type stride: int
@@ -34,7 +34,7 @@ class Conv1d(NIRNode):
     """
 
     input_shape: int | None  # N
-    weight: np.ndarray  # Weight C_out * C_in * N
+    weight: np.ndarray  # Weight C_out * C_in / groups * N
     stride: int  # Stride
     padding: int | str  # Padding
     dilation: int  # Dilation
@@ -53,7 +53,9 @@ class Conv1d(NIRNode):
         else:
             # infer input and output types from input_shape
             self.input_type = {
-                "input": np.array([self.weight.shape[1], self.input_shape])
+                "input": np.array(
+                    [self.weight.shape[1] * self.groups, self.input_shape]
+                )
             }
             output_shape = calculate_conv_output(
                 self.input_shape,
@@ -80,7 +82,7 @@ class Conv2d(NIRNode):
 
     :param input_shape: Shape of spatial input (N_x, N_y)
     :type input_shape: Optional[tuple[int, int]]
-    :param weight: Weight, shape (C_out, C_in, N_x, N_y)
+    :param weight: Weight, shape (C_out, C_in / groups, N_x, N_y)
     :type weight: np.ndarray
     :param stride: Stride
     :type stride: int | int, int
@@ -95,7 +97,7 @@ class Conv2d(NIRNode):
     """
 
     input_shape: tuple[int, int] | None  # N_x, N_y
-    weight: np.ndarray  # Weight C_out * C_in * W_x * W_y
+    weight: np.ndarray  # Weight C_out * C_in / groups * W_x * W_y
     stride: int | tuple[int, int]  # Stride
     padding: int | tuple[int, int] | str  # Padding
     dilation: int | tuple[int, int]  # Dilation
@@ -120,7 +122,9 @@ class Conv2d(NIRNode):
         else:
             # infer input and output types from input_shape
             self.input_type = {
-                "input": np.array([self.weight.shape[1], *self.input_shape])
+                "input": np.array(
+                    [self.weight.shape[1] * self.groups, *self.input_shape]
+                )
             }
             output_shape = calculate_conv_output(
                 self.input_shape,

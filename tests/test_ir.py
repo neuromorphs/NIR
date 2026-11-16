@@ -162,12 +162,48 @@ def test_conv2d():
         padding=(1, 1),
         stride=(1, 2),
         dilation=(1, 1),
-        groups=(1, 1),
+        groups=1,
         bias=np.ndarray([1]),
     )
     assert np.allclose(a.weight, w)
     assert np.allclose(a.input_shape, np.array([100, 100]))
     assert np.allclose(a.output_type["output"], np.array([3, 100, 50]))
+
+
+@pytest.mark.parametrize("c_in, c_out, groups", [(4, 4, 4), (6, 4, 2), (4, 2, 1)])
+def test_conv_groups_input_type(c_in, c_out, groups):
+    # Weights use the PyTorch layout (C_out, C_in / groups, *kernel_size)
+    conv1d = nir.Conv1d(
+        input_shape=8,
+        weight=np.zeros((c_out, c_in // groups, 3)),
+        stride=1,
+        padding=0,
+        dilation=1,
+        groups=groups,
+        bias=np.zeros(c_out),
+    )
+    assert np.array_equal(conv1d.input_type["input"], [c_in, 8])
+    assert np.array_equal(conv1d.output_type["output"], [c_out, 6])
+
+    conv2d = nir.Conv2d(
+        input_shape=(8, 8),
+        weight=np.zeros((c_out, c_in // groups, 3, 3)),
+        stride=1,
+        padding=0,
+        dilation=1,
+        groups=groups,
+        bias=np.zeros(c_out),
+    )
+    assert np.array_equal(conv2d.input_type["input"], [c_in, 8, 8])
+    assert np.array_equal(conv2d.output_type["output"], [c_out, 6, 6])
+
+    # The graph type check must accept the C_in-channel input
+    graph = nir.NIRGraph.from_list(
+        nir.Input(input_type=np.array([c_in, 8, 8])),
+        conv2d,
+        nir.Output(output_type=None),
+    )
+    assert np.array_equal(graph.output_type["output"], [c_out, 6, 6])
 
 
 def test_conv2d_same():
