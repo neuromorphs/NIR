@@ -198,6 +198,7 @@ def test_conv2d_same():
     assert np.allclose(nir_network.nodes["conv2d"].output_type["output"], [1, 3, 3])
 
 
+<<<<<<< HEAD
 def test_sparse_conv2d():
     """
     Simple test for the SparseConv2D node type.
@@ -218,6 +219,54 @@ def test_sparse_conv2d():
     assert np.allclose(cols, node.cols)
     assert np.allclose(weights, node.weights)
     assert np.allclose(shape, node.shape)
+=======
+@pytest.mark.parametrize(
+    "input_shape, kernel, padding, stride, dilation, expected",
+    [
+        # (H, W) - (k_h, k_w) + 1 per dimension
+        ((10, 10), (3, 5), 0, 1, 1, (8, 6)),
+        # per-dimension padding, stride and dilation
+        ((10, 12), (3, 5), (1, 2), (2, 1), (1, 2), (5, 8)),
+    ],
+)
+def test_conv2d_non_square_kernel(
+    input_shape, kernel, padding, stride, dilation, expected
+):
+    weight = np.zeros((2, 1, *kernel))
+    expected = np.array([2, *expected])
+
+    # Output type computed from the explicit input_shape
+    conv = nir.Conv2d(
+        input_shape=input_shape,
+        weight=weight,
+        stride=stride,
+        padding=padding,
+        dilation=dilation,
+        groups=1,
+        bias=np.zeros(2),
+    )
+    assert np.array_equal(conv.output_type["output"], expected)
+
+    # Output type computed by NIRGraph.infer_types
+    graph = nir.NIRGraph(
+        nodes={
+            "input": nir.Input(input_type=np.array([1, *input_shape])),
+            "conv": nir.Conv2d(
+                input_shape=None,
+                weight=weight,
+                stride=stride,
+                padding=padding,
+                dilation=dilation,
+                groups=1,
+                bias=np.zeros(2),
+            ),
+            "output": nir.Output(output_type=None),
+        },
+        edges=[("input", "conv"), ("conv", "output")],
+    )
+    assert np.array_equal(graph.nodes["conv"].output_type["output"], expected)
+    assert np.array_equal(graph.output_type["output"], expected)
+>>>>>>> main
 
 
 def test_cuba_li():

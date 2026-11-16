@@ -126,7 +126,7 @@ class Conv2d(NIRNode):
                 self.input_shape,
                 self.padding,
                 self.dilation,
-                self.weight.shape[2],
+                self.weight.shape[2:],
                 self.stride,
             )
             self.output_type = {

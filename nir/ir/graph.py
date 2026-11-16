@@ -385,7 +385,7 @@ class NIRGraph(NIRNode):
                         post_node.input_shape,
                         post_node.padding,
                         post_node.dilation,
-                        post_node.weight.shape[2],
+                        post_node.weight.shape[2:],
                         post_node.stride,
                     )
                     output_type = np.array([post_node.weight.shape[0], *output_shape])
