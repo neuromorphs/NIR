@@ -4,6 +4,11 @@ import pytest
 import nir
 from tests import mock_affine, mock_delay, mock_integrator, mock_linear, mock_output
 
+try:
+    from scipy.sparse import coo_array
+except ImportError:
+    coo_array = None
+
 
 def test_has_version():
     assert hasattr(nir, "version")
@@ -191,6 +196,28 @@ def test_conv2d_same():
         type_check=False,  # TODO: Add type check
     )
     assert np.allclose(nir_network.nodes["conv2d"].output_type["output"], [1, 3, 3])
+
+
+def test_sparse_conv2d():
+    """
+    Simple test for the SparseConv2D node type.
+    """
+
+    # Create a COO array.
+    rows = np.array([0, 0, 0, 1, 1, 2], dtype=np.uint32)
+    cols = np.array([0, 1, 5, 1, 2, 3], dtype=np.uint32)
+    weights = np.array([0.5, 1.0, 1.5, 2, 2.5, 3])
+
+    # A 10x10 matrix
+    shape = (10, 10)
+
+    coo = coo_array((weights, (rows, cols)), shape=shape)
+
+    node = nir.SparseConv2D(rows=coo.row, cols=coo.col, weights=coo.data, shape=shape)
+    assert np.allclose(rows, node.rows)
+    assert np.allclose(cols, node.cols)
+    assert np.allclose(weights, node.weights)
+    assert np.allclose(shape, node.shape)
 
 
 def test_cuba_li():
