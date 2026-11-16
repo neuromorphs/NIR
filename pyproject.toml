@@ -1,20 +1,17 @@
 [build-system]
-requires = [
-  "setuptools>=60",
-  "setuptools-scm>=8.0"
-]
+requires = ["setuptools>=60", "setuptools-scm>=8.0"]
 
 [project]
 name = "nir"
 description = "Neuromorphic Intermediate Representation"
 authors = [
-  { name = "Steven Abreu", email = "s.abreu@rug.nl" },
-  { name = "Felix Bauer", email = "felix.bauer@synsense.ai" },
-  { name = "Jason Eshraghian", email = "jeshragh@ucsc.edu" },
-  { name = "Matthias Jobst", email = "matthias.jobst2@tu-dresden.de" },
-  { name = "Gregor Lenz", email = "mail@lenzgregor.com" },
-  { name = "Jens Egholm Pedersen", email = "jens@jepedersen.dk" },
-  { name = "Sadique Sheik", email = "sadique.sheik@synsense.ai" },
+    { name = "Steven Abreu", email = "s.abreu@rug.nl" },
+    { name = "Felix Bauer", email = "felix.bauer@synsense.ai" },
+    { name = "Jason Eshraghian", email = "jeshragh@ucsc.edu" },
+    { name = "Matthias Jobst", email = "matthias.jobst2@tu-dresden.de" },
+    { name = "Gregor Lenz", email = "mail@lenzgregor.com" },
+    { name = "Jens Egholm Pedersen", email = "jens@jepedersen.dk" },
+    { name = "Sadique Sheik", email = "sadique.sheik@synsense.ai" },
 ]
 readme = "README.md"
 keywords = ["neuromorphic", "intermediate", "representation"]
@@ -30,7 +27,7 @@ classifiers = [
     "Topic :: Scientific/Engineering :: Physics",
     "Topic :: Software Development :: Libraries :: Python Modules",
 ]
-dependencies = [ "numpy", "h5py" ]
+dependencies = ["numpy", "h5py"]
 dynamic = ["version"] # Version number read from __init__.py
 requires-python = ">=3.10"
 
@@ -43,12 +40,12 @@ testpaths = ["tests"]
 [tool.setuptools_scm]
 
 [tool.setuptools.packages]
-find={include = ["nir*"]}
+find = { include = ["nir*"] }
 
 [tool.ruff]
 line-length = 100
-lint.per-file-ignores = {"docs/conf.py" = ["E402"]}
-exclude  = ["paper/"]
+lint.per-file-ignores = { "docs/conf.py" = ["E402"] }
+exclude = ["paper/"]
 extend-exclude = ["*.ipynb"]
 
 [dependency-groups]
@@ -59,3 +56,5 @@ dev = [
     "ruff>=0.9.9",
     "sphinx>=7.4.7",
 ]
+sparse = ["scipy>=1.18.0"]
+all = [{ include-group = "dev" }, { include-group = "sparse" }]

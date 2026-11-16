@@ -132,3 +132,49 @@ class Conv2d(NIRNode):
             self.output_type = {
                 "output": np.array([self.weight.shape[0], *output_shape])
             }
+
+
+@dataclass(eq=False)
+class SparseConv2D(NIRNode):
+    """Sparse 2D convolution.
+
+    :param rows: Populated rows in sparse martrix.
+    :type rows: numpy.ndarray
+    :param cols: Populated columns in the sparse martrix.
+    :type cols: numpy.ndarray
+    :param weights: Values of the populated rows and columns in the sparse martrix.
+        Represents the actual weights of the filters encoded in the matrix
+    :type weights: numpy.ndarray
+    :param shape: Shape of the sparse matrix (cannot be inferred from the rows & cols).
+    :type shape: tuple[int, int]
+    """
+
+    # Rows, columns and values that define the fan-in.
+    # Suitable for use with the COO format,
+    # which can be subsequently converted to other formats.
+    rows: np.ndarray # 1D, dense, np.uint32
+    cols: np.ndarray # 1D, dense, np.uint32
+    weights: np.ndarray # 1D, dense, np.float32
+
+    # Shape of the fan-in sparse matrix.
+    shape: tuple[int, int]
+
+    def __post_init__(self):
+
+        # Input shape (1D).
+        # Corresponds to the number of columns in the matrix.
+        self.input_type = {"input": None if self.shape is None else self.shape[1]}
+
+        # Output shape (1D).
+        # Corresponds to the number of rows in the matrix.
+        self.output_type = {
+            "output": None if self.shape is None else self.shape[0],
+        }
+
+        # Ensure that the rows and columns have integer types
+        self.rows = self.rows.astype(np.uint32)
+        self.cols = self.cols.astype(np.uint32)
+
+        assert self.rows.size == self.cols.size == self.weights.size
+        assert len(self.rows.shape) == len(self.cols.shape) == len(self.weights.shape) == 1
+    
