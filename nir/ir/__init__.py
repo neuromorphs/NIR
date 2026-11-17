@@ -9,6 +9,7 @@ from .neuron import IF, LI, LIF, CubaLI, CubaLIF, I
 from .pooling import AvgPool2d, SumPool2d
 from .threshold import Threshold
 from .typing import NIRNode
+from .upsample import Upsample2d
 
 # NIRNodes that can be (de)serialized
 __all_ir = [
@@ -39,6 +40,8 @@ __all_ir = [
     "SumPool2d",
     # surrogate_gradient
     "Threshold",
+    # upsample
+    "Upsample2d",
 ]
 
 
@@ -90,6 +93,8 @@ __all__ = [
     "SumPool2d",
     # surrogate_gradient
     "Threshold",
+    # upsample
+    "Upsample2d",
     "dict2NIRNode",
     "str2NIRNode",
 ]
