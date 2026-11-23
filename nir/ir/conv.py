@@ -107,11 +107,11 @@ class Conv2d(NIRNode):
             raise ValueError(
                 f"padding must be 'same', 'valid', or int, not {self.padding}"
             )
-        if isinstance(self.padding, int):
+        if isinstance(self.padding, (int, np.integer)):
             self.padding = (self.padding, self.padding)
-        if isinstance(self.stride, int):
+        if isinstance(self.stride, (int, np.integer)):
             self.stride = (self.stride, self.stride)
-        if isinstance(self.dilation, int):
+        if isinstance(self.dilation, (int, np.integer)):
             self.dilation = (self.dilation, self.dilation)
         if self.input_shape is None:
             # leave input and output types undefined

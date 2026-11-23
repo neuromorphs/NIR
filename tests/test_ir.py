@@ -277,6 +277,14 @@ def test_linear():
     assert ("a", "b") in ir.edges
 
 
+def test_linear_types_are_arrays():
+    for node in (mock_linear(3, 2), mock_affine(3, 2)):
+        assert isinstance(node.input_type["input"], np.ndarray)
+        assert isinstance(node.output_type["output"], np.ndarray)
+        assert np.array_equal(node.input_type["input"], [3])
+        assert np.array_equal(node.output_type["output"], [2])
+
+
 def test_flatten():
     ir = nir.NIRGraph(
         nodes={
@@ -365,6 +373,18 @@ def test_from_list_tuple_or_list():
     assert len(nir.NIRGraph.from_list(tuple(nodes)).nodes) == 4
     assert len(nir.NIRGraph.from_list(nodes[0], nodes[1]).edges) == 3
     assert len(nir.NIRGraph.from_list(nodes[0], nodes[1]).edges) == 3
+
+
+def test_from_list_empty():
+    with pytest.raises(ValueError, match="empty"):
+        nir.NIRGraph.from_list()
+    with pytest.raises(ValueError, match="empty"):
+        nir.NIRGraph.from_list([])
+
+
+def test_graph_from_dict_wrong_type_message():
+    with pytest.raises(AssertionError, match="different type Input"):
+        nir.NIRGraph.from_dict({"type": "Input", "nodes": {}, "edges": []})
 
 
 def test_graph_from_dict_type_checked():
@@ -649,6 +669,23 @@ def test_conv2d_type_inference():
         ), name
         assert np.array_equal(graph.input_type["input"], np.array([1, 64, 64])), name
         assert np.array_equal(graph.output_type["output"], np.array([1, 61, 61])), name
+
+
+def test_conv2d_numpy_integer_arguments():
+    # Scalars read from numpy arrays are np.integer, not int
+    conv = nir.Conv2d(
+        input_shape=(8, 8),
+        weight=np.ones((4, 2, 3, 3)),
+        stride=np.int64(2),
+        padding=np.int64(1),
+        dilation=np.int64(1),
+        groups=1,
+        bias=np.zeros(4),
+    )
+    assert conv.stride == (2, 2)
+    assert conv.padding == (1, 1)
+    assert conv.dilation == (1, 1)
+    assert np.array_equal(conv.output_type["output"], [4, 4, 4])
 
 
 def test_conv1d_type_inference():
