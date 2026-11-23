@@ -46,5 +46,6 @@ class Flatten(NIRNode):
 
     @classmethod
     def from_dict(cls, node: dict[str, Any]):
+        node = node.copy()  # Do not modify the dictionary of the caller
         node["input_type"] = {"input": node.get("input_type", None)}
         return super().from_dict(node)
