@@ -155,8 +155,14 @@ class NIRGraph(NIRNode):
             f"{type}. Either remove the entry or use <Specific NIRNode>.from_dict, such as Input.from_dict"
         kwargs_local["type"] = "NIRGraph"
 
+        # Forward type_check to the subgraphs, which would otherwise be checked
+        # by default even when the caller disabled type checking
+        type_check = kwargs_local.get("type_check", True)
         kwargs_local["nodes"] = {
-            k: dict2NIRNode(n) for k, n in kwargs_local["nodes"].items()
+            k: dict2NIRNode(
+                {**n, "type_check": type_check} if n.get("type") == "NIRGraph" else n
+            )
+            for k, n in kwargs_local["nodes"].items()
         }
         # h5py deserializes edges into a numpy array of type bytes and dtype=object,
         # hence using ensure_str here

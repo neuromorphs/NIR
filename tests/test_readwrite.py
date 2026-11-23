@@ -100,6 +100,55 @@ def test_nested():
     factory_test_metadata(nested)
 
 
+def _wrap_in_graph(node: nir.NIRNode) -> nir.NIRGraph:
+    return nir.NIRGraph(
+        nodes={
+            "in": nir.Input(np.array([3])),
+            "sub": node,
+            "out": nir.Output(np.array([2])),
+        },
+        edges=[("in", "sub"), ("sub", "out")],
+        type_check=False,
+    )
+
+
+@pytest.mark.parametrize("depth", [1, 2])
+def test_nested_read_without_type_check(depth):
+    # The Linear node expects 5 inputs but receives 3: the innermost graph
+    # only loads if type checking is disabled in subgraphs as well
+    ir = _wrap_in_graph(nir.Linear(weight=np.ones((2, 5))))
+    for _ in range(depth):
+        ir = _wrap_in_graph(ir)
+
+    with tempfile.TemporaryFile() as fp:
+        nir.write(fp, ir)
+        ir2 = nir.read(fp, type_check=False)
+        with pytest.raises(ValueError):
+            nir.read(fp, type_check=True)
+    assert_equivalence(ir, ir2)
+
+
+def test_nested_from_dict_without_type_check():
+    ir = _wrap_in_graph(_wrap_in_graph(nir.Linear(weight=np.ones((2, 5)))))
+
+    graph_dict = ir.to_dict()
+    graph_dict["type_check"] = False
+    ir2 = nir.NIRGraph.from_dict(graph_dict)
+    assert_equivalence(ir, ir2)
+    # The dictionary of the subgraph is left untouched
+    assert "type_check" not in graph_dict["nodes"]["sub"]
+    # The setting of the parent applies to the whole graph
+    graph_dict = ir.to_dict()
+    graph_dict["type_check"] = False
+    graph_dict["nodes"]["sub"]["type_check"] = True
+    assert_equivalence(ir, nir.NIRGraph.from_dict(graph_dict))
+
+    with pytest.raises(ValueError):
+        nir.NIRGraph.from_dict({**ir.to_dict(), "type_check": True})
+    with pytest.raises(ValueError):
+        nir.NIRGraph.from_dict(ir.to_dict())
+
+
 @pytest.mark.skip("Not implemented")  # TODO: Implement broadcast type checking
 def test_conv1d():
     ir = nir.NIRGraph.from_list(
