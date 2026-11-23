@@ -82,6 +82,9 @@ class NIRGraph(NIRNode):
             counts[basename] += 1
             return name
 
+        if len(nodes) == 0:
+            raise ValueError("Cannot create a graph from an empty list of nodes")
+
         counts = Counter()
         if not isinstance(nodes[0], Input):
             node_dict = {"input": Input(input_type=nodes[0].input_type)}
@@ -149,10 +152,10 @@ class NIRGraph(NIRNode):
         assert "edges" in kwargs, "The incoming dictionary must hade a 'edges' entry"
         # Assert that the type is well-formed
         if "type" in kwargs:
-            assert (
-                kwargs["type"] == "NIRGraph"
-            ), "You are calling NIRGraph.from_dict with a different type "
-            f"{type}. Either remove the entry or use <Specific NIRNode>.from_dict, such as Input.from_dict"
+            assert kwargs["type"] == "NIRGraph", (
+                "You are calling NIRGraph.from_dict with a different type "
+                f"{kwargs['type']}. Either remove the entry or use <Specific NIRNode>.from_dict, such as Input.from_dict"
+            )
         kwargs_local["type"] = "NIRGraph"
 
         kwargs_local["nodes"] = {
