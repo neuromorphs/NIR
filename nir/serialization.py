@@ -232,6 +232,9 @@ def write(
 
     def write_recursive(group: h5py.Group, node: dict) -> None:
         for k, v in node.items():
+            if v is None:
+                # HDF5 cannot store None: leave the entry out of the file
+                continue
             if k == "metadata":
                 if v != {}:  # Skip metadata if empty
                     write_recursive(group.create_group(k), v)
