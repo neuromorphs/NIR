@@ -28,10 +28,14 @@
             postVenvCreation = ''
               unset SOURCE_DATE_EPOCH
               uv pip install --group dev
+              uv pip install --group sem
               uv pip install -r docs/requirements.txt
             '';
             postShellHook = ''
               unset SOURCE_DATE_EPOCH
+              # postVenvCreation does not re-run for an existing ./.venv, so the
+              # optional sympy group is topped up here. nir itself must not need it.
+              python -c "import sympy" 2>/dev/null || uv pip install --group sem
             '';
           };
       }

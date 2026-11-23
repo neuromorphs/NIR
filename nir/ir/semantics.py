@@ -1,118 +1,243 @@
 """
-NIR primitives as equations.
+NIR primitives as equations, formalising docs/source/primitives.md.
 
-Normative by reference: formalises the table in nir/docs/source/primitives.md.
+sympy is NOT a dependency of nir: it is declared in the `sem` dependency group,
+this module is its only importer, and nir/ir/__init__.py MUST NOT import it.
 
-Imports nothing from this package, and nothing from `nir` — the adapter in ingest.py owns that dependency so this table can be vendored upstream without a cycle.
+    from nir.ir import semantics
 """
 
 from __future__ import annotations
 
-import nir
-from dataclasses import dataclass
-from typing import Any, Callable, Dict, Optional, Tuple
+from dataclasses import dataclass, field, fields, replace
+from types import MappingProxyType
+from typing import Dict, Mapping, Tuple
 
 import sympy as sp
 
-t = sp.Symbol("t", positive=True)
+from .graph import NIRGraph
+from .node import NIRNode
 
+t = sp.Symbol("t")  # no assumptions: positive=True zeroes DiracDelta(t)
 v, i, x, y, z = sp.symbols("v i x y z")
-tau, r, v_leak, v_threshold, w, delay = sp.symbols("tau r v_leak v_threshold w delay")
+tau, r, delay = sp.symbols("tau r delay", positive=True)
+v_leak, v_threshold, v_reset, w, b = sp.symbols("v_leak v_threshold v_reset w b")
 
 
-class SympySemantic:
-    pass
+class Semantic:
+    """A single equation."""
+
+    @property
+    def defines(self) -> sp.Symbol:
+        """The symbol this equation determines."""
+        raise NotImplementedError
 
 
 @dataclass(frozen=True)
-class Derivative(SympySemantic):
-    """d(state)/dt = rhs"""
+class Derivative(Semantic):
+    """d(state)/dt = rhs."""
 
     state: sp.Symbol
     rhs: sp.Expr
 
+    @property
+    def defines(self) -> sp.Symbol:
+        return self.state
+
 
 @dataclass(frozen=True)
-class Jump(SympySemantic):
-    """lhs = rhs. No state, no time."""
+class Algebraic(Semantic):
+    """lhs = rhs."""
 
     lhs: sp.Symbol
     rhs: sp.Expr
 
+    @property
+    def defines(self) -> sp.Symbol:
+        return self.lhs
+
 
 @dataclass(frozen=True)
-class Delay(SympySemantic):
-    """out(t) = src(t - by), `by` real-valued."""
+class Delay(Semantic):
+    """output(t) = input(t - shift), `shift` real-valued."""
+
+    output: sp.Symbol
+    input: sp.Symbol
+    shift: sp.Expr
+
+    @property
+    def defines(self) -> sp.Symbol:
+        return self.output
+
+
+@dataclass(frozen=True)
+class Crossing(Semantic):
+    """A unit atom at each upward sign change of `arg`."""
 
     out: sp.Symbol
-    src: sp.Symbol
-    by: sp.Expr
+    arg: sp.Expr
 
-
-class SemanticNode:
-    node: nir.NIRNode
+    @property
+    def defines(self) -> sp.Symbol:
+        return self.out
 
 
 @dataclass(frozen=True)
-class PrimitiveNode(SemanticNode):
-    """"""
+class Primitive:
+    """One NIR Primitive in the form of equations and bound symbols."""
 
-    eqs: Tuple[object, ...]
-    output: sp.Symbol
-    guard: Optional[sp.Expr] = None
-    reset: Tuple[Jump, ...] = ()
+    equations: Tuple[Semantic, ...]
+    # Symbol -> nir field name, listing only the symbols whose names disagree
+    # with the field they bind to. An unlisted symbol binds to its own name, so
+    # `r` needs no entry while Linear's `w` does
+    # A symbol that binds to no field at all is an INPUT
+    aliases: Mapping[sp.Symbol, str] = MappingProxyType({})
+
+    def __post_init__(self):
+        # frozen protects the field, not a dict's contents, and from_nir hands
+        # this same object to every node of the type.
+        object.__setattr__(self, "aliases", MappingProxyType(dict(self.aliases)))
+
+    def field_of(self, symbol: sp.Symbol) -> str:
+        """The nir field `symbol` binds to. Its own name unless aliased."""
+        return self.aliases.get(symbol, symbol.name)
+
+
+@dataclass(frozen=True)
+class SemanticNode:
+    node: NIRNode
+
+
+@dataclass(frozen=True)
+class SemanticLeaf(SemanticNode):
+    """One NIR node and the equations it means."""
+
+    semantics: Primitive
 
 
 @dataclass(frozen=True)
 class SemanticGraph(SemanticNode):
-    nodes: Dict[str, PrimitiveNode]
+    nodes: Dict[str, SemanticNode] = field(default_factory=dict)
     edges: Tuple[Tuple[str, str], ...] = ()
+    boundary: Tuple[str, ...] = ()
 
 
-def from_nir(node: nir.NIRNode, expr: sp.Expr) -> SemanticNode:
-    if isinstance(node, nir.NIRGraph):
-        converted = {name: from_nir(n, expr) for name, n in node.nodes.items()}
-        return SemanticGraph(node=node, nodes=converted, edges=node.edges)
-    elif node.__class__.__name__ in SEMANTICS:
-        return PrimitiveNode(node, SEMANTICS[node.__class__.__name__])
-    elif not isinstance(node, nir.NIRNode):
-        raise ValueError("The node input is not a NIRNode")
-    else:
-        raise ValueError(
-            f"No Sympy semantics found for node type {node.__class__.__name__}"
+_BOUNDARY = ("Input", "Output")
+
+
+def from_nir(node: NIRNode) -> SemanticNode:
+    """Attach equations to a NIR graph or node, recursing into NIRGraph."""
+    if isinstance(node, NIRGraph):
+        inner, skipped = {}, []
+        for name, n in node.nodes.items():
+            if type(n).__name__ in _BOUNDARY:
+                skipped.append(name)
+            else:
+                inner[name] = from_nir(n)
+        return SemanticGraph(
+            node=node,
+            nodes=inner,
+            edges=tuple(tuple(e) for e in node.edges),
+            boundary=tuple(skipped),
         )
+    if not isinstance(node, NIRNode):
+        raise ValueError(f"not a NIRNode: {type(node).__name__}")
+    kind = type(node).__name__
+    if kind not in SEMANTICS:
+        raise ValueError(
+            f"no sympy semantics for {kind} (have: {', '.join(sorted(SEMANTICS))})"
+        )
+    return SemanticLeaf(node=node, semantics=SEMANTICS[kind])
 
 
-# The semantics map
-SEMANTICS: Dict[str, Callable[..., sp.Expr]] = {
-    "LI": Derivative(v, ((v_leak - v) + r * i) / tau),
-    "Threshold": Jump(z, sp.Heaviside(v - v_threshold)),
-}
+_SCOPE_SEP = "."
+_GLOBAL = frozenset({t})
 
 
-def Linear(*, w_=1.0) -> Primitive:
-    """Stateless. Every rule is the identity on it — the pass-through case."""
-    return Primitive(params=dict(w=w_), eqs=(Instant(y, w * x),), output=y)
+def qualify(symbol: sp.Symbol, scope: str) -> sp.Symbol:
+    """`v` in scope "n1" becomes `n1.v`, assumptions preserved."""
+    if not scope:
+        raise ValueError("scope must be a non-empty node name")
+    return sp.Symbol(f"{scope}{_SCOPE_SEP}{symbol.name}", **symbol.assumptions0)
 
 
-def LIF(*, tau_=10e-3, r_=1.0, v_leak_=0.0, v_threshold_=1.0) -> Primitive:
-    return Primitive(
-        params=dict(tau=tau_, r=r_, v_leak=v_leak_, v_threshold=v_threshold_),
-        eqs=(Deriv(v, ((v_leak - v) + r * i) / tau),),
-        output=v,
-        guard=v - v_threshold,
-        reset=(Instant(v, v - v_threshold),),
-    )
+def rename(semantic: Semantic, scope: str) -> Semantic:
+    """Every symbol of `semantic`, bound or free, moved into `scope`."""
+    subs: Dict[sp.Symbol, sp.Symbol] = {}
+    for f in fields(semantic):
+        value = getattr(semantic, f.name)
+        if isinstance(value, sp.Expr):
+            for s in value.free_symbols - _GLOBAL:
+                subs.setdefault(s, qualify(s, scope))
+    renamed = {
+        f.name: getattr(semantic, f.name).xreplace(subs)
+        for f in fields(semantic)
+        if isinstance(getattr(semantic, f.name), sp.Expr)
+    }
+    return replace(semantic, **renamed)
 
 
-def Delay(*, delay_=3e-3) -> Primitive:
-    """Not an ODE. Included precisely because it breaks the ODE-rule story.
+def _free(semantic: Semantic) -> set:
+    """Every symbol mentioned by `semantic`, time excluded."""
+    return set().union(
+        *(
+            getattr(semantic, f.name).free_symbols
+            for f in fields(semantic)
+            if isinstance(getattr(semantic, f.name), sp.Expr)
+        )
+    ) - _GLOBAL
 
-    primitives.md names the parameter `tau`, colliding with LI's time constant;
-    nir.ir.Delay names the field `delay`. Following the implementation.
+
+def ports(node: SemanticLeaf) -> Tuple[Tuple[sp.Symbol, ...], sp.Symbol]:
+    """(inputs, output) of `node`.
+
+    Every symbol an equation mentions is one of three things:
+
+      * DEFINED -- it is what some equation of this node determines. That covers
+        a state, an output, and a symbol bound by a sibling equation.
+      * a PARAMETER -- it binds to a field of the nir node, by name or by alias.
+      * an INPUT -- whatever is left.
     """
-    return Primitive(params=dict(delay=delay_), eqs=(Delayed(y, x, delay),), output=y)
+    sem = node.semantics
+    params = {f.name for f in fields(type(node.node))}
+    defined = {e.defines for e in sem.equations}
+    free = set().union(*(_free(e) for e in sem.equations))
+    inputs = tuple(sorted(free - defined - {s for s in free if sem.field_of(s) in params}, key=str))
+
+    fires = [e.defines for e in sem.equations if isinstance(e, Crossing)]
+    if len(fires) > 1:
+        raise ValueError(f"{type(node.node).__name__}: {len(fires)} Crossings, no single output")
+    if fires:
+        return inputs, fires[0]
+    if len(sem.equations) != 1:
+        raise ValueError(f"{type(node.node).__name__}: {len(sem.equations)} equations, no Crossing")
+    return inputs, sem.equations[0].defines
 
 
-def Threshold(*, threshold_=1.0) -> Primitive:
-    raise NotImplementedError(Threshold.__doc__)
+def system(graph: SemanticGraph) -> Tuple[Semantic, ...]:
+    """`graph` as one system of equations, each node renamed into its own scope."""
+    raise NotImplementedError(system.__doc__)
+
+
+SEMANTICS: Dict[str, Primitive] = {
+    "I":         Primitive((Derivative(v, r * i),)),
+    "LI":        Primitive((Derivative(v, ((v_leak - v) + r * i) / tau),)),
+    "Linear":    Primitive((Algebraic(y, w * x),), {w: "weight"}),
+    "Scale":     Primitive((Algebraic(y, w * x),), {w: "scale"}),
+    "Delay":     Primitive((Delay(y, x, delay),)),
+    "Threshold": Primitive(
+        (Crossing(z, v - v_threshold),), {v_threshold: "threshold"}
+    ),
+    "IF": Primitive(
+        (
+            Derivative(v, r * i + (v_reset - v_threshold) * z),
+            Crossing(z, v - v_threshold),
+        )
+    ),
+    "LIF": Primitive(
+        (
+            Derivative(v, ((v_leak - v) + r * i) / tau + (v_reset - v_threshold) * z),
+            Crossing(z, v - v_threshold)
+        )
+    )
+}
