@@ -495,6 +495,7 @@ class Input(NIRNode):
 
     @classmethod
     def from_dict(cls, node: dict[str, Any]) -> "NIRNode":
+        node = node.copy()  # Do not modify the dictionary of the caller
         node["input_type"] = {"input": node["shape"]}
         del node["shape"]
         return super().from_dict(node)
@@ -522,6 +523,7 @@ class Output(NIRNode):
 
     @classmethod
     def from_dict(cls, node: dict[str, Any]) -> "NIRNode":
+        node = node.copy()  # Do not modify the dictionary of the caller
         node["output_type"] = {"output": node["shape"]}
         del node["shape"]
         return super().from_dict(node)
