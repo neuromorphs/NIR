@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from typing import Any
 
 import numpy as np
 
@@ -66,6 +67,11 @@ class Conv1d(NIRNode):
                 "output": np.array([self.weight.shape[0], *output_shape])
             }
 
+    @classmethod
+    def from_dict(cls, node: dict[str, Any]) -> "Conv1d":
+        # An undefined input_shape is not written to file, as HDF5 cannot store None
+        return super().from_dict({"input_shape": None, **node})
+
 
 @dataclass(eq=False)
 class Conv2d(NIRNode):
@@ -132,3 +138,8 @@ class Conv2d(NIRNode):
             self.output_type = {
                 "output": np.array([self.weight.shape[0], *output_shape])
             }
+
+    @classmethod
+    def from_dict(cls, node: dict[str, Any]) -> "Conv2d":
+        # An undefined input_shape is not written to file, as HDF5 cannot store None
+        return super().from_dict({"input_shape": None, **node})

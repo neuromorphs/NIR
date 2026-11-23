@@ -107,6 +107,7 @@ class CubaLIF(NIRNode):
 
     @classmethod
     def from_dict(cls, kwargs: dict[str, Any]) -> "CubaLIF":
+        kwargs = kwargs.copy()  # Do not modify the dictionary of the caller
         if "v_reset" not in kwargs:
             kwargs["v_reset"] = np.zeros_like(kwargs["v_threshold"])
         return super().from_dict(kwargs)
@@ -166,6 +167,7 @@ class IF(NIRNode):
 
     @classmethod
     def from_dict(cls, kwargs: dict[str, Any]) -> "IF":
+        kwargs = kwargs.copy()  # Do not modify the dictionary of the caller
         if "v_reset" not in kwargs:
             kwargs["v_reset"] = np.zeros_like(kwargs["v_threshold"])
         return super().from_dict(kwargs)
@@ -248,6 +250,7 @@ class LIF(NIRNode):
 
     @classmethod
     def from_dict(cls, kwargs: dict[str, Any]) -> "LIF":
+        kwargs = kwargs.copy()  # Do not modify the dictionary of the caller
         if "v_reset" not in kwargs:
             kwargs["v_reset"] = np.zeros_like(kwargs["v_threshold"])
         return super().from_dict(kwargs)

@@ -1,3 +1,5 @@
+import copy
+
 import numpy as np
 import pytest
 
@@ -387,6 +389,57 @@ def test_graph_from_dict_type_checked():
         }
         kwargs = {"nodes": nodes, "edges": [("input", "module"), ("module", "output")]}
         nir.NIRGraph.from_dict(kwargs)
+
+
+def _assert_dicts_equal(actual, expected):
+    assert actual.keys() == expected.keys()
+    for key, value in expected.items():
+        if isinstance(value, dict):
+            _assert_dicts_equal(actual[key], value)
+        else:
+            assert np.array_equal(actual[key], value)
+
+
+@pytest.mark.parametrize(
+    "node_dict",
+    [
+        nir.Input(input_type=np.array([2])).to_dict(),
+        nir.Output(output_type=np.array([2])).to_dict(),
+        nir.Flatten(input_type={"input": np.array([2, 3])}).to_dict(),
+        # Dictionaries without v_reset, as found in files written by older versions
+        {"type": "IF", "r": np.ones(2), "v_threshold": np.ones(2)},
+        {
+            "type": "LIF",
+            "tau": np.ones(2),
+            "r": np.ones(2),
+            "v_leak": np.zeros(2),
+            "v_threshold": np.ones(2),
+        },
+        {
+            "type": "CubaLIF",
+            "tau_syn": np.ones(2),
+            "tau_mem": np.ones(2),
+            "r": np.ones(2),
+            "v_leak": np.zeros(2),
+            "v_threshold": np.ones(2),
+        },
+    ],
+    ids=["Input", "Output", "Flatten", "IF", "LIF", "CubaLIF"],
+)
+def test_from_dict_does_not_mutate_input(node_dict):
+    expected = copy.deepcopy(node_dict)
+    nir.dict2NIRNode(node_dict)
+    _assert_dicts_equal(node_dict, expected)
+    # A second call on the same dictionary must still succeed
+    nir.dict2NIRNode(node_dict)
+
+
+def test_graph_from_dict_does_not_mutate_input():
+    graph_dict = nir.NIRGraph.from_list(nir.Linear(np.ones((2, 3)))).to_dict()
+    expected = copy.deepcopy(graph_dict)
+    nir.NIRGraph.from_dict(graph_dict)
+    _assert_dicts_equal(graph_dict, expected)
+    nir.NIRGraph.from_dict(graph_dict)
 
 
 @pytest.mark.skip("Not implemented")  # TODO: Fix subgraph nodes for type checking

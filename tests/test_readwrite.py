@@ -260,6 +260,59 @@ def test_flatten():
     factory_test_metadata(ir)
 
 
+def test_flatten_undefined_input_type():
+    # HDF5 cannot store None, an undefined input_type is left out of the file
+    ir = nir.NIRGraph(
+        nodes={"flatten": nir.Flatten(input_type=None, start_dim=0, end_dim=1)},
+        edges=[],
+        type_check=False,
+    )
+    with tempfile.TemporaryFile() as fp:
+        nir.write(fp, ir)
+        ir2 = nir.read(fp, type_check=False)
+    flatten = ir2.nodes["flatten"]
+    assert flatten.input_type == {"input": None}
+    assert flatten.output_type == {"output": None}
+    assert flatten.start_dim == 0
+    assert flatten.end_dim == 1
+
+
+def test_write_none_metadata():
+    ir = nir.NIRGraph.from_list(mock_affine(2, 2))
+    ir.metadata = {"author": None, "dt": 1e-4}
+    ir.nodes["affine"].metadata = {"comment": None}
+    with tempfile.TemporaryFile() as fp:
+        nir.write(fp, ir)
+        ir2 = nir.read(fp)
+    assert ir2.metadata == {"dt": 1e-4}
+    assert ir2.nodes["affine"].metadata == {}
+
+
+@pytest.mark.parametrize(
+    "node",
+    [
+        nir.Conv1d(None, np.ones((4, 2, 3)), 1, 1, 1, 1, np.zeros(4)),
+        nir.Conv2d(None, np.ones((4, 2, 3, 3)), 1, 1, 1, 1, np.zeros(4)),
+        nir.Input(input_type=None),
+        nir.Output(output_type=None),
+    ],
+    ids=["Conv1d", "Conv2d", "Input", "Output"],
+)
+def test_undefined_types_round_trip(node):
+    # Undefined shapes are left out of the file and read back as undefined
+    ir = nir.NIRGraph(nodes={"n": node}, edges=[], type_check=False)
+    with tempfile.TemporaryFile() as fp:
+        nir.write(fp, ir)
+        ir2 = nir.read(fp, type_check=False)
+    node2 = ir2.nodes["n"]
+    assert type(node2) is type(node)
+    assert node2.input_type == {"input": None}
+    assert node2.output_type == {"output": None}
+    if isinstance(node, (nir.Conv1d, nir.Conv2d)):
+        assert node2.input_shape is None
+        assert np.array_equal(node2.weight, node.weight)
+
+
 def test_sum_pool_2d():
     ir = nir.NIRGraph.from_list(
         [
