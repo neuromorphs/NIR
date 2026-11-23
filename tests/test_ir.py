@@ -107,6 +107,34 @@ def test_nested():
     ]
 
 
+class _CountingArray(np.ndarray):
+    """Array that counts how many times it is deep-copied."""
+
+    deep_copies = 0
+
+    def __deepcopy__(self, memo):
+        _CountingArray.deep_copies += 1
+        return super().__deepcopy__(memo)
+
+
+@pytest.mark.parametrize("depth", [0, 1, 2])
+def test_graph_to_dict_copies_weights_once(depth):
+    weight = np.ones((2, 3)).view(_CountingArray)
+    graph = nir.NIRGraph.from_list(nir.Linear(weight=weight))
+    for _ in range(depth):
+        graph = nir.NIRGraph.from_list(graph)
+    _CountingArray.deep_copies = 0
+
+    graph_dict = graph.to_dict()
+
+    assert _CountingArray.deep_copies == 1
+    for _ in range(depth):
+        graph_dict = graph_dict["nodes"]["nirgraph"]
+    copied = graph_dict["nodes"]["linear"]["weight"]
+    assert np.array_equal(copied, weight)
+    assert not np.shares_memory(copied, weight)
+
+
 def test_simple_with_input_output():
     a = mock_affine(3, 3)
     ir = nir.NIRGraph(
