@@ -372,6 +372,43 @@ def test_read_without_type_check():
     )
 
 
+@pytest.mark.parametrize("type_check", [True, False])
+@pytest.mark.parametrize(
+    "node",
+    [
+        nir.Affine(np.ones((3, 2)), np.ones(3)),
+        nir.AvgPool2d(np.array([2, 2]), np.array([2, 2]), np.array([0, 0])),
+        nir.Conv1d(8, np.ones((4, 2, 3)), 1, 0, 1, 1, np.zeros(4)),
+        nir.Conv2d((8, 8), np.ones((4, 2, 3, 3)), 1, "same", 1, 1, np.zeros(4)),
+        nir.CubaLI(*[np.ones(2)] * 4),
+        nir.CubaLIF(*[np.ones(2)] * 5),
+        nir.Delay(np.ones(2)),
+        nir.Flatten(np.array([2, 3]), start_dim=0),
+        nir.I(np.ones(2)),
+        nir.IF(np.ones(2), np.ones(2)),
+        nir.Input(np.array([2])),
+        nir.LI(*[np.ones(2)] * 3),
+        nir.LIF(*[np.ones(2)] * 4),
+        nir.Linear(np.ones((3, 2))),
+        nir.Output(np.array([2])),
+        nir.Scale(np.ones(2)),
+        nir.SumPool2d(np.array([2, 2]), np.array([2, 2]), np.array([0, 0])),
+        nir.Threshold(np.ones(2)),
+    ],
+    ids=lambda node: type(node).__name__,
+)
+def test_read_single_node(tmp_path, node, type_check):
+    # A node that is not a graph can be written, so it must be readable as well
+    path = tmp_path / "node.nir"
+    nir.write(path, node)
+    node2 = nir.read(path, type_check=type_check)
+    assert type(node2) is type(node)
+    expected, actual = node.to_dict(), node2.to_dict()
+    assert actual.keys() == expected.keys()
+    for key, value in expected.items():
+        assert np.array_equal(actual[key], value), key
+
+
 def test_serialize_deserialize_data():
     graph_data = nir.NIRGraphData(
         nodes={

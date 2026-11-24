@@ -189,7 +189,8 @@ def read(filename: str | pathlib.Path, type_check: bool = True) -> nir.NIRGraph:
             raise ValueError(
                 "The 'type_check' key was found in the read NIR graph, but is unsupported and clashes with the type checking parameter in the read function"
             )
-        else:
+        elif data_dict["type"] == "NIRGraph":
+            # Only graphs take a type_check argument; other nodes would reject it
             data_dict["type_check"] = type_check
         return nir.dict2NIRNode(data_dict)
 
