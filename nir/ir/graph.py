@@ -1,5 +1,6 @@
+import copy
 from collections import Counter
-from dataclasses import dataclass
+from dataclasses import dataclass, fields
 from typing import Any
 
 import numpy as np
@@ -134,8 +135,15 @@ class NIRGraph(NIRNode):
         }
 
     def to_dict(self) -> dict[str, Any]:
-        ret = super().to_dict()
+        # Not built from NIRNode.to_dict: asdict() would deep-copy every node,
+        # weights included, only for the copy to be replaced by the node dicts.
+        ret = {
+            f.name: copy.deepcopy(getattr(self, f.name))
+            for f in fields(self)
+            if f.name not in ("input_type", "output_type", "nodes")
+        }
         ret["nodes"] = {k: n.to_dict() for k, n in self.nodes.items()}
+        ret["type"] = type(self).__name__
         return ret
 
     @classmethod
